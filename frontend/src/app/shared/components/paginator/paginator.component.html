@@ -1,0 +1,11 @@
+<div class="paginator" *ngIf="totalElements > 0">
+  <span>Pagina {{ page + 1 }} de {{ totalPages || 1 }} · {{ totalElements }} registros</span>
+  <div class="btn-group" role="group" aria-label="Paginacion">
+    <button type="button" class="btn btn-outline-secondary" [disabled]="!canGoPrevious" (click)="previous()">
+      Anterior
+    </button>
+    <button type="button" class="btn btn-outline-secondary" [disabled]="!canGoNext" (click)="next()">
+      Siguiente
+    </button>
+  </div>
+</div>

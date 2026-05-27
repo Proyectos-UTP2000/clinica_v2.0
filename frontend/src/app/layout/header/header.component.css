@@ -1,0 +1,50 @@
+.app-header {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1.5rem;
+  background: #ffffff;
+  border-bottom: 1px solid var(--clinic-border);
+  box-shadow: var(--clinic-shadow-sm);
+}
+
+.header-kicker {
+  margin: 0;
+  color: var(--clinic-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.user-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  text-align: right;
+}
+
+.user-name {
+  font-weight: 600;
+}
+
+@media (max-width: 575.98px) {
+  .app-header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .user-actions {
+    width: 100%;
+    justify-content: space-between;
+    text-align: left;
+  }
+}

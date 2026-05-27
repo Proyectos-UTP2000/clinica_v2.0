@@ -1,0 +1,29 @@
+.app-shell {
+  min-height: 100dvh;
+  display: flex;
+  background: var(--clinic-canvas);
+}
+
+.app-main {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-area {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+@media (max-width: 991.98px) {
+  .app-shell {
+    flex-direction: column;
+  }
+
+  .content-area {
+    padding: 1rem;
+  }
+}

@@ -1,0 +1,21 @@
+<aside class="sidebar" aria-label="Navegacion principal">
+  <div class="sidebar-brand">
+    <span class="brand-mark" aria-hidden="true">+</span>
+    <div>
+      <strong>Clinica</strong>
+      <small>Gestion interna</small>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a
+      *ngFor="let item of menuItems"
+      class="nav-link"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+    >
+      {{ item.label }}
+    </a>
+  </nav>
+</aside>

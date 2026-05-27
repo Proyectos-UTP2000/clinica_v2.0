@@ -1,0 +1,49 @@
+<section class="dashboard-page" aria-labelledby="dashboard-title">
+  <div class="page-heading">
+    <div>
+      <p class="section-kicker">Resumen operativo</p>
+      <h2 id="dashboard-title">Dashboard</h2>
+    </div>
+    <a class="btn btn-primary" routerLink="/citas">Nueva cita</a>
+  </div>
+
+  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+
+  <div *ngIf="cargando" class="row g-3" aria-live="polite">
+    <div class="col-12 col-md-6 col-xl-3" *ngFor="let item of [1, 2, 3, 4]">
+      <div class="metric-card placeholder-card">
+        <span class="placeholder col-6"></span>
+        <span class="placeholder col-4"></span>
+        <span class="placeholder col-8"></span>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!cargando" class="row g-3">
+    <div class="col-12 col-md-6 col-xl-3" *ngFor="let metrica of metricas">
+      <article class="metric-card">
+        <p>{{ metrica.titulo }}</p>
+        <strong>{{ metrica.valor | number }}</strong>
+        <span>{{ metrica.detalle }}</span>
+      </article>
+    </div>
+  </div>
+
+  <section class="quick-section" aria-labelledby="quick-title">
+    <div class="section-header">
+      <div>
+        <p class="section-kicker">Accesos rapidos</p>
+        <h3 id="quick-title">Modulos principales</h3>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-12 col-md-6 col-xl-3" *ngFor="let link of quickLinks">
+        <a class="quick-card" [routerLink]="link.route">
+          <strong>{{ link.label }}</strong>
+          <span>{{ link.description }}</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</section>

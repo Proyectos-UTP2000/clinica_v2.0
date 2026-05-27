@@ -1,0 +1,25 @@
+package com.web.clinica.service.abstractService;
+
+import com.web.clinica.dto.request.MedicoCreateRequest;
+import com.web.clinica.dto.request.MedicoUpdateRequest;
+import com.web.clinica.dto.response.MedicoResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+public interface IMedicoService {
+
+    /** Crea un medico con usuario interno y password temporal. */
+    MedicoResponse crear(MedicoCreateRequest solicitud);
+
+    /** Actualiza datos del medico y su usuario asociado. */
+    MedicoResponse actualizar(Long id, MedicoUpdateRequest solicitud);
+
+    /** Obtiene un medico por identificador. */
+    MedicoResponse obtenerPorId(Long id);
+
+    /** Lista medicos activos con filtros opcionales. */
+    Page<MedicoResponse> listarActivos(String texto, Long especialidadId, Long sedeId, Pageable pageable);
+
+    /** Desactiva el usuario asociado al medico. */
+    void desactivar(Long id);
+}

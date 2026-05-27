@@ -1,0 +1,78 @@
+<section class="feature-page">
+  <app-page-header kicker="Medicos" title="Editar medico" description="Actualice informacion laboral y sedes asociadas. El DNI se mantiene como identificador de acceso.">
+    <a class="btn btn-outline-secondary" routerLink="/medicos">Volver</a>
+  </app-page-header>
+
+  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  <div *ngIf="cargando" class="feature-panel feature-panel-body text-muted fw-semibold">Cargando medico...</div>
+
+  <form *ngIf="!cargando && medico" class="feature-panel" [formGroup]="medicoForm" (ngSubmit)="guardar()" novalidate>
+    <div class="feature-panel-body">
+      <div class="readonly-strip">
+        <span>DNI</span>
+        <strong>{{ medico.dni }}</strong>
+      </div>
+      <div class="form-grid">
+        <div>
+          <label for="nombres" class="form-label">Nombres</label>
+          <input id="nombres" class="form-control" formControlName="nombres" [class.is-invalid]="campoInvalido('nombres')" />
+          <div class="invalid-feedback">Los nombres son obligatorios.</div>
+        </div>
+        <div>
+          <label for="apellidos" class="form-label">Apellidos</label>
+          <input id="apellidos" class="form-control" formControlName="apellidos" [class.is-invalid]="campoInvalido('apellidos')" />
+          <div class="invalid-feedback">Los apellidos son obligatorios.</div>
+        </div>
+        <div>
+          <label for="email" class="form-label">Email</label>
+          <input id="email" type="email" class="form-control" formControlName="email" [class.is-invalid]="campoInvalido('email')" />
+          <div class="invalid-feedback">Ingrese un email valido.</div>
+        </div>
+        <div>
+          <label for="telefono" class="form-label">Telefono</label>
+          <input id="telefono" class="form-control" inputmode="tel" formControlName="telefono" [class.is-invalid]="campoInvalido('telefono')" />
+          <div class="invalid-feedback">Ingrese un telefono numerico valido.</div>
+        </div>
+        <div>
+          <label for="fechaNacimiento" class="form-label">Fecha nacimiento</label>
+          <input id="fechaNacimiento" type="date" class="form-control" formControlName="fechaNacimiento" />
+        </div>
+        <div>
+          <label for="especialidadId" class="form-label">Especialidad</label>
+          <select id="especialidadId" class="form-select" formControlName="especialidadId" [class.is-invalid]="campoInvalido('especialidadId')">
+            <option value="">Seleccione</option>
+            <option *ngFor="let especialidad of especialidades" [value]="especialidad.id">{{ especialidad.nombre }}</option>
+          </select>
+          <div class="invalid-feedback">Seleccione una especialidad.</div>
+        </div>
+        <div>
+          <label for="subespecialidadId" class="form-label">Subespecialidad</label>
+          <select id="subespecialidadId" class="form-select" formControlName="subespecialidadId">
+            <option value="">Sin subespecialidad</option>
+            <option *ngFor="let sub of subespecialidades" [value]="sub.id">{{ sub.nombre }}</option>
+          </select>
+        </div>
+      </div>
+
+      <fieldset class="sede-picker" [class.is-invalid]="campoInvalido('sedesIds')">
+        <legend>Sedes donde atiende</legend>
+        <label *ngFor="let sede of sedes" class="sede-option">
+          <input type="checkbox" [checked]="sedeSeleccionada(sede.id)" (change)="toggleSede(sede.id, $any($event.target).checked)" />
+          <span>
+            <strong>{{ sede.nombre }}</strong>
+            <small>{{ sede.direccion }}</small>
+          </span>
+        </label>
+      </fieldset>
+      <div *ngIf="campoInvalido('sedesIds')" class="text-danger small fw-semibold mt-2">Seleccione al menos una sede.</div>
+
+      <div class="form-actions">
+        <a class="btn btn-outline-secondary" routerLink="/medicos">Cancelar</a>
+        <button type="submit" class="btn btn-primary" [disabled]="guardando">
+          <span *ngIf="guardando" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          Actualizar medico
+        </button>
+      </div>
+    </div>
+  </form>
+</section>

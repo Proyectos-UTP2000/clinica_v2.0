@@ -1,7 +1,9 @@
 .app-shell {
   min-height: 100dvh;
   display: flex;
-  background: var(--clinic-canvas);
+  background:
+    linear-gradient(180deg, #f8fbff 0, var(--clinic-canvas) 20rem),
+    var(--clinic-canvas);
 }
 
 .app-main {
@@ -15,7 +17,7 @@
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 1.75rem;
 }
 
 @media (max-width: 991.98px) {

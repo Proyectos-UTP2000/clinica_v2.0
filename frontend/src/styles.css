@@ -5,15 +5,20 @@
   --clinic-primary-dark: #0b5ed7;
   --clinic-success: #198754;
   --clinic-sidebar: #343a40;
+  --clinic-sidebar-deep: #2d3339;
   --clinic-sidebar-active: #495057;
   --clinic-surface: #ffffff;
+  --clinic-surface-soft: #f8fafc;
   --clinic-canvas: #f5f7fa;
-  --clinic-border: rgba(33, 37, 41, 0.12);
+  --clinic-border: rgba(33, 37, 41, 0.1);
+  --clinic-border-strong: rgba(13, 110, 253, 0.24);
   --clinic-text: #212529;
   --clinic-muted: #6c757d;
   --clinic-danger: #dc3545;
   --clinic-radius: 0.5rem;
-  --clinic-shadow-sm: 0 0.125rem 0.5rem rgba(33, 37, 41, 0.08);
+  --clinic-radius-lg: 0.75rem;
+  --clinic-shadow-sm: 0 0.125rem 0.5rem rgba(33, 37, 41, 0.07);
+  --clinic-shadow-md: 0 0.75rem 1.75rem rgba(33, 37, 41, 0.1);
 }
 
 html,
@@ -24,7 +29,9 @@ body {
 body {
   margin: 0;
   color: var(--clinic-text);
-  background: var(--clinic-canvas);
+  background:
+    linear-gradient(180deg, #f8fbff 0%, var(--clinic-canvas) 24rem),
+    var(--clinic-canvas);
   font-family: var(--bs-body-font-family);
   line-height: 1.5;
 }
@@ -49,6 +56,17 @@ button,
 .form-control:focus {
   border-color: var(--clinic-primary);
   box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.18);
+}
+
+.btn-primary {
+  box-shadow: 0 0.35rem 0.9rem rgba(13, 110, 253, 0.18);
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  background-color: var(--clinic-primary-dark);
+  border-color: var(--clinic-primary-dark);
+  box-shadow: 0 0.5rem 1.1rem rgba(13, 110, 253, 0.22);
 }
 
 .table {

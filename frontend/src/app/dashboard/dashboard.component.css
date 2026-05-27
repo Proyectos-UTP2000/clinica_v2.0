@@ -1,6 +1,6 @@
 .dashboard-page {
   display: grid;
-  gap: 1.5rem;
+  gap: 1.75rem;
 }
 
 .page-heading,
@@ -9,6 +9,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+}
+
+.page-heading {
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px solid var(--clinic-border);
+  border-radius: var(--clinic-radius-lg);
+  box-shadow: var(--clinic-shadow-sm);
 }
 
 .section-kicker {
@@ -38,34 +46,89 @@ h3 {
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   padding: 1.25rem;
   background: #ffffff;
   border: 1px solid var(--clinic-border);
-  border-radius: var(--clinic-radius);
-  box-shadow: var(--clinic-shadow-sm);
+  border-radius: var(--clinic-radius-lg);
+  box-shadow: var(--clinic-shadow-md);
 }
 
 .metric-card {
-  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--metric-accent, var(--clinic-primary));
+}
+
+.metric-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .metric-card p {
-  margin: 0 0 0.75rem;
+  margin: 0;
   color: var(--clinic-muted);
   font-weight: 700;
 }
 
+.metric-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  height: 30px;
+  padding-inline: 0.5rem;
+  color: var(--metric-accent, var(--clinic-primary));
+  background: var(--metric-soft, rgba(13, 110, 253, 0.1));
+  border: 1px solid var(--metric-border, rgba(13, 110, 253, 0.18));
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
 .metric-card strong {
-  color: var(--clinic-primary);
+  color: var(--clinic-text);
   font-size: 2.25rem;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
-.metric-card span {
+.metric-detail {
   margin-top: 0.75rem;
   color: var(--clinic-muted);
+}
+
+.metric-blue {
+  --metric-accent: var(--clinic-primary);
+  --metric-soft: rgba(13, 110, 253, 0.1);
+  --metric-border: rgba(13, 110, 253, 0.22);
+}
+
+.metric-green {
+  --metric-accent: var(--clinic-success);
+  --metric-soft: rgba(25, 135, 84, 0.1);
+  --metric-border: rgba(25, 135, 84, 0.22);
+}
+
+.metric-slate {
+  --metric-accent: #495057;
+  --metric-soft: rgba(73, 80, 87, 0.1);
+  --metric-border: rgba(73, 80, 87, 0.2);
+}
+
+.metric-cyan {
+  --metric-accent: #0aa2c0;
+  --metric-soft: rgba(10, 162, 192, 0.1);
+  --metric-border: rgba(10, 162, 192, 0.2);
 }
 
 .placeholder-card {
@@ -80,6 +143,7 @@ h3 {
 .quick-card {
   color: var(--clinic-text);
   text-decoration: none;
+  box-shadow: var(--clinic-shadow-sm);
 }
 
 .quick-card:hover,
@@ -95,6 +159,20 @@ h3 {
 .quick-card span {
   margin-top: 0.5rem;
   color: var(--clinic-muted);
+}
+
+.quick-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.quick-card-heading span {
+  margin: 0;
+  color: var(--clinic-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 
 @media (max-width: 575.98px) {

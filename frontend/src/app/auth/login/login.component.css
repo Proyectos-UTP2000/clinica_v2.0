@@ -3,16 +3,52 @@
   display: grid;
   place-items: center;
   padding: 2rem 1rem;
-  background: #eef3f8;
+  background:
+    linear-gradient(135deg, #eef5fb 0%, #f8fafc 48%, #eef3f8 100%),
+    #eef3f8;
+}
+
+.auth-shell {
+  width: min(100%, 900px);
+  display: grid;
+  grid-template-columns: 0.92fr 1fr;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid var(--clinic-border);
+  border-radius: var(--clinic-radius-lg);
+  box-shadow: var(--clinic-shadow-md);
+}
+
+.auth-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 520px;
+  padding: 2rem;
+  color: #ffffff;
+  background: linear-gradient(180deg, var(--clinic-sidebar) 0%, var(--clinic-sidebar-deep) 100%);
+}
+
+.auth-panel h2 {
+  max-width: 14rem;
+  margin: 1.5rem 0 0.75rem;
+  font-size: 1.65rem;
+  font-weight: 700;
+}
+
+.auth-panel p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.panel-mark {
+  background: var(--clinic-primary);
+  box-shadow: 0 0.75rem 1.5rem rgba(13, 110, 253, 0.28);
 }
 
 .auth-card {
-  width: min(100%, 440px);
   padding: 2rem;
   background: var(--clinic-surface);
-  border: 1px solid var(--clinic-border);
-  border-radius: var(--clinic-radius);
-  box-shadow: var(--clinic-shadow-sm);
 }
 
 .auth-brand {
@@ -61,4 +97,15 @@ h1 {
 
 .auth-link:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 767.98px) {
+  .auth-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-panel {
+    min-height: auto;
+    padding: 1.5rem;
+  }
 }

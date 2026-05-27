@@ -6,6 +6,8 @@ interface MetricCard {
   titulo: string;
   valor: number;
   detalle: string;
+  codigo: string;
+  clase: string;
 }
 
 interface QuickLink {
@@ -51,22 +53,30 @@ export class DashboardComponent implements OnInit {
       {
         titulo: 'Pacientes',
         valor: this.totales?.totalPacientes ?? 0,
-        detalle: 'Registros activos'
+        detalle: 'Registros activos',
+        codigo: 'PX',
+        clase: 'metric-blue'
       },
       {
         titulo: 'Medicos',
         valor: this.totales?.totalMedicos ?? 0,
-        detalle: 'Profesionales registrados'
+        detalle: 'Profesionales registrados',
+        codigo: 'MD',
+        clase: 'metric-green'
       },
       {
         titulo: 'Citas programadas',
         valor: this.totales?.totalCitasProgramadas ?? 0,
-        detalle: 'Pendientes de atencion'
+        detalle: 'Pendientes de atencion',
+        codigo: 'CP',
+        clase: 'metric-slate'
       },
       {
         titulo: 'Citas del dia',
         valor: this.totales?.citasHoy ?? 0,
-        detalle: 'Agenda de hoy'
+        detalle: 'Agenda de hoy',
+        codigo: 'HD',
+        clase: 'metric-cyan'
       }
     ];
   }

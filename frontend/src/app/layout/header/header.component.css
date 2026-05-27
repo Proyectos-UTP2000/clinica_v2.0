@@ -5,9 +5,10 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.875rem 1.5rem;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.94);
   border-bottom: 1px solid var(--clinic-border);
-  box-shadow: var(--clinic-shadow-sm);
+  box-shadow: 0 0.35rem 1rem rgba(33, 37, 41, 0.06);
+  backdrop-filter: blur(8px);
 }
 
 .header-kicker {
@@ -32,6 +33,13 @@ h1 {
 }
 
 .user-name {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0.35rem 0.75rem;
+  background: var(--clinic-surface-soft);
+  border: 1px solid var(--clinic-border);
+  border-radius: 999px;
   font-weight: 600;
 }
 

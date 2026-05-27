@@ -1,54 +1,62 @@
 <main class="auth-page">
-  <section class="auth-card" aria-labelledby="login-title">
-    <div class="auth-brand">
-      <span class="brand-mark" aria-hidden="true">+</span>
-      <div>
-        <p class="brand-kicker">Sistema interno</p>
-        <h1 id="login-title">Clinica</h1>
+  <section class="auth-shell" aria-labelledby="login-title">
+    <aside class="auth-panel">
+      <span class="brand-mark panel-mark" aria-hidden="true">+</span>
+      <h2>Gestion clinica interna</h2>
+      <p>Acceso seguro para personal autorizado, dashboard operativo y modulos administrativos.</p>
+    </aside>
+
+    <div class="auth-card">
+      <div class="auth-brand">
+        <span class="brand-mark" aria-hidden="true">+</span>
+        <div>
+          <p class="brand-kicker">Sistema interno</p>
+          <h1 id="login-title">Clinica</h1>
+        </div>
       </div>
+
+      <p class="auth-intro">Ingrese con su DNI y contrasena para gestionar la operacion diaria de la clinica.</p>
+
+      <div *ngIf="mensajeError" class="alert alert-danger" role="alert">
+        {{ mensajeError }}
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="ingresar()" novalidate>
+        <div class="mb-3">
+          <label for="dni" class="form-label">DNI</label>
+          <input
+            id="dni"
+            type="text"
+            inputmode="numeric"
+            maxlength="8"
+            class="form-control"
+            [class.is-invalid]="campoInvalido('dni')"
+            formControlName="dni"
+            autocomplete="username"
+          />
+          <div class="invalid-feedback">Ingrese un DNI valido de 8 digitos.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">Contrasena</label>
+          <input
+            id="password"
+            type="password"
+            class="form-control"
+            [class.is-invalid]="campoInvalido('password')"
+            formControlName="password"
+            autocomplete="current-password"
+          />
+          <div class="invalid-feedback">La contrasena es obligatoria.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100" [disabled]="cargando">
+          <span *ngIf="cargando" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          {{ cargando ? 'Ingresando...' : 'Ingresar' }}
+        </button>
+      </form>
+
+      <a class="auth-link" routerLink="/recuperar-password">Olvidaste tu contrasena?</a>
     </div>
-
-    <p class="auth-intro">Ingrese con su DNI y contrasena para gestionar la operacion diaria de la clinica.</p>
-
-    <div *ngIf="mensajeError" class="alert alert-danger" role="alert">
-      {{ mensajeError }}
-    </div>
-
-    <form [formGroup]="loginForm" (ngSubmit)="ingresar()" novalidate>
-      <div class="mb-3">
-        <label for="dni" class="form-label">DNI</label>
-        <input
-          id="dni"
-          type="text"
-          inputmode="numeric"
-          maxlength="8"
-          class="form-control"
-          [class.is-invalid]="campoInvalido('dni')"
-          formControlName="dni"
-          autocomplete="username"
-        />
-        <div class="invalid-feedback">Ingrese un DNI valido de 8 digitos.</div>
-      </div>
-
-      <div class="mb-3">
-        <label for="password" class="form-label">Contrasena</label>
-        <input
-          id="password"
-          type="password"
-          class="form-control"
-          [class.is-invalid]="campoInvalido('password')"
-          formControlName="password"
-          autocomplete="current-password"
-        />
-        <div class="invalid-feedback">La contrasena es obligatoria.</div>
-      </div>
-
-      <button type="submit" class="btn btn-primary w-100" [disabled]="cargando">
-        <span *ngIf="cargando" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-        {{ cargando ? 'Ingresando...' : 'Ingresar' }}
-      </button>
-    </form>
-
-    <a class="auth-link" routerLink="/recuperar-password">Olvidaste tu contrasena?</a>
   </section>
 </main>

@@ -21,10 +21,13 @@
 
   <div *ngIf="!cargando" class="row g-3">
     <div class="col-12 col-md-6 col-xl-3" *ngFor="let metrica of metricas">
-      <article class="metric-card">
-        <p>{{ metrica.titulo }}</p>
+      <article class="metric-card" [ngClass]="metrica.clase">
+        <div class="metric-topline">
+          <p>{{ metrica.titulo }}</p>
+          <span class="metric-code">{{ metrica.codigo }}</span>
+        </div>
         <strong>{{ metrica.valor | number }}</strong>
-        <span>{{ metrica.detalle }}</span>
+        <span class="metric-detail">{{ metrica.detalle }}</span>
       </article>
     </div>
   </div>
@@ -40,7 +43,10 @@
     <div class="row g-3">
       <div class="col-12 col-md-6 col-xl-3" *ngFor="let link of quickLinks">
         <a class="quick-card" [routerLink]="link.route">
-          <strong>{{ link.label }}</strong>
+          <div class="quick-card-heading">
+            <strong>{{ link.label }}</strong>
+            <span aria-hidden="true">Ver</span>
+          </div>
           <span>{{ link.description }}</span>
         </a>
       </div>

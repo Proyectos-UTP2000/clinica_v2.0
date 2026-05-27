@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AuthService } from '../../core/services/auth.service';
 
 interface MenuItem {
   label: string;
@@ -14,12 +15,26 @@ interface MenuItem {
 export class SidebarComponent {
   menuItems: MenuItem[] = [
     { label: 'Dashboard', route: '/dashboard', permiso: 'dashboard.ver' },
-    { label: 'Pacientes', route: '/pacientes' },
-    { label: 'Medicos', route: '/medicos' },
-    { label: 'Citas', route: '/citas' },
-    { label: 'Historial', route: '/historial' },
-    { label: 'Pagos', route: '/pagos' },
-    { label: 'Sedes', route: '/sedes' },
-    { label: 'Especialidades', route: '/especialidades' }
+    { label: 'Pacientes', route: '/pacientes', permiso: 'pacientes.ver' },
+    { label: 'Medicos', route: '/medicos', permiso: 'medicos.ver' },
+    { label: 'Citas', route: '/citas', permiso: 'citas.ver_todas' },
+    { label: 'Historial', route: '/historial', permiso: 'historial.ver_todos' },
+    { label: 'Pagos', route: '/pagos', permiso: 'pagos.ver' },
+    { label: 'Sedes', route: '/sedes', permiso: 'sedes.ver' },
+    { label: 'Especialidades', route: '/especialidades', permiso: 'especialidades.ver' }
   ];
+
+  constructor(private readonly authService: AuthService) {}
+
+  puedeVer(item: MenuItem): boolean {
+    if (!item.permiso) {
+      return true;
+    }
+
+    if (item.route === '/citas') {
+      return this.authService.hasPermission('citas.ver_todas') || this.authService.hasPermission('citas.ver_propias');
+    }
+
+    return this.authService.hasPermission(item.permiso);
+  }
 }

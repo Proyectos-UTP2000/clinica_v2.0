@@ -10,6 +10,7 @@
   <nav class="sidebar-nav">
     <a
       *ngFor="let item of menuItems"
+      [hidden]="!puedeVer(item)"
       class="nav-link"
       [routerLink]="item.route"
       routerLinkActive="active"

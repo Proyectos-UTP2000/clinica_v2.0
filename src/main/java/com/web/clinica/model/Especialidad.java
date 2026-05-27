@@ -8,12 +8,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import java.util.HashSet;
+import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "especialidad")
 public class Especialidad {
@@ -31,4 +38,8 @@ public class Especialidad {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "especialidad_padre_id")
     private Especialidad especialidadPadre;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "especialidadPadre")
+    private Set<Especialidad> subespecialidades = new HashSet<>();
 }

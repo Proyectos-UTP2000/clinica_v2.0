@@ -1,20 +1,35 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: clinica
-    
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: rogervz.1710@gmail.com
-    password: lzbe lqnd ejwu itvi
+  datasource:
+    url: jdbc:postgresql://localhost:5432/clinica_db
+    username: clinica
+    password: clinica123
+  jpa:
+    hibernate:
+      ddl-auto: validate
     properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
 
 app:
+  jwt:
+    secret: "uE1qUxiTg2D2W0AHG+hEc8JuR2UYsS93+bFC/YqFcF0="
+    expiration-ms: 86400000
+  cors:
+    allowed-origin: "http://localhost:4200"
+  mail:
+    from: "no-reply@clinica.local"
+    enabled: false
   dni-api:
     url: "https://miapi.cloud/v1/dni"
-    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0MDYsImV4cCI6MTc2Mzc4NjU4N30.mCthamubrKmkP7sQcieZo3YJM9vawV7ANvUnEMCQG8k"
+    token: ""
+
+logging:
+  level:
+    org.springframework.security: INFO
+    com.web.clinica: DEBUG

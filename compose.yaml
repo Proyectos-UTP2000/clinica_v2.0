@@ -1,0 +1,9 @@
+services:
+  postgres:
+    image: "postgres:latest"
+    environment:
+      - "POSTGRES_DB=clinica_db"
+      - "POSTGRES_PASSWORD=clinica123"
+      - "POSTGRES_USER=clinica"
+    ports:
+      - "5432:5432"

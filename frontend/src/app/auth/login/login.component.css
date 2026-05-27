@@ -1,0 +1,64 @@
+.auth-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+  background: #eef3f8;
+}
+
+.auth-card {
+  width: min(100%, 440px);
+  padding: 2rem;
+  background: var(--clinic-surface);
+  border: 1px solid var(--clinic-border);
+  border-radius: var(--clinic-radius);
+  box-shadow: var(--clinic-shadow-sm);
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.brand-mark {
+  display: inline-grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  color: #ffffff;
+  background: var(--clinic-primary);
+  border-radius: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.brand-kicker {
+  margin: 0;
+  color: var(--clinic-muted);
+  font-size: 0.875rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.auth-intro {
+  margin-bottom: 1.5rem;
+  color: var(--clinic-muted);
+}
+
+.auth-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--clinic-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}

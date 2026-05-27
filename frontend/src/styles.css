@@ -1,0 +1,72 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+:root {
+  --clinic-primary: #0d6efd;
+  --clinic-primary-dark: #0b5ed7;
+  --clinic-success: #198754;
+  --clinic-sidebar: #343a40;
+  --clinic-sidebar-active: #495057;
+  --clinic-surface: #ffffff;
+  --clinic-canvas: #f5f7fa;
+  --clinic-border: rgba(33, 37, 41, 0.12);
+  --clinic-text: #212529;
+  --clinic-muted: #6c757d;
+  --clinic-danger: #dc3545;
+  --clinic-radius: 0.5rem;
+  --clinic-shadow-sm: 0 0.125rem 0.5rem rgba(33, 37, 41, 0.08);
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--clinic-text);
+  background: var(--clinic-canvas);
+  font-family: var(--bs-body-font-family);
+  line-height: 1.5;
+}
+
+a,
+button,
+.btn,
+.nav-link {
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.btn,
+.form-control {
+  min-height: 44px;
+}
+
+.form-label {
+  font-weight: 600;
+}
+
+.form-control:focus {
+  border-color: var(--clinic-primary);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.18);
+}
+
+.table {
+  --bs-table-striped-bg: #f8f9fb;
+  border-color: var(--clinic-border);
+}
+
+.table thead th {
+  background: #eef2f7;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

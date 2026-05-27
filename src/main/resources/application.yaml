@@ -1,3 +1,20 @@
 spring:
   application:
     name: clinica
+    
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: rogervz.1710@gmail.com
+    password: lzbe lqnd ejwu itvi
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  dni-api:
+    url: "https://miapi.cloud/v1/dni"
+    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0MDYsImV4cCI6MTc2Mzc4NjU4N30.mCthamubrKmkP7sQcieZo3YJM9vawV7ANvUnEMCQG8k"

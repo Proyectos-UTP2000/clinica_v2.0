@@ -7,3 +7,5 @@ services:
       - "POSTGRES_USER=clinica"
     ports:
       - "5432:5432"
+    volumes:
+      - "./docker/postgres/init:/docker-entrypoint-initdb.d:ro"

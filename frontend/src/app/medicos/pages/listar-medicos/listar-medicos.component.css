@@ -1,0 +1,50 @@
+.filters-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.filter-actions,
+.action-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 180px;
+  color: var(--clinic-muted);
+  font-weight: 700;
+}
+
+td small {
+  display: block;
+  color: var(--clinic-muted);
+}
+
+.sede-chip {
+  display: inline-flex;
+  margin: 0.125rem;
+  padding: 0.2rem 0.55rem;
+  color: #084298;
+  background: rgba(13, 110, 253, 0.1);
+  border: 1px solid rgba(13, 110, 253, 0.18);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.btn-sm {
+  min-height: 36px;
+}
+
+@media (max-width: 991.98px) {
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+}

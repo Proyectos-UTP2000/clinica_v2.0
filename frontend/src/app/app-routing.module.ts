@@ -22,7 +22,10 @@ const routes: Routes = [
         path: 'medicos',
         loadChildren: () => import('./medicos/medicos.module').then((m) => m.MedicosModule)
       },
-      { path: 'citas', redirectTo: 'dashboard' },
+      {
+        path: 'citas',
+        loadChildren: () => import('./citas/citas.module').then((m) => m.CitasModule)
+      },
       { path: 'historial', redirectTo: 'dashboard' },
       { path: 'pagos', redirectTo: 'dashboard' },
       { path: 'sedes', redirectTo: 'dashboard' },

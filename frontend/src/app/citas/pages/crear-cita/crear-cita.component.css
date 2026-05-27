@@ -1,0 +1,100 @@
+.appointment-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 1rem;
+  align-items: start;
+}
+
+.form-grid-full {
+  grid-column: 1 / -1;
+}
+
+.slots-panel {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  background: var(--clinic-surface-soft);
+  border: 1px solid var(--clinic-border);
+  border-radius: var(--clinic-radius-lg);
+}
+
+.slots-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.empty-slots {
+  color: var(--clinic-muted);
+  font-weight: 600;
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 0.5rem;
+}
+
+.slot-button {
+  min-height: 44px;
+  color: var(--clinic-primary);
+  background: #ffffff;
+  border: 1px solid rgba(13, 110, 253, 0.22);
+  border-radius: var(--clinic-radius);
+  font-weight: 800;
+}
+
+.slot-button.active,
+.slot-button:hover {
+  color: #ffffff;
+  background: var(--clinic-primary);
+}
+
+.summary-card {
+  position: sticky;
+  top: 1rem;
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px solid var(--clinic-border);
+  border-radius: var(--clinic-radius-lg);
+  box-shadow: var(--clinic-shadow-md);
+}
+
+.summary-kicker {
+  margin: 0 0 0.25rem;
+  color: var(--clinic-muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+h3 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+dl {
+  display: grid;
+  gap: 0.85rem;
+}
+
+dt {
+  color: var(--clinic-muted);
+  font-size: 0.82rem;
+}
+
+dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+@media (max-width: 991.98px) {
+  .appointment-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-card {
+    position: static;
+  }
+}

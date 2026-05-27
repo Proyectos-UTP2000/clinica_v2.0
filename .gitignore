@@ -33,6 +33,7 @@ build/
 .vscode/
 
 ## IA ##
+.worktrees/
 .agents/
 skills-lock.json
 docs/

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 public interface PacienteRepository extends JpaRepository<Paciente, Long> {
 
@@ -17,4 +18,8 @@ public interface PacienteRepository extends JpaRepository<Paciente, Long> {
 
     /** Lista pacientes activos con paginacion. */
     Page<Paciente> findByActivoTrue(Pageable pageable);
+
+    /** Cuenta pacientes activos para dashboard. */
+    @Query("SELECT COUNT(p) FROM Paciente p WHERE p.activo = true")
+    long countByActivoTrue();
 }

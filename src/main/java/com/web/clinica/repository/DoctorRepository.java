@@ -19,6 +19,10 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     @Query("SELECT d FROM Doctor d WHERE d.usuario.activo = true")
     List<Doctor> findByActivoTrue();
 
+    /** Cuenta doctores activos para dashboard. */
+    @Query("SELECT COUNT(d) FROM Doctor d JOIN d.usuario u WHERE u.activo = true")
+    long countDoctoresActivos();
+
     /** Lista doctores activos con datos necesarios para DTO. */
     @EntityGraph(attributePaths = {"usuario", "especialidad", "subespecialidad", "sedes"})
     @Query("SELECT d FROM Doctor d WHERE d.usuario.activo = true")

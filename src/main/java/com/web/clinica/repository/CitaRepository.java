@@ -19,6 +19,10 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
     @Query("SELECT COUNT(c) FROM Cita c WHERE c.fechaHoraInicio BETWEEN :inicio AND :fin")
     long countCitasProgramadasEntre(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
 
+    /** Cuenta citas por estados para dashboard. */
+    @Query("SELECT COUNT(c) FROM Cita c WHERE c.estado IN :estados")
+    long countByEstadoIn(@Param("estados") List<String> estados);
+
     /** Devuelve ranking de medicos por citas atendidas en un rango. */
     @Query("""
             SELECT c.doctor, COUNT(c) FROM Cita c

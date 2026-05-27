@@ -8,10 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,24 +19,27 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "especialidad")
-public class Especialidad {
+@Table(name = "estudio_complementario")
+public class EstudioComplementario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
-    private String nombre;
-
-    @Column(length = 255)
-    private String descripcion;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "especialidad_padre_id")
-    private Especialidad especialidadPadre;
+    @JoinColumn(name = "consulta_id", nullable = false)
+    private Consulta consulta;
+
+    @Column(name = "tipo_estudio", length = 100)
+    private String tipoEstudio;
+
+    @Column(columnDefinition = "TEXT")
+    private String detalle;
 
     @Builder.Default
-    @OneToMany(mappedBy = "especialidadPadre")
-    private Set<Especialidad> subespecialidades = new HashSet<>();
+    @Column(nullable = false, length = 20)
+    private String estado = "pendiente";
+
+    @Column(name = "archivo_resultado", length = 255)
+    private String archivoResultado;
 }

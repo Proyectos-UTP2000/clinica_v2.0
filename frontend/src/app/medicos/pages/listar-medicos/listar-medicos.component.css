@@ -31,10 +31,10 @@ td small {
   display: inline-flex;
   margin: 0.125rem;
   padding: 0.2rem 0.55rem;
-  color: #084298;
-  background: rgba(13, 110, 253, 0.1);
-  border: 1px solid rgba(13, 110, 253, 0.18);
-  border-radius: 999px;
+  color: var(--clinic-primary-dark);
+  background: rgba(20, 107, 95, 0.1);
+  border: 1px solid rgba(20, 107, 95, 0.18);
+  border-radius: 2rem;
   font-size: 0.78rem;
   font-weight: 700;
 }

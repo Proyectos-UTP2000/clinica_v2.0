@@ -8,6 +8,12 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrl: './header.component.css'
 })
 export class HeaderComponent {
+  readonly fechaOperativa = new Intl.DateTimeFormat('es-PE', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'short'
+  }).format(new Date());
+
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router

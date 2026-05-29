@@ -34,14 +34,14 @@
   display: flex;
   gap: 0.75rem;
   padding: 0.75rem;
-  background: var(--clinic-surface-soft);
+  background: var(--clinic-surface-inset);
   border: 1px solid transparent;
   border-radius: var(--clinic-radius);
   cursor: pointer;
 }
 
 .sede-option:has(input:checked) {
-  background: rgba(13, 110, 253, 0.08);
+  background: rgba(20, 107, 95, 0.1);
   border-color: var(--clinic-border-strong);
 }
 

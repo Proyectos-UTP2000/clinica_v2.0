@@ -1,27 +1,28 @@
 .app-header {
-  min-height: 72px;
+  min-height: 76px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.875rem 1.5rem;
-  background: rgba(255, 255, 255, 0.94);
+  padding: 1rem 1.6rem;
+  background: rgba(255, 255, 255, 0.78);
   border-bottom: 1px solid var(--clinic-border);
-  box-shadow: 0 0.35rem 1rem rgba(33, 37, 41, 0.06);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(14px);
 }
 
 .header-kicker {
   margin: 0;
   color: var(--clinic-muted);
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 h1 {
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
+  color: var(--clinic-ink);
+  font-size: 1.28rem;
+  font-weight: 800;
 }
 
 .user-actions {
@@ -32,15 +33,23 @@ h1 {
   text-align: right;
 }
 
+.operation-day,
 .user-name {
   display: inline-flex;
   align-items: center;
   min-height: 36px;
   padding: 0.35rem 0.75rem;
-  background: var(--clinic-surface-soft);
+  background: rgba(255, 255, 255, 0.72);
   border: 1px solid var(--clinic-border);
-  border-radius: 999px;
+  border-radius: 2rem;
   font-weight: 600;
+}
+
+.operation-day {
+  color: var(--clinic-primary-dark);
+  background: var(--clinic-primary-soft);
+  border-color: rgba(20, 107, 95, 0.18);
+  text-transform: capitalize;
 }
 
 @media (max-width: 575.98px) {
@@ -52,6 +61,7 @@ h1 {
 
   .user-actions {
     width: 100%;
+    flex-wrap: wrap;
     justify-content: space-between;
     text-align: left;
   }

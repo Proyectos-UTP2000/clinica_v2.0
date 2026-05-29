@@ -14,6 +14,7 @@ interface QuickLink {
   label: string;
   route: string;
   description: string;
+  code: string;
 }
 
 @Component({
@@ -27,10 +28,10 @@ export class DashboardComponent implements OnInit {
   mensajeError = '';
 
   quickLinks: QuickLink[] = [
-    { label: 'Pacientes', route: '/pacientes', description: 'Gestionar registro y contacto' },
-    { label: 'Medicos', route: '/medicos', description: 'Consultar personal medico' },
-    { label: 'Citas', route: '/citas', description: 'Agendar y revisar atenciones' },
-    { label: 'Pagos', route: '/pagos', description: 'Registrar pagos manuales' }
+    { label: 'Pacientes', route: '/pacientes', description: 'Gestionar registro y contacto', code: 'PX' },
+    { label: 'Medicos', route: '/medicos', description: 'Consultar personal medico', code: 'MD' },
+    { label: 'Citas', route: '/citas', description: 'Agendar y revisar atenciones', code: 'CT' },
+    { label: 'Pagos', route: '/pagos', description: 'Registrar pagos manuales', code: 'PG' }
   ];
 
   constructor(private readonly dashboardService: DashboardService) {}

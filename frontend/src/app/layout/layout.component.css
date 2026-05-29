@@ -2,7 +2,8 @@
   min-height: 100dvh;
   display: flex;
   background:
-    linear-gradient(180deg, #f8fbff 0, var(--clinic-canvas) 20rem),
+    radial-gradient(circle at 0 0, rgba(20, 107, 95, 0.11), transparent 22rem),
+    linear-gradient(180deg, #fbfdfb 0, var(--clinic-canvas) 22rem),
     var(--clinic-canvas);
 }
 
@@ -15,9 +16,9 @@
 
 .content-area {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 1.75rem;
+  padding: 1.25rem 1.6rem 2rem;
 }
 
 @media (max-width: 991.98px) {

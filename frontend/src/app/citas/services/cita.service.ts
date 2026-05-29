@@ -14,7 +14,14 @@ const API_URL = 'http://localhost:8080/api';
 export class CitaService {
   constructor(private readonly http: HttpClient) {}
 
-  listar(filtros?: { pacienteId?: number; doctorId?: number; fecha?: string }, page = 0, size = 10): Observable<Page<CitaResponse>> {
+  listar(filtros?: {
+    pacienteId?: number;
+    doctorId?: number;
+    sedeId?: number;
+    fecha?: string;
+    fechaInicio?: string;
+    fechaFin?: string;
+  }, page = 0, size = 10): Observable<Page<CitaResponse>> {
     let params = new HttpParams()
       .set('page', page)
       .set('size', size);
@@ -25,8 +32,17 @@ export class CitaService {
     if (filtros?.doctorId) {
       params = params.set('doctorId', filtros.doctorId);
     }
+    if (filtros?.sedeId) {
+      params = params.set('sedeId', filtros.sedeId);
+    }
     if (filtros?.fecha) {
       params = params.set('fecha', filtros.fecha);
+    }
+    if (filtros?.fechaInicio) {
+      params = params.set('fechaInicio', filtros.fechaInicio);
+    }
+    if (filtros?.fechaFin) {
+      params = params.set('fechaFin', filtros.fechaFin);
     }
 
     return this.http.get<Page<CitaResponse>>(`${API_URL}/citas`, { params });
@@ -41,6 +57,22 @@ export class CitaService {
       params = params.set('fecha', fecha);
     }
 
+    return this.http.get<Page<CitaResponse>>(`${API_URL}/citas/doctor`, { params });
+  }
+
+  listarPropiasRango(filtros: { fechaInicio?: string; fechaFin?: string; fecha?: string }, page = 0, size = 10): Observable<Page<CitaResponse>> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('size', size);
+    if (filtros.fecha) {
+      params = params.set('fecha', filtros.fecha);
+    }
+    if (filtros.fechaInicio) {
+      params = params.set('fechaInicio', filtros.fechaInicio);
+    }
+    if (filtros.fechaFin) {
+      params = params.set('fechaFin', filtros.fechaFin);
+    }
     return this.http.get<Page<CitaResponse>>(`${API_URL}/citas/doctor`, { params });
   }
 

@@ -26,10 +26,30 @@ const routes: Routes = [
         path: 'citas',
         loadChildren: () => import('./citas/citas.module').then((m) => m.CitasModule)
       },
-      { path: 'historial', redirectTo: 'dashboard' },
-      { path: 'pagos', redirectTo: 'dashboard' },
-      { path: 'sedes', redirectTo: 'dashboard' },
-      { path: 'especialidades', redirectTo: 'dashboard' }
+      {
+        path: 'agenda',
+        loadChildren: () => import('./agenda/agenda.module').then((m) => m.AgendaModule)
+      },
+      {
+        path: 'historial',
+        loadChildren: () => import('./historial/historial.module').then((m) => m.HistorialModule)
+      },
+      {
+        path: 'pagos',
+        loadChildren: () => import('./pagos/pagos.module').then((m) => m.PagosModule)
+      },
+      {
+        path: 'sedes',
+        loadChildren: () => import('./sedes/sedes.module').then((m) => m.SedesModule)
+      },
+      {
+        path: 'especialidades',
+        loadChildren: () => import('./especialidades/especialidades.module').then((m) => m.EspecialidadesModule)
+      },
+      {
+        path: 'disponibilidad',
+        loadChildren: () => import('./disponibilidad/disponibilidad.module').then((m) => m.DisponibilidadModule)
+      }
     ]
   },
   { path: '**', redirectTo: 'dashboard' }

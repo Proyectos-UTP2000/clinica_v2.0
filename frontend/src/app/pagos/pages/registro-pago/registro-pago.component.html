@@ -1,0 +1,43 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Pagos"
+    title="Registrar pago"
+    description="Registre el pago manual asociado a una cita."
+  ></app-page-header>
+
+  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  <div *ngIf="cargando" class="loading-state">Cargando cita...</div>
+
+  <div *ngIf="cita" class="feature-panel">
+    <div class="feature-panel-body detail-grid">
+      <div><span>Cita</span><strong>#{{ cita.id }}</strong></div>
+      <div><span>Paciente</span><strong>{{ cita.pacienteNombre }}</strong></div>
+      <div><span>Medico</span><strong>{{ cita.doctorNombre }}</strong></div>
+      <div><span>Fecha</span><strong>{{ cita.fechaHoraInicio | date:'short' }}</strong></div>
+    </div>
+  </div>
+
+  <form class="feature-panel" [formGroup]="pagoForm" (ngSubmit)="registrar()">
+    <div class="feature-panel-body form-grid">
+      <label class="form-label">
+        Monto
+        <input class="form-control" type="number" min="0" step="0.01" formControlName="monto" />
+      </label>
+      <label class="form-label">
+        Metodo
+        <select class="form-select" formControlName="metodo">
+          <option value="efectivo">Efectivo</option>
+          <option value="tarjeta">Tarjeta</option>
+          <option value="transferencia">Transferencia</option>
+          <option value="web">Web</option>
+        </select>
+      </label>
+      <div class="form-actions grid-span-2">
+        <a class="btn btn-outline-secondary" routerLink="/pagos">Cancelar</a>
+        <button class="btn btn-primary" type="submit" [disabled]="guardando">
+          {{ guardando ? 'Registrando...' : 'Registrar pago' }}
+        </button>
+      </div>
+    </div>
+  </form>
+</section>

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 import { CitaCreateRequest, DisponibilidadSlotResponse } from '../../../shared/models/cita.model';
@@ -34,6 +35,7 @@ export class CrearCitaComponent implements OnInit {
   constructor(
     private readonly fb: FormBuilder,
     private readonly citaService: CitaService,
+    private readonly route: ActivatedRoute,
     private readonly router: Router
   ) {}
 
@@ -130,6 +132,7 @@ export class CrearCitaComponent implements OnInit {
           this.pacientes = pacientes;
           this.medicos = medicos;
           this.sedes = sedes;
+          this.aplicarPrefillAgenda();
         },
         error: () => {
           this.mensajeError = 'No se pudieron cargar pacientes, medicos o sedes.';
@@ -145,5 +148,18 @@ export class CrearCitaComponent implements OnInit {
       sedeId: Number(raw.sedeId),
       fechaHoraInicio: raw.fechaHoraInicio ?? ''
     };
+  }
+
+  private aplicarPrefillAgenda(): void {
+    const query = this.route.snapshot.queryParamMap;
+    const fechaHoraInicio = query.get('fechaHoraInicio');
+    this.citaForm.patchValue({
+      doctorId: query.get('doctorId') || '',
+      sedeId: query.get('sedeId') || '',
+      fecha: fechaHoraInicio ? fechaHoraInicio.slice(0, 10) : ''
+    });
+    if (fechaHoraInicio) {
+      this.citaForm.patchValue({ fechaHoraInicio }, { emitEvent: false });
+    }
   }
 }

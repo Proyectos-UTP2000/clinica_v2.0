@@ -28,6 +28,11 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     @Query("SELECT d FROM Doctor d WHERE d.usuario.activo = true")
     Page<Doctor> listarActivos(Pageable pageable);
 
+    /** Lista doctores activos con relaciones para filtrado en servicio. */
+    @EntityGraph(attributePaths = {"usuario", "especialidad", "subespecialidad", "sedes"})
+    @Query("SELECT DISTINCT d FROM Doctor d WHERE d.usuario.activo = true")
+    List<Doctor> listarActivosConRelaciones();
+
     /** Filtra doctores activos por nombre, especialidad o sede. */
     @EntityGraph(attributePaths = {"usuario", "especialidad", "subespecialidad", "sedes"})
     @Query("""

@@ -30,6 +30,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -134,10 +135,36 @@ public class CitaServiceImpl implements ICitaService {
     /** Lista citas con filtros opcionales para vista interna. */
     @Override
     @Transactional(readOnly = true)
-    public Page<CitaResponse> listarConFiltros(Long pacienteId, Long doctorId, LocalDate fecha, Pageable pageable) {
-        LocalDateTime inicio = fecha == null ? null : fecha.atStartOfDay();
-        LocalDateTime fin = fecha == null ? null : fecha.plusDays(1).atStartOfDay();
-        return citaRepository.listarConFiltros(pacienteId, doctorId, inicio, fin, pageable).map(this::convertirRespuesta);
+    public Page<CitaResponse> listarConFiltros(Long pacienteId,
+                                               Long doctorId,
+                                               Long sedeId,
+                                               LocalDate fecha,
+                                               LocalDate fechaInicio,
+                                               LocalDate fechaFin,
+                                               Pageable pageable) {
+        LocalDateTime inicio = resolverInicio(fecha, fechaInicio);
+        LocalDateTime fin = resolverFin(fecha, fechaInicio, fechaFin);
+        if (inicio != null && fin != null && fin.isBefore(inicio)) {
+            throw new BadRequestException("La fecha final no puede ser anterior a la inicial");
+        }
+
+        Specification<Cita> specification = Specification.where(null);
+        if (pacienteId != null) {
+            specification = specification.and((root, query, builder) -> builder.equal(root.get("paciente").get("id"), pacienteId));
+        }
+        if (doctorId != null) {
+            specification = specification.and((root, query, builder) -> builder.equal(root.get("doctor").get("id"), doctorId));
+        }
+        if (sedeId != null) {
+            specification = specification.and((root, query, builder) -> builder.equal(root.get("sede").get("id"), sedeId));
+        }
+        if (inicio != null) {
+            specification = specification.and((root, query, builder) -> builder.greaterThanOrEqualTo(root.get("fechaHoraInicio"), inicio));
+        }
+        if (fin != null) {
+            specification = specification.and((root, query, builder) -> builder.lessThan(root.get("fechaHoraInicio"), fin));
+        }
+        return citaRepository.findAll(specification, pageable).map(this::convertirRespuesta);
     }
 
     /** Lista citas por paciente. */
@@ -150,26 +177,22 @@ public class CitaServiceImpl implements ICitaService {
     /** Lista citas por doctor y fecha opcional. */
     @Override
     @Transactional(readOnly = true)
-    public Page<CitaResponse> listarPorDoctor(Long doctorId, Pageable pageable, LocalDate fecha) {
-        if (fecha == null) {
-            return citaRepository.findByDoctorId(doctorId, pageable).map(this::convertirRespuesta);
-        }
-        return citaRepository.findByDoctorIdAndFechaHoraInicioBetween(
-                doctorId,
-                fecha.atStartOfDay(),
-                fecha.plusDays(1).atStartOfDay(),
-                pageable
-        ).map(this::convertirRespuesta);
+    public Page<CitaResponse> listarPorDoctor(Long doctorId,
+                                              Pageable pageable,
+                                              LocalDate fecha,
+                                              LocalDate fechaInicio,
+                                              LocalDate fechaFin) {
+        return listarConFiltros(null, doctorId, null, fecha, fechaInicio, fechaFin, pageable);
     }
 
     /** Lista citas propias del doctor autenticado. */
     @Override
     @Transactional(readOnly = true)
-    public Page<CitaResponse> listarMisCitas(Pageable pageable, LocalDate fecha) {
+    public Page<CitaResponse> listarMisCitas(Pageable pageable, LocalDate fecha, LocalDate fechaInicio, LocalDate fechaFin) {
         Usuario usuario = obtenerUsuarioActual();
         Doctor doctor = doctorRepository.findByUsuarioDni(usuario.getDni())
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor autenticado no encontrado"));
-        return listarPorDoctor(doctor.getId(), pageable, fecha);
+        return listarPorDoctor(doctor.getId(), pageable, fecha, fechaInicio, fechaFin);
     }
 
     /** Calcula slots libres descontando citas y excepciones. */
@@ -257,6 +280,25 @@ public class CitaServiceImpl implements ICitaService {
     /** Verifica si dos rangos de hora se solapan. */
     private boolean haySolapamiento(LocalTime inicioA, LocalTime finA, LocalTime inicioB, LocalTime finB) {
         return inicioA.isBefore(finB) && finA.isAfter(inicioB);
+    }
+
+    /** Resuelve inicio de filtro para busquedas por dia o rango. */
+    private LocalDateTime resolverInicio(LocalDate fecha, LocalDate fechaInicio) {
+        if (fecha != null) {
+            return fecha.atStartOfDay();
+        }
+        return fechaInicio == null ? null : fechaInicio.atStartOfDay();
+    }
+
+    /** Resuelve fin exclusivo de filtro para busquedas por dia o rango. */
+    private LocalDateTime resolverFin(LocalDate fecha, LocalDate fechaInicio, LocalDate fechaFin) {
+        if (fecha != null) {
+            return fecha.plusDays(1).atStartOfDay();
+        }
+        if (fechaFin != null) {
+            return fechaFin.plusDays(1).atStartOfDay();
+        }
+        return fechaInicio == null ? null : fechaInicio.plusDays(1).atStartOfDay();
     }
 
     /** Aplica alcance fino para doctores propios y secretarias asignadas. */

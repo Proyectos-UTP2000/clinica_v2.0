@@ -1,0 +1,63 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Pacientes"
+    title="Nuevo paciente"
+    description="Registre datos basicos y contacto obligatorio antes de agendar citas."
+  >
+    <a class="btn btn-outline-secondary" routerLink="/pacientes">Volver</a>
+  </app-page-header>
+
+  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+
+  <form class="feature-panel" [formGroup]="pacienteForm" (ngSubmit)="guardar()" novalidate>
+    <div class="feature-panel-body">
+      <div class="form-grid">
+        <div>
+          <label for="dni" class="form-label">DNI</label>
+          <input id="dni" class="form-control" maxlength="8" inputmode="numeric" formControlName="dni" [class.is-invalid]="campoInvalido('dni')" />
+          <div class="invalid-feedback">Ingrese un DNI valido de 8 digitos.</div>
+        </div>
+        <div>
+          <label for="sexo" class="form-label">Sexo</label>
+          <select id="sexo" class="form-select" formControlName="sexo">
+            <option value="">No especificado</option>
+            <option value="F">Femenino</option>
+            <option value="M">Masculino</option>
+          </select>
+        </div>
+        <div>
+          <label for="nombres" class="form-label">Nombres</label>
+          <input id="nombres" class="form-control" formControlName="nombres" [class.is-invalid]="campoInvalido('nombres')" />
+          <div class="invalid-feedback">Los nombres son obligatorios.</div>
+        </div>
+        <div>
+          <label for="apellidos" class="form-label">Apellidos</label>
+          <input id="apellidos" class="form-control" formControlName="apellidos" [class.is-invalid]="campoInvalido('apellidos')" />
+          <div class="invalid-feedback">Los apellidos son obligatorios.</div>
+        </div>
+        <div>
+          <label for="fechaNacimiento" class="form-label">Fecha de nacimiento</label>
+          <input id="fechaNacimiento" type="date" class="form-control" formControlName="fechaNacimiento" [class.is-invalid]="campoInvalido('fechaNacimiento')" />
+          <div class="invalid-feedback">La fecha de nacimiento es obligatoria.</div>
+        </div>
+        <div>
+          <label for="telefono" class="form-label">Telefono</label>
+          <input id="telefono" class="form-control" inputmode="tel" formControlName="telefono" [class.is-invalid]="campoInvalido('telefono')" />
+          <div class="invalid-feedback">Ingrese un telefono numerico valido.</div>
+        </div>
+        <div class="form-grid-full">
+          <label for="email" class="form-label">Email opcional</label>
+          <input id="email" type="email" class="form-control" formControlName="email" [class.is-invalid]="campoInvalido('email')" />
+          <div class="invalid-feedback">Ingrese un email valido.</div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <a class="btn btn-outline-secondary" routerLink="/pacientes">Cancelar</a>
+        <button type="submit" class="btn btn-primary" [disabled]="cargando">
+          <span *ngIf="cargando" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          Guardar paciente
+        </button>
+      </div>
+    </div>
+  </form>
+</section>

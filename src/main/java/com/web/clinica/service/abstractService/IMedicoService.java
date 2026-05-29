@@ -17,6 +17,9 @@ public interface IMedicoService {
     /** Obtiene un medico por identificador. */
     MedicoResponse obtenerPorId(Long id);
 
+    /** Obtiene el perfil medico del usuario autenticado. */
+    MedicoResponse obtenerAutenticado();
+
     /** Lista medicos activos con filtros opcionales. */
     Page<MedicoResponse> listarActivos(String texto, Long especialidadId, Long sedeId, Pageable pageable);
 

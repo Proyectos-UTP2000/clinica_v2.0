@@ -1,0 +1,18 @@
+@import "../crear-medico/crear-medico.component.css";
+
+.readonly-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.9rem 1rem;
+  background: var(--clinic-surface-soft);
+  border: 1px solid var(--clinic-border);
+  border-radius: var(--clinic-radius);
+}
+
+.readonly-strip span {
+  color: var(--clinic-muted);
+  font-weight: 800;
+}

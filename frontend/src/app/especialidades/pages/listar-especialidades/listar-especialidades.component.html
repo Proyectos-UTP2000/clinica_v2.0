@@ -1,0 +1,42 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Especialidades"
+    title="Catalogo de especialidades"
+    description="Administre especialidades medicas disponibles para agenda y medicos."
+  >
+    <a *ngIf="authService.hasPermission('especialidades.crear')" class="btn btn-primary" routerLink="/especialidades/crear">Nueva especialidad</a>
+  </app-page-header>
+
+  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  <div *ngIf="mensajeExito" class="alert alert-success" role="status">{{ mensajeExito }}</div>
+
+  <div class="table-shell">
+    <div *ngIf="cargando" class="loading-state">Cargando especialidades...</div>
+    <div *ngIf="!cargando && especialidades.length === 0" class="empty-state">No hay especialidades registradas.</div>
+    <div *ngIf="!cargando && especialidades.length > 0" class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Descripcion</th>
+            <th>Padre</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let especialidad of especialidades">
+            <td class="fw-semibold">{{ especialidad.nombre }}</td>
+            <td>{{ especialidad.descripcion || 'Sin descripcion' }}</td>
+            <td>{{ especialidad.especialidadPadreNombre || 'Principal' }}</td>
+            <td class="text-end">
+              <a *ngIf="authService.hasPermission('especialidades.editar')" class="btn btn-sm btn-outline-secondary me-2" [routerLink]="['/especialidades/editar', especialidad.id]">Editar</a>
+              <button *ngIf="authService.hasPermission('especialidades.eliminar')" class="btn btn-sm btn-outline-danger" type="button" (click)="eliminarEspecialidad(especialidad)">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <app-paginator [page]="page" [totalPages]="totalPages" [totalElements]="totalElements" [size]="size" (pageChange)="cargarEspecialidades($event)"></app-paginator>
+</section>

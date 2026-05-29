@@ -1,0 +1,30 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Pagos"
+    title="Historial de pagos"
+    description="Pagos registrados para el paciente seleccionado."
+  ></app-page-header>
+
+  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+
+  <div class="table-shell">
+    <div *ngIf="cargando" class="loading-state">Cargando pagos...</div>
+    <div *ngIf="!cargando && pagos.length === 0" class="empty-state">No hay pagos para este paciente.</div>
+    <div *ngIf="!cargando && pagos.length > 0" class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr><th>Cita</th><th>Monto</th><th>Metodo</th><th>Fecha</th><th>Registrado por</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pago of pagos">
+            <td class="fw-semibold">#{{ pago.citaId }}</td>
+            <td>{{ pago.monto | currency:'PEN':'symbol':'1.2-2' }}</td>
+            <td>{{ pago.metodo }}</td>
+            <td>{{ pago.fechaPago | date:'short' }}</td>
+            <td>{{ pago.registradoPor || 'Sin usuario' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

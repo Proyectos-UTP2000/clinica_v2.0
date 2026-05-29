@@ -1,0 +1,10 @@
+<header class="page-header">
+  <div>
+    <p *ngIf="kicker" class="page-kicker">{{ kicker }}</p>
+    <h2>{{ title }}</h2>
+    <p *ngIf="description" class="page-description">{{ description }}</p>
+  </div>
+  <div class="page-actions">
+    <ng-content></ng-content>
+  </div>
+</header>

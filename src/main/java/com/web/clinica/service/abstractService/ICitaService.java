@@ -24,16 +24,26 @@ public interface ICitaService {
     CitaResponse obtenerPorId(Long id);
 
     /** Lista citas con filtros internos opcionales. */
-    Page<CitaResponse> listarConFiltros(Long pacienteId, Long doctorId, LocalDate fecha, Pageable pageable);
+    Page<CitaResponse> listarConFiltros(Long pacienteId,
+                                        Long doctorId,
+                                        Long sedeId,
+                                        LocalDate fecha,
+                                        LocalDate fechaInicio,
+                                        LocalDate fechaFin,
+                                        Pageable pageable);
 
     /** Lista citas de un paciente. */
     Page<CitaResponse> listarPorPaciente(Long pacienteId, Pageable pageable);
 
     /** Lista citas de un doctor con fecha opcional. */
-    Page<CitaResponse> listarPorDoctor(Long doctorId, Pageable pageable, LocalDate fecha);
+    Page<CitaResponse> listarPorDoctor(Long doctorId,
+                                       Pageable pageable,
+                                       LocalDate fecha,
+                                       LocalDate fechaInicio,
+                                       LocalDate fechaFin);
 
     /** Lista citas del doctor autenticado. */
-    Page<CitaResponse> listarMisCitas(Pageable pageable, LocalDate fecha);
+    Page<CitaResponse> listarMisCitas(Pageable pageable, LocalDate fecha, LocalDate fechaInicio, LocalDate fechaFin);
 
     /** Calcula slots libres de 30 minutos. */
     List<DisponibilidadSlotResponse> obtenerSlotsDisponibles(Long doctorId, Long sedeId, LocalDate fecha);

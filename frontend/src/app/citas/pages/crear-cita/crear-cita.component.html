@@ -1,0 +1,99 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Citas"
+    title="Nueva cita"
+    description="Seleccione paciente, medico, sede y un slot disponible antes de confirmar la agenda."
+  >
+    <a class="btn btn-outline-secondary" routerLink="/citas">Volver</a>
+  </app-page-header>
+
+  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  <div *ngIf="cargandoCatalogos" class="feature-panel feature-panel-body text-muted fw-semibold">Cargando datos de agenda...</div>
+
+  <form *ngIf="!cargandoCatalogos" class="appointment-layout" [formGroup]="citaForm" (ngSubmit)="guardar()" novalidate>
+    <div class="feature-panel">
+      <div class="feature-panel-body">
+        <div class="form-grid">
+          <div class="form-grid-full">
+            <label for="pacienteId" class="form-label">Paciente</label>
+            <select id="pacienteId" class="form-select" formControlName="pacienteId" [class.is-invalid]="campoInvalido('pacienteId')">
+              <option value="">Seleccione un paciente</option>
+              <option *ngFor="let paciente of pacientes" [value]="paciente.id">{{ paciente.dni }} - {{ paciente.nombres }} {{ paciente.apellidos }}</option>
+            </select>
+            <div class="invalid-feedback">Seleccione un paciente.</div>
+          </div>
+          <div>
+            <label for="sedeId" class="form-label">Sede</label>
+            <select id="sedeId" class="form-select" formControlName="sedeId" [class.is-invalid]="campoInvalido('sedeId')">
+              <option value="">Seleccione</option>
+              <option *ngFor="let sede of sedes" [value]="sede.id">{{ sede.nombre }}</option>
+            </select>
+            <div class="invalid-feedback">Seleccione una sede.</div>
+          </div>
+          <div>
+            <label for="doctorId" class="form-label">Medico</label>
+            <select id="doctorId" class="form-select" formControlName="doctorId" [class.is-invalid]="campoInvalido('doctorId')">
+              <option value="">Seleccione</option>
+              <option *ngFor="let medico of medicos" [value]="medico.id">{{ medico.nombres }} {{ medico.apellidos }} · {{ medico.especialidadNombre }}</option>
+            </select>
+            <div class="invalid-feedback">Seleccione un medico.</div>
+          </div>
+          <div>
+            <label for="fecha" class="form-label">Fecha</label>
+            <input id="fecha" type="date" class="form-control" formControlName="fecha" [class.is-invalid]="campoInvalido('fecha')" />
+            <div class="invalid-feedback">Seleccione una fecha.</div>
+          </div>
+        </div>
+
+        <div class="slots-panel">
+          <div class="slots-header">
+            <strong>Horarios disponibles</strong>
+            <span *ngIf="cargandoSlots" class="text-muted">Consultando...</span>
+          </div>
+          <div *ngIf="!cargandoSlots && slots.length === 0" class="empty-slots">
+            Seleccione sede, medico y fecha para consultar disponibilidad.
+          </div>
+          <div class="slot-grid" *ngIf="slots.length > 0">
+            <button
+              *ngFor="let slot of slots"
+              type="button"
+              class="slot-button"
+              [class.active]="slotSeleccionado(slot)"
+              (click)="seleccionarSlot(slot)"
+            >
+              {{ horaSlot(slot) }}
+            </button>
+          </div>
+          <div *ngIf="campoInvalido('fechaHoraInicio')" class="text-danger small fw-semibold mt-2">Seleccione un horario.</div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="summary-card">
+      <p class="summary-kicker">Resumen</p>
+      <h3>Confirmacion de cita</h3>
+      <dl>
+        <div>
+          <dt>Paciente</dt>
+          <dd>{{ pacienteSeleccionado ? pacienteSeleccionado.nombres + ' ' + pacienteSeleccionado.apellidos : 'Sin seleccionar' }}</dd>
+        </div>
+        <div>
+          <dt>Medico</dt>
+          <dd>{{ medicoSeleccionado ? medicoSeleccionado.nombres + ' ' + medicoSeleccionado.apellidos : 'Sin seleccionar' }}</dd>
+        </div>
+        <div>
+          <dt>Sede</dt>
+          <dd>{{ sedeSeleccionada?.nombre || 'Sin seleccionar' }}</dd>
+        </div>
+        <div>
+          <dt>Horario</dt>
+          <dd>{{ citaForm.getRawValue().fechaHoraInicio || 'Sin seleccionar' }}</dd>
+        </div>
+      </dl>
+      <button type="submit" class="btn btn-primary w-100" [disabled]="guardando">
+        <span *ngIf="guardando" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+        Agendar cita
+      </button>
+    </aside>
+  </form>
+</section>

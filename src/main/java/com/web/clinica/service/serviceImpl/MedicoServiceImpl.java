@@ -18,16 +18,21 @@ import com.web.clinica.repository.UsuarioRepository;
 import com.web.clinica.service.abstractService.IMedicoService;
 import com.web.clinica.util.EmailService;
 import java.security.SecureRandom;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -104,11 +109,35 @@ public class MedicoServiceImpl implements IMedicoService {
         return convertirRespuesta(obtenerEntidad(id));
     }
 
+    /** Obtiene el perfil del doctor autenticado para disponibilidad propia. */
+    @Override
+    @Transactional(readOnly = true)
+    public MedicoResponse obtenerAutenticado() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof Usuario usuario) {
+            Doctor doctor = doctorRepository.findByUsuarioDni(usuario.getDni())
+                    .orElseThrow(() -> new ResourceNotFoundException("Medico autenticado no encontrado"));
+            return convertirRespuesta(doctor);
+        }
+        throw new ResourceNotFoundException("Medico autenticado no encontrado");
+    }
+
     /** Lista doctores activos con filtros opcionales. */
     @Override
     @Transactional(readOnly = true)
     public Page<MedicoResponse> listarActivos(String texto, Long especialidadId, Long sedeId, Pageable pageable) {
-        return doctorRepository.listarConFiltros(texto, especialidadId, sedeId, pageable).map(this::convertirRespuesta);
+        if (!StringUtils.hasText(texto) && especialidadId == null && sedeId == null) {
+            return doctorRepository.listarActivos(pageable).map(this::convertirRespuesta);
+        }
+
+        List<MedicoResponse> medicos = doctorRepository.listarActivosConRelaciones().stream()
+                .filter(doctor -> coincideTexto(doctor, texto))
+                .filter(doctor -> especialidadId == null || doctor.getEspecialidad().getId().equals(especialidadId))
+                .filter(doctor -> sedeId == null || doctor.getSedes().stream().anyMatch(sede -> sede.getId().equals(sedeId)))
+                .map(this::convertirRespuesta)
+                .sorted(Comparator.comparing(MedicoResponse::getApellidos).thenComparing(MedicoResponse::getNombres))
+                .toList();
+        return paginar(medicos, pageable);
     }
 
     /** Desactiva el usuario asociado al doctor. */
@@ -164,6 +193,24 @@ public class MedicoServiceImpl implements IMedicoService {
             password.append(CARACTERES_PASSWORD.charAt(posicion));
         }
         return password.toString();
+    }
+
+    /** Evalua filtro textual contra nombre completo y DNI. */
+    private boolean coincideTexto(Doctor doctor, String texto) {
+        if (!StringUtils.hasText(texto)) {
+            return true;
+        }
+        String filtro = texto.toLowerCase(Locale.ROOT);
+        Usuario usuario = doctor.getUsuario();
+        String nombreCompleto = (usuario.getNombres() + " " + usuario.getApellidos()).toLowerCase(Locale.ROOT);
+        return nombreCompleto.contains(filtro) || usuario.getDni().contains(filtro);
+    }
+
+    /** Crea una pagina estable para resultados filtrados en memoria. */
+    private Page<MedicoResponse> paginar(List<MedicoResponse> medicos, Pageable pageable) {
+        int inicio = Math.min((int) pageable.getOffset(), medicos.size());
+        int fin = Math.min(inicio + pageable.getPageSize(), medicos.size());
+        return new PageImpl<>(medicos.subList(inicio, fin), pageable, medicos.size());
     }
 
     /** Convierte doctor a DTO de salida. */

@@ -1,0 +1,36 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Especialidades"
+    [title]="especialidadId ? 'Editar especialidad' : 'Nueva especialidad'"
+    description="Defina especialidades y subespecialidades medicas."
+  ></app-page-header>
+
+  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  <div *ngIf="cargando" class="loading-state">Cargando especialidad...</div>
+
+  <form *ngIf="!cargando" class="feature-panel" [formGroup]="especialidadForm" (ngSubmit)="guardar()">
+    <div class="feature-panel-body form-grid">
+      <label class="form-label">
+        Nombre
+        <input class="form-control" formControlName="nombre" />
+      </label>
+      <label class="form-label">
+        Especialidad padre
+        <select class="form-select" formControlName="especialidadPadreId">
+          <option [ngValue]="null">Principal</option>
+          <option *ngFor="let especialidad of especialidades" [ngValue]="especialidad.id">{{ especialidad.nombre }}</option>
+        </select>
+      </label>
+      <label class="form-label grid-span-2">
+        Descripcion
+        <textarea class="form-control" rows="3" formControlName="descripcion"></textarea>
+      </label>
+      <div class="form-actions grid-span-2">
+        <a class="btn btn-outline-secondary" routerLink="/especialidades">Cancelar</a>
+        <button class="btn btn-primary" type="submit" [disabled]="guardando">
+          {{ guardando ? 'Guardando...' : 'Guardar especialidad' }}
+        </button>
+      </div>
+    </div>
+  </form>
+</section>

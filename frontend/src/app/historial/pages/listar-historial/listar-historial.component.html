@@ -1,0 +1,113 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Historial"
+    title="Historial clinico"
+    description="Consulte consultas por paciente y registre atenciones basicas."
+  >
+    <a *ngIf="authService.hasPermission('historial.crear')" class="btn btn-primary" routerLink="/historial/crear">Nueva consulta</a>
+  </app-page-header>
+
+  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  <div *ngIf="mensajeExito" class="alert alert-success" role="status">{{ mensajeExito }}</div>
+
+  <div class="feature-panel">
+    <div class="feature-panel-body">
+      <form class="form-grid" [formGroup]="filtroForm" (ngSubmit)="cargarHistorial(0)">
+        <label class="form-label">
+          Paciente
+          <select class="form-select" formControlName="pacienteId">
+            <option [ngValue]="null">Seleccione paciente</option>
+            <option *ngFor="let paciente of pacientes" [ngValue]="paciente.id">{{ paciente.nombres }} {{ paciente.apellidos }}</option>
+          </select>
+        </label>
+        <div class="form-actions">
+          <button class="btn btn-outline-primary" type="submit">Buscar historial</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <form *ngIf="authService.hasPermission('historial.crear')" class="feature-panel" [formGroup]="consultaForm" (ngSubmit)="crearConsulta()">
+    <div class="feature-panel-body form-grid">
+      <label class="form-label">
+        Paciente
+        <select class="form-select" formControlName="pacienteId">
+          <option [ngValue]="null">Seleccione paciente</option>
+          <option *ngFor="let paciente of pacientes" [ngValue]="paciente.id">{{ paciente.nombres }} {{ paciente.apellidos }}</option>
+        </select>
+      </label>
+      <label class="form-label">
+        Medico
+        <select class="form-select" formControlName="doctorId">
+          <option [ngValue]="null">Seleccione medico</option>
+          <option *ngFor="let medico of medicos" [ngValue]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
+        </select>
+      </label>
+      <label class="form-label">
+        Sede
+        <select class="form-select" formControlName="sedeId">
+          <option [ngValue]="null">Seleccione sede</option>
+          <option *ngFor="let sede of sedes" [ngValue]="sede.id">{{ sede.nombre }}</option>
+        </select>
+      </label>
+      <label class="form-label">
+        Tipo
+        <select class="form-select" formControlName="tipo">
+          <option value="consulta">Consulta</option>
+          <option value="control">Control</option>
+          <option value="urgencia">Urgencia</option>
+          <option value="procedimiento">Procedimiento</option>
+        </select>
+      </label>
+      <label class="form-label">
+        Motivo
+        <input class="form-control" formControlName="motivoConsulta" />
+      </label>
+      <label class="form-label">
+        Diagnostico
+        <input class="form-control" formControlName="diagnostico" />
+      </label>
+      <label class="form-label">
+        Observaciones
+        <input class="form-control" formControlName="observaciones" />
+      </label>
+      <div class="form-actions">
+        <a class="btn btn-outline-primary" routerLink="/historial/crear">Formulario completo</a>
+      </div>
+    </div>
+  </form>
+
+  <div class="table-shell">
+    <div *ngIf="cargando" class="loading-state">Cargando historial...</div>
+    <div *ngIf="!cargando && consultas.length === 0" class="empty-state">No hay consultas para el paciente seleccionado.</div>
+    <div *ngIf="!cargando && consultas.length > 0" class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Paciente</th>
+            <th>Medico</th>
+            <th>Tipo</th>
+            <th>Diagnostico</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let consulta of consultas">
+            <td class="fw-semibold">{{ consulta.fechaHora | date:'short' }}</td>
+            <td>{{ consulta.pacienteNombre }}</td>
+            <td>{{ consulta.doctorNombre }}</td>
+            <td>{{ consulta.tipo }}</td>
+            <td>{{ consulta.diagnostico || 'Sin diagnostico' }}</td>
+            <td>
+              <span class="status-pill is-active">{{ consulta.estado }}</span>
+              <a class="btn btn-sm btn-outline-secondary ms-2" [routerLink]="['/historial/ver', consulta.id]">Ver</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <app-paginator [page]="page" [totalPages]="totalPages" [totalElements]="totalElements" [size]="size" (pageChange)="cargarHistorial($event)"></app-paginator>
+</section>

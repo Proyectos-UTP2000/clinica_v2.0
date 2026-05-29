@@ -1,0 +1,94 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Historial"
+    title="Ficha de consulta"
+    description="Detalle clinico, indicaciones y notas de evolucion."
+  ></app-page-header>
+
+  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  <div *ngIf="mensajeExito" class="alert alert-success" role="status">{{ mensajeExito }}</div>
+  <div *ngIf="cargando" class="loading-state">Cargando consulta...</div>
+
+  <ng-container *ngIf="consulta">
+    <div class="feature-panel">
+      <div class="feature-panel-body detail-grid">
+        <div><span>Paciente</span><strong>{{ consulta.pacienteNombre }}</strong></div>
+        <div><span>Medico</span><strong>{{ consulta.doctorNombre }}</strong></div>
+        <div><span>Sede</span><strong>{{ consulta.sedeNombre }}</strong></div>
+        <div><span>Fecha</span><strong>{{ consulta.fechaHora | date:'short' }}</strong></div>
+      </div>
+    </div>
+
+    <div class="feature-panel">
+      <div class="feature-panel-body detail-grid">
+        <div>
+          <h3>Motivo</h3>
+          <p>{{ consulta.motivoConsulta || 'Sin motivo registrado' }}</p>
+        </div>
+        <div>
+          <h3>Diagnostico</h3>
+          <p>{{ consulta.diagnostico || 'Sin diagnostico registrado' }}</p>
+        </div>
+        <div class="grid-span-2">
+          <h3>Observaciones</h3>
+          <p>{{ consulta.observaciones || 'Sin observaciones' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-shell">
+      <table class="table align-middle">
+        <thead><tr><th>Medicamento</th><th>Dosis</th><th>Frecuencia</th><th>Duracion</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let receta of consulta.recetas">
+            <td>{{ receta.medicamento }}</td>
+            <td>{{ receta.dosis || '-' }}</td>
+            <td>{{ receta.frecuencia || '-' }}</td>
+            <td>{{ receta.duracion || '-' }}</td>
+          </tr>
+          <tr *ngIf="consulta.recetas.length === 0"><td colspan="4" class="text-center text-muted">Sin recetas.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="feature-panel">
+      <div class="feature-panel-body detail-grid">
+        <div>
+          <h3>Indicaciones</h3>
+          <p *ngFor="let indicacion of consulta.indicaciones">{{ indicacion.tipo }}: {{ indicacion.descripcion }}</p>
+          <p *ngIf="consulta.indicaciones.length === 0" class="text-muted">Sin indicaciones.</p>
+        </div>
+        <div>
+          <h3>Estudios</h3>
+          <p *ngFor="let estudio of consulta.estudios">{{ estudio.tipoEstudio }}: {{ estudio.detalle }} ({{ estudio.estado }})</p>
+          <p *ngIf="consulta.estudios.length === 0" class="text-muted">Sin estudios.</p>
+        </div>
+      </div>
+    </div>
+
+    <form class="feature-panel" [formGroup]="notaForm" (ngSubmit)="agregarNota()">
+      <div class="feature-panel-body">
+        <div class="section-heading">
+          <h3>Notas de evolucion</h3>
+        </div>
+        <div class="timeline">
+          <div *ngFor="let nota of consulta.notasEvolucion" class="timeline-item">
+            <strong>{{ nota.autorNombre }}</strong>
+            <span>{{ nota.fecha | date:'short' }}</span>
+            <p>{{ nota.nota }}</p>
+          </div>
+          <p *ngIf="consulta.notasEvolucion.length === 0" class="text-muted">Sin notas de evolucion.</p>
+        </div>
+        <label class="form-label w-100">
+          Nueva nota
+          <textarea class="form-control" rows="3" formControlName="nota"></textarea>
+        </label>
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit" [disabled]="guardandoNota">
+            {{ guardandoNota ? 'Guardando...' : 'Agregar nota' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </ng-container>
+</section>

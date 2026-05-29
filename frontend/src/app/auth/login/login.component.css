@@ -1,0 +1,115 @@
+.auth-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(20, 107, 95, 0.16), transparent 18rem),
+    linear-gradient(135deg, #fbfdfb 0%, #edf3ef 52%, #f7faf8 100%),
+    var(--clinic-canvas);
+}
+
+.auth-shell {
+  width: min(100%, 960px);
+  display: grid;
+  grid-template-columns: 0.95fr 1fr;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--clinic-border);
+  border-radius: var(--clinic-radius-lg);
+  box-shadow: var(--clinic-shadow-md);
+  backdrop-filter: blur(14px);
+}
+
+.auth-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 520px;
+  padding: 2rem;
+  color: var(--clinic-ink);
+  background:
+    linear-gradient(180deg, rgba(220, 238, 232, 0.88), rgba(255, 255, 255, 0.72));
+  border-right: 1px solid var(--clinic-border);
+}
+
+.auth-panel h2 {
+  max-width: 16rem;
+  margin: 1.5rem 0 0.75rem;
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.auth-panel p {
+  margin: 0;
+  color: var(--clinic-muted);
+}
+
+.panel-mark {
+  background: linear-gradient(135deg, var(--clinic-primary), #2f7d55);
+  box-shadow: 0 0.75rem 1.5rem rgba(20, 107, 95, 0.24);
+}
+
+.auth-card {
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.brand-mark {
+  display: inline-grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--clinic-primary), #2f7d55);
+  border-radius: 0.6rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.brand-kicker {
+  margin: 0;
+  color: var(--clinic-muted);
+  font-size: 0.875rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.auth-intro {
+  margin-bottom: 1.5rem;
+  color: var(--clinic-muted);
+}
+
+.auth-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--clinic-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 767.98px) {
+  .auth-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-panel {
+    min-height: auto;
+    padding: 1.5rem;
+  }
+}

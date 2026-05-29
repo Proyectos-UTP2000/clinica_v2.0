@@ -38,17 +38,22 @@ public class CitaController {
     @RequierePermiso("citas.ver_todas")
     public Page<CitaResponse> listar(@RequestParam(required = false) Long pacienteId,
                                      @RequestParam(required = false) Long doctorId,
+                                     @RequestParam(required = false) Long sedeId,
                                      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
+                                     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+                                     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
                                      Pageable pageable) {
-        return citaService.listarConFiltros(pacienteId, doctorId, fecha, pageable);
+        return citaService.listarConFiltros(pacienteId, doctorId, sedeId, fecha, fechaInicio, fechaFin, pageable);
     }
 
     /** Lista citas del doctor autenticado. */
     @GetMapping("/doctor")
     @RequierePermiso("citas.ver_propias")
     public Page<CitaResponse> listarMisCitas(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
+                                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+                                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
                                              Pageable pageable) {
-        return citaService.listarMisCitas(pageable, fecha);
+        return citaService.listarMisCitas(pageable, fecha, fechaInicio, fechaFin);
     }
 
     /** Obtiene una cita por id. */

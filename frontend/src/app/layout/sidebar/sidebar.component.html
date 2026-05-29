@@ -1,0 +1,25 @@
+<aside class="sidebar" aria-label="Navegacion principal">
+  <div class="sidebar-brand">
+    <span class="brand-mark" aria-hidden="true">CL</span>
+    <div>
+      <strong>Clinica interna</strong>
+      <small>Operacion multisede</small>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <section *ngFor="let group of groups" class="nav-group" [hidden]="visiblesPorGrupo(group).length === 0">
+      <p class="nav-group-label">{{ group }}</p>
+      <a
+        *ngFor="let item of visiblesPorGrupo(group)"
+        class="nav-link"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+      >
+        <span class="nav-code" aria-hidden="true">{{ item.code }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    </section>
+  </nav>
+</aside>

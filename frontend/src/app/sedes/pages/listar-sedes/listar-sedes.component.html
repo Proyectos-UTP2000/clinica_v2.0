@@ -1,0 +1,42 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Sedes"
+    title="Gestion de sedes"
+    description="Controle sedes activas y direcciones operativas."
+  >
+    <a *ngIf="authService.hasPermission('sedes.crear')" class="btn btn-primary" routerLink="/sedes/crear">Nueva sede</a>
+  </app-page-header>
+
+  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  <div *ngIf="mensajeExito" class="alert alert-success" role="status">{{ mensajeExito }}</div>
+
+  <div class="table-shell">
+    <div *ngIf="cargando" class="loading-state">Cargando sedes...</div>
+    <div *ngIf="!cargando && sedes.length === 0" class="empty-state">No hay sedes activas registradas.</div>
+    <div *ngIf="!cargando && sedes.length > 0" class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Direccion</th>
+            <th>Estado</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let sede of sedes">
+            <td class="fw-semibold">{{ sede.nombre }}</td>
+            <td>{{ sede.direccion || 'Sin direccion' }}</td>
+            <td><span class="status-pill" [class.is-active]="sede.activo">{{ sede.activo ? 'Activa' : 'Inactiva' }}</span></td>
+            <td class="text-end">
+              <a *ngIf="authService.hasPermission('sedes.editar')" class="btn btn-sm btn-outline-secondary me-2" [routerLink]="['/sedes/editar', sede.id]">Editar</a>
+              <button *ngIf="authService.hasPermission('sedes.eliminar')" class="btn btn-sm btn-outline-danger" type="button" (click)="desactivarSede(sede)">Desactivar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <app-paginator [page]="page" [totalPages]="totalPages" [totalElements]="totalElements" [size]="size" (pageChange)="cargarSedes($event)"></app-paginator>
+</section>

@@ -10,4 +10,10 @@ public interface DisponibilidadBaseRepository extends JpaRepository<Disponibilid
 
     /** Busca horarios base por doctor, sede y dia. */
     List<DisponibilidadBase> findByDoctorAndSedeAndDiaSemana(Doctor doctor, Sede sede, int diaSemana);
+
+    /** Lista horarios base de un doctor ordenados para la vista semanal. */
+    List<DisponibilidadBase> findByDoctorIdOrderByDiaSemanaAscHoraInicioAsc(Long doctorId);
+
+    /** Busca un horario base dentro del alcance de un doctor. */
+    java.util.Optional<DisponibilidadBase> findByIdAndDoctorId(Long id, Long doctorId);
 }

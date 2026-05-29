@@ -39,6 +39,13 @@ public class MedicoController {
         return medicoService.listarActivos(texto, especialidadId, sedeId, pageable);
     }
 
+    /** Obtiene el medico autenticado para pantallas de disponibilidad propia. */
+    @GetMapping("/me")
+    @RequierePermiso("disponibilidad.ver_propia")
+    public MedicoResponse obtenerAutenticado() {
+        return medicoService.obtenerAutenticado();
+    }
+
     /** Obtiene un medico por id. */
     @GetMapping("/{id}")
     @RequierePermiso({"medicos.ver", "usuarios.ver"})

@@ -10,4 +10,12 @@ public interface ExcepcionDisponibilidadRepository extends JpaRepository<Excepci
 
     /** Busca excepciones de agenda del doctor en una fecha. */
     List<ExcepcionDisponibilidad> findByDoctorAndFecha(Doctor doctor, LocalDate fecha);
+
+    /** Lista excepciones en un rango de fechas para calendario operativo. */
+    List<ExcepcionDisponibilidad> findByDoctorIdAndFechaBetweenOrderByFechaAscHoraInicioAsc(Long doctorId,
+                                                                                            LocalDate fechaInicio,
+                                                                                            LocalDate fechaFin);
+
+    /** Busca una excepcion dentro del alcance de un doctor. */
+    java.util.Optional<ExcepcionDisponibilidad> findByIdAndDoctorId(Long id, Long doctorId);
 }

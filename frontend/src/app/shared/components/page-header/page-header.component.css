@@ -1,0 +1,52 @@
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(247, 250, 248, 0.88));
+  border: 1px solid var(--clinic-border);
+  border-radius: var(--clinic-radius-lg);
+  box-shadow: var(--clinic-shadow-sm);
+  backdrop-filter: blur(12px);
+}
+
+.page-kicker {
+  margin: 0 0 0.25rem;
+  color: var(--clinic-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+h2 {
+  margin: 0;
+  color: var(--clinic-ink);
+  font-size: 1.55rem;
+  font-weight: 800;
+}
+
+.page-description {
+  max-width: 58rem;
+  margin: 0.45rem 0 0;
+  color: var(--clinic-muted);
+}
+
+.page-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+@media (max-width: 767.98px) {
+  .page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .page-actions {
+    justify-content: flex-start;
+  }
+}

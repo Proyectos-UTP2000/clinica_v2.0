@@ -1,0 +1,114 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Citas"
+    title="Agenda de citas"
+    description="Revise citas programadas, filtre la agenda y gestione cancelaciones o reprogramaciones segun permisos."
+  >
+    <a *ngIf="authService.hasPermission('citas.crear')" class="btn btn-primary" routerLink="/citas/crear">Nueva cita</a>
+  </app-page-header>
+
+  <form class="feature-panel" [formGroup]="filtrosForm" (ngSubmit)="buscar()">
+    <div class="feature-panel-body filters-grid">
+      <div *ngIf="!usaAgendaPropia">
+        <label for="pacienteId" class="form-label">Paciente</label>
+        <select id="pacienteId" class="form-select" formControlName="pacienteId">
+          <option value="">Todos</option>
+          <option *ngFor="let paciente of pacientes" [value]="paciente.id">{{ paciente.dni }} - {{ paciente.nombres }} {{ paciente.apellidos }}</option>
+        </select>
+      </div>
+      <div *ngIf="!usaAgendaPropia">
+        <label for="doctorId" class="form-label">Medico</label>
+        <select id="doctorId" class="form-select" formControlName="doctorId">
+          <option value="">Todos</option>
+          <option *ngFor="let medico of medicos" [value]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
+        </select>
+      </div>
+      <div>
+        <label for="fecha" class="form-label">Fecha</label>
+        <input id="fecha" type="date" class="form-control" formControlName="fecha" />
+      </div>
+      <div class="filter-actions">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        <button type="button" class="btn btn-outline-secondary" (click)="limpiarFiltros()">Limpiar</button>
+      </div>
+    </div>
+  </form>
+
+  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  <div *ngIf="mensajeExito" class="alert alert-success" role="status">{{ mensajeExito }}</div>
+
+  <div class="table-shell">
+    <div *ngIf="cargando" class="loading-state" aria-live="polite">
+      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      Cargando citas...
+    </div>
+    <div *ngIf="!cargando && citas.length === 0" class="empty-state">No hay citas para los filtros seleccionados.</div>
+    <div *ngIf="!cargando && citas.length > 0" class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Paciente</th>
+            <th>Medico</th>
+            <th>Sede</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Estado</th>
+            <th>Pago</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cita of citas">
+            <td class="fw-semibold">{{ cita.pacienteNombre }}</td>
+            <td>{{ cita.doctorNombre }}</td>
+            <td>{{ cita.sedeNombre }}</td>
+            <td>{{ fecha(cita) }}</td>
+            <td>{{ hora(cita) }}</td>
+            <td><span class="status-pill" [ngClass]="estadoClass(cita.estado)">{{ cita.estado }}</span></td>
+            <td>
+              <span class="status-pill" [class.is-paid]="cita.estadoPago === 'pagado'" [class.is-pending]="cita.estadoPago !== 'pagado'">
+                {{ cita.estadoPago }}
+              </span>
+            </td>
+            <td class="text-end">
+              <div class="action-group">
+                <button *ngIf="authService.hasPermission('citas.editar_propias') || authService.hasPermission('citas.editar_asignados')" type="button" class="btn btn-sm btn-outline-primary" (click)="abrirReprogramacion(cita)">Reprogramar</button>
+                <button *ngIf="authService.hasPermission('citas.cancelar')" type="button" class="btn btn-sm btn-outline-danger" (click)="abrirCancelacion(cita)">Cancelar</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <app-paginator [page]="page" [totalPages]="totalPages" [totalElements]="totalElements" [size]="size" (pageChange)="cargarCitas($event)"></app-paginator>
+
+  <div *ngIf="citaReprogramar" class="dialog-backdrop-custom">
+    <section class="reschedule-dialog" role="dialog" aria-modal="true" aria-label="Reprogramar cita">
+      <h3>Reprogramar cita</h3>
+      <p>{{ citaReprogramar.pacienteNombre }} con {{ citaReprogramar.doctorNombre }}</p>
+      <form [formGroup]="reprogramarForm" (ngSubmit)="reprogramarCita()">
+        <label for="nuevaFechaHora" class="form-label">Nueva fecha y hora</label>
+        <input id="nuevaFechaHora" type="datetime-local" class="form-control" formControlName="nuevaFechaHora" />
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-outline-secondary" [disabled]="procesando" (click)="citaReprogramar = null">Cancelar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="procesando">
+            <span *ngIf="procesando" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+            Reprogramar
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <app-confirm-dialog
+    [visible]="!!citaCancelar"
+    title="Cancelar cita"
+    [message]="'Desea cancelar la cita de ' + (citaCancelar?.pacienteNombre || '') + '?'"
+    confirmText="Cancelar cita"
+    [processing]="procesando"
+    (dismissed)="citaCancelar = null"
+    (confirmed)="cancelarCita()"
+  ></app-confirm-dialog>
+</section>

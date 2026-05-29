@@ -10,10 +10,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface CitaRepository extends JpaRepository<Cita, Long> {
+public interface CitaRepository extends JpaRepository<Cita, Long>, JpaSpecificationExecutor<Cita> {
 
     /** Cuenta citas programadas dentro de un rango. */
     @Query("SELECT COUNT(c) FROM Cita c WHERE c.fechaHoraInicio BETWEEN :inicio AND :fin")
@@ -50,9 +51,33 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
     @EntityGraph(attributePaths = {"paciente", "doctor", "doctor.usuario", "sede"})
     Page<Cita> findByDoctorId(Long doctorId, Pageable pageable);
 
+    /** Lista todas las citas con datos necesarios para DTO. */
+    @EntityGraph(attributePaths = {"paciente", "doctor", "doctor.usuario", "sede"})
+    Page<Cita> findAll(Pageable pageable);
+
+    /** Lista citas por fecha. */
+    @EntityGraph(attributePaths = {"paciente", "doctor", "doctor.usuario", "sede"})
+    Page<Cita> findByFechaHoraInicioBetween(LocalDateTime inicio, LocalDateTime fin, Pageable pageable);
+
+    /** Lista citas por paciente y doctor. */
+    @EntityGraph(attributePaths = {"paciente", "doctor", "doctor.usuario", "sede"})
+    Page<Cita> findByPacienteIdAndDoctorId(Long pacienteId, Long doctorId, Pageable pageable);
+
     /** Lista citas por doctor y rango de fecha. */
     @EntityGraph(attributePaths = {"paciente", "doctor", "doctor.usuario", "sede"})
     Page<Cita> findByDoctorIdAndFechaHoraInicioBetween(Long doctorId, LocalDateTime inicio, LocalDateTime fin, Pageable pageable);
+
+    /** Lista citas por paciente y rango de fecha. */
+    @EntityGraph(attributePaths = {"paciente", "doctor", "doctor.usuario", "sede"})
+    Page<Cita> findByPacienteIdAndFechaHoraInicioBetween(Long pacienteId, LocalDateTime inicio, LocalDateTime fin, Pageable pageable);
+
+    /** Lista citas por paciente, doctor y rango de fecha. */
+    @EntityGraph(attributePaths = {"paciente", "doctor", "doctor.usuario", "sede"})
+    Page<Cita> findByPacienteIdAndDoctorIdAndFechaHoraInicioBetween(Long pacienteId,
+                                                                    Long doctorId,
+                                                                    LocalDateTime inicio,
+                                                                    LocalDateTime fin,
+                                                                    Pageable pageable);
 
     /** Lista citas aplicando filtros opcionales. */
     @EntityGraph(attributePaths = {"paciente", "doctor", "doctor.usuario", "sede"})

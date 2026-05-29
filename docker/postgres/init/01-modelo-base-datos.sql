@@ -323,6 +323,14 @@ INSERT INTO permiso (codigo, descripcion) VALUES
     ('usuarios.crear', 'Crear usuarios'),
     ('usuarios.editar', 'Editar usuarios'),
     ('usuarios.desactivar', 'Desactivar usuarios'),
+    ('pacientes.ver', 'Ver pacientes'),
+    ('pacientes.crear', 'Crear pacientes'),
+    ('pacientes.editar', 'Editar pacientes'),
+    ('pacientes.eliminar', 'Eliminar pacientes'),
+    ('medicos.ver', 'Ver medicos'),
+    ('medicos.crear', 'Crear medicos'),
+    ('medicos.editar', 'Editar medicos'),
+    ('medicos.eliminar', 'Eliminar medicos'),
     ('sedes.ver', 'Ver sedes'),
     ('sedes.crear', 'Crear sedes'),
     ('sedes.editar', 'Editar sedes'),
@@ -347,6 +355,7 @@ INSERT INTO permiso (codigo, descripcion) VALUES
     ('historial.editar', 'Editar historial clinico'),
     ('disponibilidad.ver_todas', 'Ver todas las disponibilidades'),
     ('disponibilidad.ver_propia', 'Ver disponibilidad propia'),
+    ('disponibilidad.editar_todas', 'Editar todas las disponibilidades'),
     ('disponibilidad.editar_propia', 'Editar disponibilidad propia'),
     ('justificaciones.ver_todas', 'Ver todas las justificaciones'),
     ('justificaciones.ver_propias', 'Ver justificaciones propias'),
@@ -354,13 +363,63 @@ INSERT INTO permiso (codigo, descripcion) VALUES
     ('dashboard.ver', 'Ver dashboard');
 
 INSERT INTO rol (nombre, descripcion, activo)
-VALUES ('Administrador', 'Rol administrador con acceso completo al sistema', TRUE);
+VALUES
+    ('Administrador', 'Rol administrador con acceso completo al sistema', TRUE),
+    ('Doctor', 'Medico con acceso a agenda e historial propio', TRUE),
+    ('Secretaria', 'Secretaria con gestion operativa de citas y pagos', TRUE),
+    ('Enfermera', 'Enfermera con acceso de consulta', TRUE);
 
 INSERT INTO rol_permiso (rol_id, permiso_id)
 SELECT r.id, p.id
 FROM rol r
 CROSS JOIN permiso p
 WHERE r.nombre = 'Administrador';
+
+INSERT INTO rol_permiso (rol_id, permiso_id)
+SELECT r.id, p.id
+FROM rol r
+JOIN permiso p ON p.codigo IN (
+    'citas.ver_propias',
+    'historial.ver_propios',
+    'historial.crear',
+    'historial.editar',
+    'disponibilidad.ver_propia',
+    'disponibilidad.editar_propia',
+    'dashboard.ver'
+)
+WHERE r.nombre = 'Doctor';
+
+INSERT INTO rol_permiso (rol_id, permiso_id)
+SELECT r.id, p.id
+FROM rol r
+JOIN permiso p ON p.codigo IN (
+    'pacientes.ver',
+    'pacientes.crear',
+    'pacientes.editar',
+    'medicos.ver',
+    'sedes.ver',
+    'especialidades.ver',
+    'citas.ver_todas',
+    'citas.crear',
+    'citas.editar_asignados',
+    'citas.cancelar',
+    'pagos.ver',
+    'pagos.crear',
+    'dashboard.ver'
+)
+WHERE r.nombre = 'Secretaria';
+
+INSERT INTO rol_permiso (rol_id, permiso_id)
+SELECT r.id, p.id
+FROM rol r
+JOIN permiso p ON p.codigo IN (
+    'pacientes.ver',
+    'medicos.ver',
+    'citas.ver_todas',
+    'historial.ver_basico',
+    'dashboard.ver'
+)
+WHERE r.nombre = 'Enfermera';
 
 INSERT INTO usuario (
     dni,
@@ -376,7 +435,7 @@ INSERT INTO usuario (
     'Sistema',
     'admin@clinica.com',
     '$2a$10$fGm9sT24fvKIf.jWDYJvzu9KrgsyYoRAO1lUWFL5wMTYTR6s9XAES',
-    TRUE,
+    FALSE,
     TRUE
 );
 
@@ -385,5 +444,179 @@ SELECT u.id, r.id
 FROM usuario u
 JOIN rol r ON r.nombre = 'Administrador'
 WHERE u.dni = '00000000';
+
+INSERT INTO sede (nombre, direccion, activo)
+VALUES ('Sede Central', 'Av. Salud 123, Lima', TRUE);
+
+INSERT INTO especialidad (nombre, descripcion)
+VALUES ('Medicina General', 'Atencion primaria y control general');
+
+INSERT INTO sede_especialidad (sede_id, especialidad_id)
+SELECT s.id, e.id
+FROM sede s
+CROSS JOIN especialidad e
+WHERE s.nombre = 'Sede Central'
+  AND e.nombre = 'Medicina General';
+
+INSERT INTO usuario (
+    dni,
+    nombres,
+    apellidos,
+    email,
+    telefono,
+    fecha_nacimiento,
+    password_hash,
+    cambio_password_obligatorio,
+    activo
+) VALUES
+    ('11111111', 'Diana', 'Medico', 'diana.medico@clinica.com', '999111222', '1985-03-12', '$2a$10$fGm9sT24fvKIf.jWDYJvzu9KrgsyYoRAO1lUWFL5wMTYTR6s9XAES', FALSE, TRUE),
+    ('22222222', 'Sara', 'Secretaria', 'sara.secretaria@clinica.com', '999222333', '1990-07-20', '$2a$10$fGm9sT24fvKIf.jWDYJvzu9KrgsyYoRAO1lUWFL5wMTYTR6s9XAES', FALSE, TRUE),
+    ('33333333', 'Elena', 'Enfermera', 'elena.enfermera@clinica.com', '999333444', '1992-11-05', '$2a$10$fGm9sT24fvKIf.jWDYJvzu9KrgsyYoRAO1lUWFL5wMTYTR6s9XAES', FALSE, TRUE);
+
+INSERT INTO usuario_rol (usuario_id, rol_id)
+SELECT u.id, r.id
+FROM usuario u
+JOIN rol r ON (
+    (u.dni = '11111111' AND r.nombre = 'Doctor')
+    OR (u.dni = '22222222' AND r.nombre = 'Secretaria')
+    OR (u.dni = '33333333' AND r.nombre = 'Enfermera')
+);
+
+INSERT INTO doctor (usuario_id, especialidad_id)
+SELECT u.id, e.id
+FROM usuario u
+CROSS JOIN especialidad e
+WHERE u.dni = '11111111'
+  AND e.nombre = 'Medicina General';
+
+INSERT INTO doctor_sede (doctor_id, sede_id)
+SELECT d.id, s.id
+FROM doctor d
+JOIN usuario u ON u.id = d.usuario_id
+CROSS JOIN sede s
+WHERE u.dni = '11111111'
+  AND s.nombre = 'Sede Central';
+
+INSERT INTO secretaria (usuario_id)
+SELECT id
+FROM usuario
+WHERE dni = '22222222';
+
+INSERT INTO secretaria_doctor (secretaria_id, doctor_id)
+SELECT sec.id, d.id
+FROM secretaria sec
+JOIN usuario us ON us.id = sec.usuario_id
+CROSS JOIN doctor d
+JOIN usuario ud ON ud.id = d.usuario_id
+WHERE us.dni = '22222222'
+  AND ud.dni = '11111111';
+
+INSERT INTO enfermera (usuario_id)
+SELECT id
+FROM usuario
+WHERE dni = '33333333';
+
+INSERT INTO paciente (dni, nombres, apellidos, sexo, fecha_nacimiento, telefono, email, password_hash, activo)
+VALUES ('44444444', 'Pablo', 'Paciente', 'M', '1995-01-10', '988777666', 'pablo.paciente@example.com', '$2a$10$fGm9sT24fvKIf.jWDYJvzu9KrgsyYoRAO1lUWFL5wMTYTR6s9XAES', TRUE);
+
+INSERT INTO justificacion (doctor_id, texto, tipo)
+SELECT d.id, 'Carga inicial para validar agenda y excepciones', 'cambio_horario'
+FROM doctor d
+JOIN usuario u ON u.id = d.usuario_id
+WHERE u.dni = '11111111';
+
+INSERT INTO cita (
+    paciente_id,
+    doctor_id,
+    sede_id,
+    fecha_hora_inicio,
+    fecha_hora_fin,
+    estado,
+    estado_pago,
+    origen,
+    creado_por_usuario_id
+)
+SELECT p.id, d.id, s.id, TIMESTAMP '2026-06-01 09:00:00', TIMESTAMP '2026-06-01 09:30:00', 'programada', 'pendiente', 'interno', u_admin.id
+FROM paciente p
+CROSS JOIN doctor d
+JOIN usuario u_doctor ON u_doctor.id = d.usuario_id
+CROSS JOIN sede s
+CROSS JOIN usuario u_admin
+WHERE p.dni = '44444444'
+  AND u_doctor.dni = '11111111'
+  AND s.nombre = 'Sede Central'
+  AND u_admin.dni = '00000000';
+
+INSERT INTO pago (cita_id, monto, metodo, fecha_pago, registrado_por_usuario_id)
+SELECT c.id, 80.00, 'efectivo', TIMESTAMP '2026-06-01 09:35:00', u.id
+FROM cita c
+CROSS JOIN usuario u
+WHERE u.dni = '00000000';
+
+UPDATE cita
+SET estado_pago = 'pagado'
+WHERE id IN (SELECT cita_id FROM pago);
+
+INSERT INTO disponibilidad_base (doctor_id, sede_id, dia_semana, hora_inicio, hora_fin)
+SELECT d.id, s.id, 1, TIME '08:00', TIME '13:00'
+FROM doctor d
+JOIN usuario u ON u.id = d.usuario_id
+CROSS JOIN sede s
+WHERE u.dni = '11111111'
+  AND s.nombre = 'Sede Central';
+
+INSERT INTO excepcion_disponibilidad (doctor_id, fecha, hora_inicio, hora_fin, motivo, justificacion_id)
+SELECT d.id, DATE '2026-06-02', TIME '10:00', TIME '11:00', 'Bloque de prueba', j.id
+FROM doctor d
+JOIN usuario u ON u.id = d.usuario_id
+JOIN justificacion j ON j.doctor_id = d.id
+WHERE u.dni = '11111111';
+
+INSERT INTO consulta (
+    paciente_id,
+    doctor_id,
+    cita_id,
+    sede_id,
+    fecha_hora,
+    tipo,
+    motivo_consulta,
+    diagnostico,
+    observaciones,
+    estado
+)
+SELECT p.id, d.id, c.id, s.id, TIMESTAMP '2026-06-01 09:40:00', 'consulta', 'Control general', 'Paciente estable', 'Sin observaciones relevantes', 'activa'
+FROM paciente p
+CROSS JOIN doctor d
+JOIN usuario u ON u.id = d.usuario_id
+CROSS JOIN cita c
+CROSS JOIN sede s
+WHERE p.dni = '44444444'
+  AND u.dni = '11111111'
+  AND s.nombre = 'Sede Central';
+
+INSERT INTO receta (consulta_id, medicamento, dosis, frecuencia, duracion, indicaciones)
+SELECT id, 'Paracetamol', '500 mg', 'Cada 8 horas', '3 dias', 'Tomar con agua'
+FROM consulta;
+
+INSERT INTO indicacion_medica (consulta_id, tipo, descripcion)
+SELECT id, 'reposo', 'Reposo relativo por 24 horas'
+FROM consulta;
+
+INSERT INTO estudio_complementario (consulta_id, tipo_estudio, detalle, estado, archivo_resultado)
+SELECT id, 'Hemograma', 'Control de rutina', 'pendiente', NULL
+FROM consulta;
+
+INSERT INTO adjunto (consulta_id, nombre_archivo, ruta, tipo_mime, fecha_subida)
+SELECT id, 'resultado-demo.pdf', '/adjuntos/resultado-demo.pdf', 'application/pdf', TIMESTAMP '2026-06-01 10:00:00'
+FROM consulta;
+
+INSERT INTO nota_evolucion (consulta_id, fecha, nota, autor_id)
+SELECT c.id, TIMESTAMP '2026-06-01 10:05:00', 'Paciente evoluciona favorablemente', u.id
+FROM consulta c
+CROSS JOIN usuario u
+WHERE u.dni = '00000000';
+
+INSERT INTO codigo_verificacion (email, codigo, tipo, usado, fecha_expiracion)
+VALUES ('admin@clinica.com', '123456', 'recuperacion', FALSE, TIMESTAMP '2026-06-01 12:00:00');
 
 COMMIT;

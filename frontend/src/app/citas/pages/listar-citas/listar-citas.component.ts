@@ -9,9 +9,10 @@ import { Page } from '../../../shared/models/page.model';
 import { CitaService } from '../../services/cita.service';
 
 @Component({
-  selector: 'app-listar-citas',
-  templateUrl: './listar-citas.component.html',
-  styleUrl: './listar-citas.component.css'
+    selector: 'app-listar-citas',
+    templateUrl: './listar-citas.component.html',
+    styleUrl: './listar-citas.component.css',
+    standalone: false
 })
 export class ListarCitasComponent implements OnInit {
   citas: CitaResponse[] = [];

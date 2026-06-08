@@ -5,8 +5,9 @@ import { PagoResponse } from '../../../shared/models/pago.model';
 import { PagoService } from '../../services/pago.service';
 
 @Component({
-  selector: 'app-historial-pagos',
-  templateUrl: './historial-pagos.component.html'
+    selector: 'app-historial-pagos',
+    templateUrl: './historial-pagos.component.html',
+    standalone: false
 })
 export class HistorialPagosComponent implements OnInit {
   pacienteId = 0;

@@ -11,8 +11,9 @@ import { SedeResponse } from '../../../shared/models/sede.model';
 import { DisponibilidadService } from '../../services/disponibilidad.service';
 
 @Component({
-  selector: 'app-gestion-disponibilidad',
-  templateUrl: './gestion-disponibilidad.component.html'
+    selector: 'app-gestion-disponibilidad',
+    templateUrl: './gestion-disponibilidad.component.html',
+    standalone: false
 })
 export class GestionDisponibilidadComponent implements OnInit {
   medicos: MedicoResponse[] = [];

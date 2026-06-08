@@ -7,9 +7,10 @@ import { AuthService } from '../../core/services/auth.service';
 const PASSWORD_PATTERN = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,}$/;
 
 @Component({
-  selector: 'app-cambiar-password',
-  templateUrl: './cambiar-password.component.html',
-  styleUrl: './cambiar-password.component.css'
+    selector: 'app-cambiar-password',
+    templateUrl: './cambiar-password.component.html',
+    styleUrl: './cambiar-password.component.css',
+    standalone: false
 })
 export class CambiarPasswordComponent {
   cargando = false;

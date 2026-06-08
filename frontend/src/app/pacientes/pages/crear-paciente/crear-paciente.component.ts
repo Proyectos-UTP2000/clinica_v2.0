@@ -6,9 +6,10 @@ import { PacienteCreateRequest } from '../../../shared/models/paciente.model';
 import { PacienteService } from '../../services/paciente.service';
 
 @Component({
-  selector: 'app-crear-paciente',
-  templateUrl: './crear-paciente.component.html',
-  styleUrl: './crear-paciente.component.css'
+    selector: 'app-crear-paciente',
+    templateUrl: './crear-paciente.component.html',
+    styleUrl: './crear-paciente.component.css',
+    standalone: false
 })
 export class CrearPacienteComponent {
   cargando = false;

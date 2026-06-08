@@ -9,8 +9,9 @@ import { SedeResponse } from '../../../shared/models/sede.model';
 import { HistorialService } from '../../services/historial.service';
 
 @Component({
-  selector: 'app-crear-consulta',
-  templateUrl: './crear-consulta.component.html'
+    selector: 'app-crear-consulta',
+    templateUrl: './crear-consulta.component.html',
+    standalone: false
 })
 export class CrearConsultaComponent implements OnInit {
   pacientes: PacienteResponse[] = [];

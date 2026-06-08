@@ -6,9 +6,10 @@ import { AuthService } from '../../core/services/auth.service';
 const PASSWORD_PATTERN = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,}$/;
 
 @Component({
-  selector: 'app-recuperar-password',
-  templateUrl: './recuperar-password.component.html',
-  styleUrl: './recuperar-password.component.css'
+    selector: 'app-recuperar-password',
+    templateUrl: './recuperar-password.component.html',
+    styleUrl: './recuperar-password.component.css',
+    standalone: false
 })
 export class RecuperarPasswordComponent {
   pasoActual: 1 | 2 = 1;

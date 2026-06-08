@@ -6,8 +6,9 @@ import { EspecialidadResponse } from '../../../shared/models/especialidad.model'
 import { EspecialidadService } from '../../services/especialidad.service';
 
 @Component({
-  selector: 'app-especialidad-form',
-  templateUrl: './especialidad-form.component.html'
+    selector: 'app-especialidad-form',
+    templateUrl: './especialidad-form.component.html',
+    standalone: false
 })
 export class EspecialidadFormComponent implements OnInit {
   especialidadId: number | null = null;

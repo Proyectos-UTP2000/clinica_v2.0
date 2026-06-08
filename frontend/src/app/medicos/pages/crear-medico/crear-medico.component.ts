@@ -8,9 +8,10 @@ import { SedeResponse } from '../../../shared/models/sede.model';
 import { MedicoService } from '../../services/medico.service';
 
 @Component({
-  selector: 'app-crear-medico',
-  templateUrl: './crear-medico.component.html',
-  styleUrl: './crear-medico.component.css'
+    selector: 'app-crear-medico',
+    templateUrl: './crear-medico.component.html',
+    styleUrl: './crear-medico.component.css',
+    standalone: false
 })
 export class CrearMedicoComponent implements OnInit {
   todasEspecialidades: EspecialidadResponse[] = [];

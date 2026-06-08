@@ -6,8 +6,9 @@ import { ConsultaResponse } from '../../../shared/models/consulta.model';
 import { HistorialService } from '../../services/historial.service';
 
 @Component({
-  selector: 'app-ver-consulta',
-  templateUrl: './ver-consulta.component.html'
+    selector: 'app-ver-consulta',
+    templateUrl: './ver-consulta.component.html',
+    standalone: false
 })
 export class VerConsultaComponent implements OnInit {
   consulta?: ConsultaResponse;

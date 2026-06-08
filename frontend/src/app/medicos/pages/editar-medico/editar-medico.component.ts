@@ -8,9 +8,10 @@ import { SedeResponse } from '../../../shared/models/sede.model';
 import { MedicoService } from '../../services/medico.service';
 
 @Component({
-  selector: 'app-editar-medico',
-  templateUrl: './editar-medico.component.html',
-  styleUrl: './editar-medico.component.css'
+    selector: 'app-editar-medico',
+    templateUrl: './editar-medico.component.html',
+    styleUrl: './editar-medico.component.css',
+    standalone: false
 })
 export class EditarMedicoComponent implements OnInit {
   medico: MedicoResponse | null = null;

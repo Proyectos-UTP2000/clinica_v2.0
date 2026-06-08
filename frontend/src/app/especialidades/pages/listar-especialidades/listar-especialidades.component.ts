@@ -6,8 +6,9 @@ import { Page } from '../../../shared/models/page.model';
 import { EspecialidadService } from '../../services/especialidad.service';
 
 @Component({
-  selector: 'app-listar-especialidades',
-  templateUrl: './listar-especialidades.component.html'
+    selector: 'app-listar-especialidades',
+    templateUrl: './listar-especialidades.component.html',
+    standalone: false
 })
 export class ListarEspecialidadesComponent implements OnInit {
   especialidades: EspecialidadResponse[] = [];

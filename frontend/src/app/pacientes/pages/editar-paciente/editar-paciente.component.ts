@@ -6,9 +6,10 @@ import { PacienteResponse, PacienteUpdateRequest } from '../../../shared/models/
 import { PacienteService } from '../../services/paciente.service';
 
 @Component({
-  selector: 'app-editar-paciente',
-  templateUrl: './editar-paciente.component.html',
-  styleUrl: './editar-paciente.component.css'
+    selector: 'app-editar-paciente',
+    templateUrl: './editar-paciente.component.html',
+    styleUrl: './editar-paciente.component.css',
+    standalone: false
 })
 export class EditarPacienteComponent implements OnInit {
   paciente: PacienteResponse | null = null;

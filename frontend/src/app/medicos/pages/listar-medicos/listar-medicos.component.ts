@@ -9,9 +9,10 @@ import { SedeResponse } from '../../../shared/models/sede.model';
 import { MedicoService } from '../../services/medico.service';
 
 @Component({
-  selector: 'app-listar-medicos',
-  templateUrl: './listar-medicos.component.html',
-  styleUrl: './listar-medicos.component.css'
+    selector: 'app-listar-medicos',
+    templateUrl: './listar-medicos.component.html',
+    styleUrl: './listar-medicos.component.css',
+    standalone: false
 })
 export class ListarMedicosComponent implements OnInit {
   medicos: MedicoResponse[] = [];

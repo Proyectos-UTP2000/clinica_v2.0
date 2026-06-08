@@ -5,8 +5,9 @@ import { finalize } from 'rxjs';
 import { SedeService } from '../../services/sede.service';
 
 @Component({
-  selector: 'app-sede-form',
-  templateUrl: './sede-form.component.html'
+    selector: 'app-sede-form',
+    templateUrl: './sede-form.component.html',
+    standalone: false
 })
 export class SedeFormComponent implements OnInit {
   sedeId: number | null = null;

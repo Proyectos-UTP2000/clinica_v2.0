@@ -6,8 +6,9 @@ import { SedeResponse } from '../../../shared/models/sede.model';
 import { SedeService } from '../../services/sede.service';
 
 @Component({
-  selector: 'app-listar-sedes',
-  templateUrl: './listar-sedes.component.html'
+    selector: 'app-listar-sedes',
+    templateUrl: './listar-sedes.component.html',
+    standalone: false
 })
 export class ListarSedesComponent implements OnInit {
   sedes: SedeResponse[] = [];

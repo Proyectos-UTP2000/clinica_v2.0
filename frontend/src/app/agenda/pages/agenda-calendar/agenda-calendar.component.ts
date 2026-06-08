@@ -10,8 +10,9 @@ import { AgendaService } from '../../services/agenda.service';
 type VistaAgenda = 'dia' | 'semana';
 
 @Component({
-  selector: 'app-agenda-calendar',
-  templateUrl: './agenda-calendar.component.html'
+    selector: 'app-agenda-calendar',
+    templateUrl: './agenda-calendar.component.html',
+    standalone: false
 })
 export class AgendaCalendarComponent implements OnInit {
   sedes: SedeResponse[] = [];

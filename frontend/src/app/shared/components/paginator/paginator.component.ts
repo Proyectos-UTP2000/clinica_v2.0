@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-paginator',
-  templateUrl: './paginator.component.html',
-  styleUrl: './paginator.component.css'
+    selector: 'app-paginator',
+    templateUrl: './paginator.component.html',
+    styleUrl: './paginator.component.css',
+    standalone: false
 })
 export class PaginatorComponent {
   @Input() page = 0;

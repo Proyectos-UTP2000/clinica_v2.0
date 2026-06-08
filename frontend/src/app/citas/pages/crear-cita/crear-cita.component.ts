@@ -10,9 +10,10 @@ import { SedeResponse } from '../../../shared/models/sede.model';
 import { CitaService } from '../../services/cita.service';
 
 @Component({
-  selector: 'app-crear-cita',
-  templateUrl: './crear-cita.component.html',
-  styleUrl: './crear-cita.component.css'
+    selector: 'app-crear-cita',
+    templateUrl: './crear-cita.component.html',
+    styleUrl: './crear-cita.component.css',
+    standalone: false
 })
 export class CrearCitaComponent implements OnInit {
   pacientes: PacienteResponse[] = [];

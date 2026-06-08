@@ -8,8 +8,9 @@ import { PagoResponse } from '../../../shared/models/pago.model';
 import { PagoService } from '../../services/pago.service';
 
 @Component({
-  selector: 'app-listar-pagos',
-  templateUrl: './listar-pagos.component.html'
+    selector: 'app-listar-pagos',
+    templateUrl: './listar-pagos.component.html',
+    standalone: false
 })
 export class ListarPagosComponent implements OnInit {
   pacientes: PacienteResponse[] = [];

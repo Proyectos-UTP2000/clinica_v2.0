@@ -11,8 +11,9 @@ import { SedeResponse } from '../../../shared/models/sede.model';
 import { HistorialService } from '../../services/historial.service';
 
 @Component({
-  selector: 'app-listar-historial',
-  templateUrl: './listar-historial.component.html'
+    selector: 'app-listar-historial',
+    templateUrl: './listar-historial.component.html',
+    standalone: false
 })
 export class ListarHistorialComponent implements OnInit {
   pacientes: PacienteResponse[] = [];

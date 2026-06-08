@@ -6,9 +6,10 @@ import { Page } from '../../../shared/models/page.model';
 import { PacienteService } from '../../services/paciente.service';
 
 @Component({
-  selector: 'app-listar-pacientes',
-  templateUrl: './listar-pacientes.component.html',
-  styleUrl: './listar-pacientes.component.css'
+    selector: 'app-listar-pacientes',
+    templateUrl: './listar-pacientes.component.html',
+    styleUrl: './listar-pacientes.component.css',
+    standalone: false
 })
 export class ListarPacientesComponent implements OnInit {
   pacientes: PacienteResponse[] = [];

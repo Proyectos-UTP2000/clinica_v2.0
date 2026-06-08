@@ -6,8 +6,9 @@ import { CitaResponse } from '../../../shared/models/cita.model';
 import { PagoService } from '../../services/pago.service';
 
 @Component({
-  selector: 'app-registro-pago',
-  templateUrl: './registro-pago.component.html'
+    selector: 'app-registro-pago',
+    templateUrl: './registro-pago.component.html',
+    standalone: false
 })
 export class RegistroPagoComponent implements OnInit {
   cita?: CitaResponse;

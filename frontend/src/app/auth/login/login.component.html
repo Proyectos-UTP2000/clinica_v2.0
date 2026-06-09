@@ -17,9 +17,11 @@
 
       <p class="auth-intro">Ingrese con su DNI y contrasena para gestionar la operacion diaria de la clinica.</p>
 
-      <div *ngIf="mensajeError" class="alert alert-danger" role="alert">
-        {{ mensajeError }}
-      </div>
+      @if (mensajeError) {
+        <div class="alert alert-danger" role="alert">
+          {{ mensajeError }}
+        </div>
+      }
 
       <form [formGroup]="loginForm" (ngSubmit)="ingresar()" novalidate>
         <div class="mb-3">
@@ -33,7 +35,7 @@
             [class.is-invalid]="campoInvalido('dni')"
             formControlName="dni"
             autocomplete="username"
-          />
+            />
           <div class="invalid-feedback">Ingrese un DNI valido de 8 digitos.</div>
         </div>
 
@@ -46,12 +48,14 @@
             [class.is-invalid]="campoInvalido('password')"
             formControlName="password"
             autocomplete="current-password"
-          />
+            />
           <div class="invalid-feedback">La contrasena es obligatoria.</div>
         </div>
 
         <button type="submit" class="btn btn-primary w-100" [disabled]="cargando">
-          <span *ngIf="cargando" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          @if (cargando) {
+            <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          }
           {{ cargando ? 'Ingresando...' : 'Ingresar' }}
         </button>
       </form>

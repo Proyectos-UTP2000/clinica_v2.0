@@ -3,11 +3,15 @@
     kicker="Agenda"
     title="Calendario de citas"
     description="Revise la agenda diaria o semanal por sede, especialidad y medico."
-  >
-    <a *ngIf="authService.hasPermission('citas.crear')" class="btn btn-primary" routerLink="/citas/crear">Nueva cita</a>
+    >
+    @if (authService.hasPermission('citas.crear')) {
+      <a class="btn btn-primary" routerLink="/citas/crear">Nueva cita</a>
+    }
   </app-page-header>
 
-  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
 
   <div class="feature-panel">
     <div class="feature-panel-body form-grid">
@@ -15,21 +19,27 @@
         Sede
         <select class="form-select" [(ngModel)]="sedeId" (ngModelChange)="cargarMedicos(); cargarAgenda()">
           <option [ngValue]="null">Todas</option>
-          <option *ngFor="let sede of sedes" [ngValue]="sede.id">{{ sede.nombre }}</option>
+          @for (sede of sedes; track sede) {
+            <option [ngValue]="sede.id">{{ sede.nombre }}</option>
+          }
         </select>
       </label>
       <label class="form-label">
         Especialidad
         <select class="form-select" [(ngModel)]="especialidadId" (ngModelChange)="cargarMedicos()">
           <option [ngValue]="null">Todas</option>
-          <option *ngFor="let especialidad of especialidades" [ngValue]="especialidad.id">{{ especialidad.nombre }}</option>
+          @for (especialidad of especialidades; track especialidad) {
+            <option [ngValue]="especialidad.id">{{ especialidad.nombre }}</option>
+          }
         </select>
       </label>
       <label class="form-label">
         Medico
         <select class="form-select" [(ngModel)]="doctorId" (ngModelChange)="cargarAgenda()">
           <option [ngValue]="null">Todos</option>
-          <option *ngFor="let medico of medicos" [ngValue]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
+          @for (medico of medicos; track medico) {
+            <option [ngValue]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
+          }
         </select>
       </label>
       <label class="form-label">
@@ -48,48 +58,63 @@
   </div>
 
   <div class="table-shell agenda-shell">
-    <div *ngIf="cargando" class="loading-state">Cargando agenda...</div>
-    <div *ngIf="!cargando" class="table-responsive">
-      <table class="table agenda-table align-middle">
-        <thead>
-          <tr>
-            <th>Hora</th>
-            <th *ngFor="let dia of diasVisibles()">{{ dia | date:'EEE d/M' }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let hora of horas">
-            <td class="agenda-time">{{ hora }}</td>
-            <td *ngFor="let dia of diasVisibles()" class="agenda-cell">
-              <a *ngIf="authService.hasPermission('citas.crear')" class="agenda-slot-link" [routerLink]="rutaNuevaCita(dia, hora)" [queryParams]="queryNuevaCita(dia, hora)">+</a>
-              <button
-                *ngFor="let cita of citasEnFranja(dia, hora)"
-                class="appointment-block"
-                type="button"
-                (click)="citaSeleccionada = cita"
-              >
-                <strong>{{ cita.pacienteNombre }}</strong>
-                <span>{{ cita.doctorNombre }}</span>
-                <small>{{ cita.estado }} / {{ cita.estadoPago }}</small>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    @if (cargando) {
+      <div class="loading-state">Cargando agenda...</div>
+    }
+    @if (!cargando) {
+      <div class="table-responsive">
+        <table class="table agenda-table align-middle">
+          <thead>
+            <tr>
+              <th>Hora</th>
+              @for (dia of diasVisibles(); track dia) {
+                <th>{{ dia | date:'EEE d/M' }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (hora of horas; track hora) {
+              <tr>
+                <td class="agenda-time">{{ hora }}</td>
+                @for (dia of diasVisibles(); track dia) {
+                  <td class="agenda-cell">
+                    @if (authService.hasPermission('citas.crear')) {
+                      <a class="agenda-slot-link" [routerLink]="rutaNuevaCita(dia, hora)" [queryParams]="queryNuevaCita(dia, hora)">+</a>
+                    }
+                    @for (cita of citasEnFranja(dia, hora); track cita) {
+                      <button
+                        class="appointment-block"
+                        type="button"
+                        (click)="citaSeleccionada = cita"
+                        >
+                        <strong>{{ cita.pacienteNombre }}</strong>
+                        <span>{{ cita.doctorNombre }}</span>
+                        <small>{{ cita.estado }} / {{ cita.estadoPago }}</small>
+                      </button>
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   </div>
 
-  <div *ngIf="citaSeleccionada" class="feature-panel">
-    <div class="feature-panel-body detail-grid">
-      <div><span>Paciente</span><strong>{{ citaSeleccionada.pacienteNombre }}</strong></div>
-      <div><span>Medico</span><strong>{{ citaSeleccionada.doctorNombre }}</strong></div>
-      <div><span>Sede</span><strong>{{ citaSeleccionada.sedeNombre }}</strong></div>
-      <div><span>Horario</span><strong>{{ citaSeleccionada.fechaHoraInicio | date:'shortTime' }} - {{ citaSeleccionada.fechaHoraFin | date:'shortTime' }}</strong></div>
-      <div class="form-actions grid-span-2">
-        <a class="btn btn-outline-primary" [routerLink]="['/historial/crear']" [queryParams]="{ citaId: citaSeleccionada.id }">Crear consulta</a>
-        <a class="btn btn-outline-secondary" [routerLink]="['/pagos/cita', citaSeleccionada.id]">Registrar pago</a>
-        <button class="btn btn-outline-secondary" type="button" (click)="citaSeleccionada = undefined">Cerrar</button>
+  @if (citaSeleccionada) {
+    <div class="feature-panel">
+      <div class="feature-panel-body detail-grid">
+        <div><span>Paciente</span><strong>{{ citaSeleccionada.pacienteNombre }}</strong></div>
+        <div><span>Medico</span><strong>{{ citaSeleccionada.doctorNombre }}</strong></div>
+        <div><span>Sede</span><strong>{{ citaSeleccionada.sedeNombre }}</strong></div>
+        <div><span>Horario</span><strong>{{ citaSeleccionada.fechaHoraInicio | date:'shortTime' }} - {{ citaSeleccionada.fechaHoraFin | date:'shortTime' }}</strong></div>
+        <div class="form-actions grid-span-2">
+          <a class="btn btn-outline-primary" [routerLink]="['/historial/crear']" [queryParams]="{ citaId: citaSeleccionada.id }">Crear consulta</a>
+          <a class="btn btn-outline-secondary" [routerLink]="['/pagos/cita', citaSeleccionada.id]">Registrar pago</a>
+          <button class="btn btn-outline-secondary" type="button" (click)="citaSeleccionada = undefined">Cerrar</button>
+        </div>
       </div>
     </div>
-  </div>
+  }
 </section>

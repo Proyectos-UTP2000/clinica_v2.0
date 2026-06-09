@@ -1,15 +1,19 @@
-<div *ngIf="visible" class="dialog-backdrop" role="presentation">
-  <section class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="title">
-    <h3>{{ title }}</h3>
-    <p>{{ message }}</p>
-    <div class="dialog-actions">
-      <button type="button" class="btn btn-outline-secondary" [disabled]="processing" (click)="dismissed.emit()">
-        {{ cancelText }}
-      </button>
-      <button type="button" class="btn btn-danger" [disabled]="processing" (click)="confirmed.emit()">
-        <span *ngIf="processing" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-        {{ confirmText }}
-      </button>
-    </div>
-  </section>
-</div>
+@if (visible) {
+  <div class="dialog-backdrop" role="presentation">
+    <section class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="title">
+      <h3>{{ title }}</h3>
+      <p>{{ message }}</p>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-outline-secondary" [disabled]="processing" (click)="dismissed.emit()">
+          {{ cancelText }}
+        </button>
+        <button type="button" class="btn btn-danger" [disabled]="processing" (click)="confirmed.emit()">
+          @if (processing) {
+            <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          }
+          {{ confirmText }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

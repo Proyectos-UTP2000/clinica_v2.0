@@ -5,11 +5,17 @@
     description="Detalle clinico, indicaciones y notas de evolucion."
   ></app-page-header>
 
-  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
-  <div *ngIf="mensajeExito" class="alert alert-success" role="status">{{ mensajeExito }}</div>
-  <div *ngIf="cargando" class="loading-state">Cargando consulta...</div>
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (mensajeExito) {
+    <div class="alert alert-success" role="status">{{ mensajeExito }}</div>
+  }
+  @if (cargando) {
+    <div class="loading-state">Cargando consulta...</div>
+  }
 
-  <ng-container *ngIf="consulta">
+  @if (consulta) {
     <div class="feature-panel">
       <div class="feature-panel-body detail-grid">
         <div><span>Paciente</span><strong>{{ consulta.pacienteNombre }}</strong></div>
@@ -18,7 +24,6 @@
         <div><span>Fecha</span><strong>{{ consulta.fechaHora | date:'short' }}</strong></div>
       </div>
     </div>
-
     <div class="feature-panel">
       <div class="feature-panel-body detail-grid">
         <div>
@@ -35,49 +40,62 @@
         </div>
       </div>
     </div>
-
     <div class="table-shell">
       <table class="table align-middle">
         <thead><tr><th>Medicamento</th><th>Dosis</th><th>Frecuencia</th><th>Duracion</th></tr></thead>
         <tbody>
-          <tr *ngFor="let receta of consulta.recetas">
-            <td>{{ receta.medicamento }}</td>
-            <td>{{ receta.dosis || '-' }}</td>
-            <td>{{ receta.frecuencia || '-' }}</td>
-            <td>{{ receta.duracion || '-' }}</td>
-          </tr>
-          <tr *ngIf="consulta.recetas.length === 0"><td colspan="4" class="text-center text-muted">Sin recetas.</td></tr>
+          @for (receta of consulta.recetas; track receta) {
+            <tr>
+              <td>{{ receta.medicamento }}</td>
+              <td>{{ receta.dosis || '-' }}</td>
+              <td>{{ receta.frecuencia || '-' }}</td>
+              <td>{{ receta.duracion || '-' }}</td>
+            </tr>
+          }
+          @if (consulta.recetas.length === 0) {
+            <tr><td colspan="4" class="text-center text-muted">Sin recetas.</td></tr>
+          }
         </tbody>
       </table>
     </div>
-
     <div class="feature-panel">
       <div class="feature-panel-body detail-grid">
         <div>
           <h3>Indicaciones</h3>
-          <p *ngFor="let indicacion of consulta.indicaciones">{{ indicacion.tipo }}: {{ indicacion.descripcion }}</p>
-          <p *ngIf="consulta.indicaciones.length === 0" class="text-muted">Sin indicaciones.</p>
+          @for (indicacion of consulta.indicaciones; track indicacion) {
+            <p>{{ indicacion.tipo }}: {{ indicacion.descripcion }}</p>
+          }
+          @if (consulta.indicaciones.length === 0) {
+            <p class="text-muted">Sin indicaciones.</p>
+          }
         </div>
         <div>
           <h3>Estudios</h3>
-          <p *ngFor="let estudio of consulta.estudios">{{ estudio.tipoEstudio }}: {{ estudio.detalle }} ({{ estudio.estado }})</p>
-          <p *ngIf="consulta.estudios.length === 0" class="text-muted">Sin estudios.</p>
+          @for (estudio of consulta.estudios; track estudio) {
+            <p>{{ estudio.tipoEstudio }}: {{ estudio.detalle }} ({{ estudio.estado }})</p>
+          }
+          @if (consulta.estudios.length === 0) {
+            <p class="text-muted">Sin estudios.</p>
+          }
         </div>
       </div>
     </div>
-
     <form class="feature-panel" [formGroup]="notaForm" (ngSubmit)="agregarNota()">
       <div class="feature-panel-body">
         <div class="section-heading">
           <h3>Notas de evolucion</h3>
         </div>
         <div class="timeline">
-          <div *ngFor="let nota of consulta.notasEvolucion" class="timeline-item">
-            <strong>{{ nota.autorNombre }}</strong>
-            <span>{{ nota.fecha | date:'short' }}</span>
-            <p>{{ nota.nota }}</p>
-          </div>
-          <p *ngIf="consulta.notasEvolucion.length === 0" class="text-muted">Sin notas de evolucion.</p>
+          @for (nota of consulta.notasEvolucion; track nota) {
+            <div class="timeline-item">
+              <strong>{{ nota.autorNombre }}</strong>
+              <span>{{ nota.fecha | date:'short' }}</span>
+              <p>{{ nota.nota }}</p>
+            </div>
+          }
+          @if (consulta.notasEvolucion.length === 0) {
+            <p class="text-muted">Sin notas de evolucion.</p>
+          }
         </div>
         <label class="form-label w-100">
           Nueva nota
@@ -90,5 +108,5 @@
         </div>
       </div>
     </form>
-  </ng-container>
+  }
 </section>

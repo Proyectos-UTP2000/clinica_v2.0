@@ -8,18 +8,21 @@
   </div>
 
   <nav class="sidebar-nav">
-    <section *ngFor="let group of groups" class="nav-group" [hidden]="visiblesPorGrupo(group).length === 0">
-      <p class="nav-group-label">{{ group }}</p>
-      <a
-        *ngFor="let item of visiblesPorGrupo(group)"
-        class="nav-link"
-        [routerLink]="item.route"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
-      >
-        <span class="nav-code" aria-hidden="true">{{ item.code }}</span>
-        <span>{{ item.label }}</span>
-      </a>
-    </section>
+    @for (group of groups; track group) {
+      <section class="nav-group" [hidden]="visiblesPorGrupo(group).length === 0">
+        <p class="nav-group-label">{{ group }}</p>
+        @for (item of visiblesPorGrupo(group); track item) {
+          <a
+            class="nav-link"
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+            >
+            <span class="nav-code" aria-hidden="true">{{ item.code }}</span>
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      </section>
+    }
   </nav>
 </aside>

@@ -3,73 +3,89 @@
     kicker="Pacientes"
     title="Gestion de pacientes"
     description="Administre registros activos, datos de contacto y acceso rapido a edicion."
-  >
-    <a *ngIf="authService.hasPermission('pacientes.crear')" class="btn btn-primary" routerLink="/pacientes/crear">
-      Nuevo paciente
-    </a>
+    >
+    @if (authService.hasPermission('pacientes.crear')) {
+      <a class="btn btn-primary" routerLink="/pacientes/crear">
+        Nuevo paciente
+      </a>
+    }
   </app-page-header>
 
-  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
-  <div *ngIf="mensajeExito" class="alert alert-success" role="status">{{ mensajeExito }}</div>
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (mensajeExito) {
+    <div class="alert alert-success" role="status">{{ mensajeExito }}</div>
+  }
 
   <div class="table-shell">
-    <div *ngIf="cargando" class="loading-state" aria-live="polite">
-      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-      Cargando pacientes...
-    </div>
+    @if (cargando) {
+      <div class="loading-state" aria-live="polite">
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        Cargando pacientes...
+      </div>
+    }
 
-    <div *ngIf="!cargando && pacientes.length === 0" class="empty-state">
-      No hay pacientes activos registrados.
-    </div>
+    @if (!cargando && pacientes.length === 0) {
+      <div class="empty-state">
+        No hay pacientes activos registrados.
+      </div>
+    }
 
-    <div *ngIf="!cargando && pacientes.length > 0" class="table-responsive">
-      <table class="table table-striped align-middle">
-        <thead>
-          <tr>
-            <th>DNI</th>
-            <th>Nombres</th>
-            <th>Apellidos</th>
-            <th>Telefono</th>
-            <th>Email</th>
-            <th>Estado</th>
-            <th class="text-end">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let paciente of pacientes">
-            <td class="fw-semibold">{{ paciente.dni }}</td>
-            <td>{{ paciente.nombres }}</td>
-            <td>{{ paciente.apellidos }}</td>
-            <td>{{ paciente.telefono }}</td>
-            <td>{{ paciente.email || 'Sin email' }}</td>
-            <td>
-              <span class="status-pill" [class.is-active]="paciente.activo" [class.is-danger]="!paciente.activo">
-                {{ paciente.activo ? 'Activo' : 'Inactivo' }}
-              </span>
-            </td>
-            <td class="text-end">
-              <div class="action-group">
-                <a
-                  *ngIf="authService.hasPermission('pacientes.editar')"
-                  class="btn btn-sm btn-outline-primary"
-                  [routerLink]="['/pacientes/editar', paciente.id]"
-                >
-                  Editar
-                </a>
-                <button
-                  *ngIf="authService.hasPermission('pacientes.eliminar')"
-                  type="button"
-                  class="btn btn-sm btn-outline-danger"
-                  (click)="abrirConfirmacion(paciente)"
-                >
-                  Desactivar
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    @if (!cargando && pacientes.length > 0) {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>DNI</th>
+              <th>Nombres</th>
+              <th>Apellidos</th>
+              <th>Telefono</th>
+              <th>Email</th>
+              <th>Estado</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (paciente of pacientes; track paciente) {
+              <tr>
+                <td class="fw-semibold">{{ paciente.dni }}</td>
+                <td>{{ paciente.nombres }}</td>
+                <td>{{ paciente.apellidos }}</td>
+                <td>{{ paciente.telefono }}</td>
+                <td>{{ paciente.email || 'Sin email' }}</td>
+                <td>
+                  <span class="status-pill" [class.is-active]="paciente.activo" [class.is-danger]="!paciente.activo">
+                    {{ paciente.activo ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <div class="action-group">
+                    @if (authService.hasPermission('pacientes.editar')) {
+                      <a
+                        class="btn btn-sm btn-outline-primary"
+                        [routerLink]="['/pacientes/editar', paciente.id]"
+                        >
+                        Editar
+                      </a>
+                    }
+                    @if (authService.hasPermission('pacientes.eliminar')) {
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        (click)="abrirConfirmacion(paciente)"
+                        >
+                        Desactivar
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   </div>
 
   <app-paginator

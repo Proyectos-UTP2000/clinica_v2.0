@@ -3,11 +3,13 @@
     kicker="Pacientes"
     title="Nuevo paciente"
     description="Registre datos basicos y contacto obligatorio antes de agendar citas."
-  >
+    >
     <a class="btn btn-outline-secondary" routerLink="/pacientes">Volver</a>
   </app-page-header>
 
-  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
 
   <form class="feature-panel" [formGroup]="pacienteForm" (ngSubmit)="guardar()" novalidate>
     <div class="feature-panel-body">
@@ -54,7 +56,9 @@
       <div class="form-actions">
         <a class="btn btn-outline-secondary" routerLink="/pacientes">Cancelar</a>
         <button type="submit" class="btn btn-primary" [disabled]="cargando">
-          <span *ngIf="cargando" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          @if (cargando) {
+            <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          }
           Guardar paciente
         </button>
       </div>

@@ -5,8 +5,12 @@
     description="Consulte pagos por paciente y registre pagos manuales sobre citas pendientes."
   ></app-page-header>
 
-  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
-  <div *ngIf="mensajeExito" class="alert alert-success" role="status">{{ mensajeExito }}</div>
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (mensajeExito) {
+    <div class="alert alert-success" role="status">{{ mensajeExito }}</div>
+  }
 
   <div class="feature-panel">
     <div class="feature-panel-body">
@@ -14,73 +18,91 @@
         <label class="form-label">
           Paciente
           <select class="form-select" formControlName="pacienteId">
-          <option [ngValue]="null">Seleccione paciente</option>
-          <option *ngFor="let paciente of pacientes" [ngValue]="paciente.id">{{ paciente.nombres }} {{ paciente.apellidos }}</option>
-        </select>
-      </label>
-      <div class="form-actions">
-        <button class="btn btn-outline-primary" type="submit">Buscar pagos</button>
-        <a *ngIf="filtroForm.value.pacienteId" class="btn btn-outline-secondary" [routerLink]="['/pagos/paciente', filtroForm.value.pacienteId]">Ver ruta dedicada</a>
-      </div>
+            <option [ngValue]="null">Seleccione paciente</option>
+            @for (paciente of pacientes; track paciente) {
+              <option [ngValue]="paciente.id">{{ paciente.nombres }} {{ paciente.apellidos }}</option>
+            }
+          </select>
+        </label>
+        <div class="form-actions">
+          <button class="btn btn-outline-primary" type="submit">Buscar pagos</button>
+          @if (filtroForm.value.pacienteId) {
+            <a class="btn btn-outline-secondary" [routerLink]="['/pagos/paciente', filtroForm.value.pacienteId]">Ver ruta dedicada</a>
+          }
+        </div>
       </form>
     </div>
   </div>
 
-  <form *ngIf="authService.hasPermission('pagos.crear')" class="feature-panel" [formGroup]="pagoForm" (ngSubmit)="registrarPago()">
-    <div class="feature-panel-body form-grid">
-      <label class="form-label">
-        Cita pendiente
-        <select class="form-select" formControlName="citaId">
-          <option [ngValue]="null">Seleccione cita</option>
-          <option *ngFor="let cita of citasPendientes" [ngValue]="cita.id">#{{ cita.id }} - {{ cita.pacienteNombre }} - {{ cita.fechaHoraInicio | date:'short' }}</option>
-        </select>
-      </label>
-      <label class="form-label">
-        Monto
-        <input class="form-control" type="number" min="0" step="0.01" formControlName="monto" />
-      </label>
-      <label class="form-label">
-        Metodo
-        <select class="form-select" formControlName="metodo">
-          <option value="efectivo">Efectivo</option>
-          <option value="tarjeta">Tarjeta</option>
-          <option value="transferencia">Transferencia</option>
-          <option value="web">Web</option>
-        </select>
-      </label>
-      <div class="form-actions">
-        <button class="btn btn-primary" type="submit" [disabled]="guardando || citasPendientes.length === 0">
-          {{ guardando ? 'Registrando...' : 'Registrar pago' }}
-        </button>
-        <a *ngIf="pagoForm.value.citaId" class="btn btn-outline-secondary" [routerLink]="['/pagos/cita', pagoForm.value.citaId]">Ruta de cita</a>
+  @if (authService.hasPermission('pagos.crear')) {
+    <form class="feature-panel" [formGroup]="pagoForm" (ngSubmit)="registrarPago()">
+      <div class="feature-panel-body form-grid">
+        <label class="form-label">
+          Cita pendiente
+          <select class="form-select" formControlName="citaId">
+            <option [ngValue]="null">Seleccione cita</option>
+            @for (cita of citasPendientes; track cita) {
+              <option [ngValue]="cita.id">#{{ cita.id }} - {{ cita.pacienteNombre }} - {{ cita.fechaHoraInicio | date:'short' }}</option>
+            }
+          </select>
+        </label>
+        <label class="form-label">
+          Monto
+          <input class="form-control" type="number" min="0" step="0.01" formControlName="monto" />
+        </label>
+        <label class="form-label">
+          Metodo
+          <select class="form-select" formControlName="metodo">
+            <option value="efectivo">Efectivo</option>
+            <option value="tarjeta">Tarjeta</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="web">Web</option>
+          </select>
+        </label>
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit" [disabled]="guardando || citasPendientes.length === 0">
+            {{ guardando ? 'Registrando...' : 'Registrar pago' }}
+          </button>
+          @if (pagoForm.value.citaId) {
+            <a class="btn btn-outline-secondary" [routerLink]="['/pagos/cita', pagoForm.value.citaId]">Ruta de cita</a>
+          }
+        </div>
       </div>
-    </div>
-  </form>
+    </form>
+  }
 
   <div class="table-shell">
-    <div *ngIf="cargando" class="loading-state">Cargando pagos...</div>
-    <div *ngIf="!cargando && pagos.length === 0" class="empty-state">No hay pagos para el paciente seleccionado.</div>
-    <div *ngIf="!cargando && pagos.length > 0" class="table-responsive">
-      <table class="table table-striped align-middle">
-        <thead>
-          <tr>
-            <th>Cita</th>
-            <th>Monto</th>
-            <th>Metodo</th>
-            <th>Fecha</th>
-            <th>Registrado por</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let pago of pagos">
-            <td class="fw-semibold">#{{ pago.citaId }}</td>
-            <td>{{ pago.monto | currency:'PEN':'symbol':'1.2-2' }}</td>
-            <td>{{ pago.metodo }}</td>
-            <td>{{ pago.fechaPago | date:'short' }}</td>
-            <td>{{ pago.registradoPor || 'Sin usuario' }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    @if (cargando) {
+      <div class="loading-state">Cargando pagos...</div>
+    }
+    @if (!cargando && pagos.length === 0) {
+      <div class="empty-state">No hay pagos para el paciente seleccionado.</div>
+    }
+    @if (!cargando && pagos.length > 0) {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Cita</th>
+              <th>Monto</th>
+              <th>Metodo</th>
+              <th>Fecha</th>
+              <th>Registrado por</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (pago of pagos; track pago) {
+              <tr>
+                <td class="fw-semibold">#{{ pago.citaId }}</td>
+                <td>{{ pago.monto | currency:'PEN':'symbol':'1.2-2' }}</td>
+                <td>{{ pago.metodo }}</td>
+                <td>{{ pago.fechaPago | date:'short' }}</td>
+                <td>{{ pago.registradoPor || 'Sin usuario' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   </div>
 </section>

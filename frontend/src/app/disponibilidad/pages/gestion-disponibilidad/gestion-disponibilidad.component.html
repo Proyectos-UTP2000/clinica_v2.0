@@ -5,15 +5,21 @@
     description="Administre horarios base semanales y excepciones puntuales del medico."
   ></app-page-header>
 
-  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
-  <div *ngIf="mensajeExito" class="alert alert-success" role="status">{{ mensajeExito }}</div>
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (mensajeExito) {
+    <div class="alert alert-success" role="status">{{ mensajeExito }}</div>
+  }
 
   <div class="feature-panel">
     <div class="feature-panel-body form-grid">
       <label class="form-label">
         Medico
         <select class="form-select" [(ngModel)]="doctorId" (ngModelChange)="cargarDisponibilidad()" [disabled]="medicos.length <= 1">
-          <option *ngFor="let medico of medicos" [ngValue]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
+          @for (medico of medicos; track medico) {
+            <option [ngValue]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
+          }
         </select>
       </label>
       <form class="form-grid grid-span-2" [formGroup]="filtroExcepcionForm" (ngSubmit)="cargarDisponibilidad()">
@@ -39,13 +45,17 @@
         Sede
         <select class="form-select" formControlName="sedeId">
           <option [ngValue]="null">Seleccione sede</option>
-          <option *ngFor="let sede of sedes" [ngValue]="sede.id">{{ sede.nombre }}</option>
+          @for (sede of sedes; track sede) {
+            <option [ngValue]="sede.id">{{ sede.nombre }}</option>
+          }
         </select>
       </label>
       <label class="form-label">
         Dia
         <select class="form-select" formControlName="diaSemana">
-          <option *ngFor="let dia of dias" [ngValue]="dia.id">{{ dia.nombre }}</option>
+          @for (dia of dias; track dia) {
+            <option [ngValue]="dia.id">{{ dia.nombre }}</option>
+          }
         </select>
       </label>
       <label class="form-label">
@@ -65,22 +75,30 @@
   </form>
 
   <div class="table-shell">
-    <div *ngIf="cargando" class="loading-state">Cargando disponibilidad...</div>
-    <div *ngIf="!cargando && horariosBase.length === 0" class="empty-state">No hay horarios base registrados.</div>
-    <div *ngIf="!cargando && horariosBase.length > 0" class="table-responsive">
-      <table class="table table-striped align-middle">
-        <thead><tr><th>Dia</th><th>Sede</th><th>Inicio</th><th>Fin</th><th class="text-end">Acciones</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let base of horariosBase">
-            <td class="fw-semibold">{{ nombreDia(base.diaSemana) }}</td>
-            <td>{{ base.sedeNombre }}</td>
-            <td>{{ base.horaInicio }}</td>
-            <td>{{ base.horaFin }}</td>
-            <td class="text-end"><button class="btn btn-sm btn-outline-danger" type="button" (click)="eliminarBase(base)">Eliminar</button></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    @if (cargando) {
+      <div class="loading-state">Cargando disponibilidad...</div>
+    }
+    @if (!cargando && horariosBase.length === 0) {
+      <div class="empty-state">No hay horarios base registrados.</div>
+    }
+    @if (!cargando && horariosBase.length > 0) {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead><tr><th>Dia</th><th>Sede</th><th>Inicio</th><th>Fin</th><th class="text-end">Acciones</th></tr></thead>
+          <tbody>
+            @for (base of horariosBase; track base) {
+              <tr>
+                <td class="fw-semibold">{{ nombreDia(base.diaSemana) }}</td>
+                <td>{{ base.sedeNombre }}</td>
+                <td>{{ base.horaInicio }}</td>
+                <td>{{ base.horaFin }}</td>
+                <td class="text-end"><button class="btn btn-sm btn-outline-danger" type="button" (click)="eliminarBase(base)">Eliminar</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   </div>
 
   <form class="feature-panel" [formGroup]="excepcionForm" (ngSubmit)="guardarExcepcion()">
@@ -111,20 +129,26 @@
   </form>
 
   <div class="table-shell">
-    <div *ngIf="!cargando && excepciones.length === 0" class="empty-state">No hay excepciones en el rango seleccionado.</div>
-    <div *ngIf="!cargando && excepciones.length > 0" class="table-responsive">
-      <table class="table table-striped align-middle">
-        <thead><tr><th>Fecha</th><th>Inicio</th><th>Fin</th><th>Motivo</th><th class="text-end">Acciones</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let excepcion of excepciones">
-            <td class="fw-semibold">{{ excepcion.fecha | date:'mediumDate' }}</td>
-            <td>{{ excepcion.horaInicio }}</td>
-            <td>{{ excepcion.horaFin }}</td>
-            <td>{{ excepcion.motivo }}</td>
-            <td class="text-end"><button class="btn btn-sm btn-outline-danger" type="button" (click)="eliminarExcepcion(excepcion)">Eliminar</button></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    @if (!cargando && excepciones.length === 0) {
+      <div class="empty-state">No hay excepciones en el rango seleccionado.</div>
+    }
+    @if (!cargando && excepciones.length > 0) {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead><tr><th>Fecha</th><th>Inicio</th><th>Fin</th><th>Motivo</th><th class="text-end">Acciones</th></tr></thead>
+          <tbody>
+            @for (excepcion of excepciones; track excepcion) {
+              <tr>
+                <td class="fw-semibold">{{ excepcion.fecha | date:'mediumDate' }}</td>
+                <td>{{ excepcion.horaInicio }}</td>
+                <td>{{ excepcion.horaFin }}</td>
+                <td>{{ excepcion.motivo }}</td>
+                <td class="text-end"><button class="btn btn-sm btn-outline-danger" type="button" (click)="eliminarExcepcion(excepcion)">Eliminar</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   </div>
 </section>

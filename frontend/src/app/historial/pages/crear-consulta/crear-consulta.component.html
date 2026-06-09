@@ -5,107 +5,120 @@
     description="Registre una atencion clinica con recetas, indicaciones y estudios."
   ></app-page-header>
 
-  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
-  <div *ngIf="cargando" class="loading-state">Cargando catalogos...</div>
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (cargando) {
+    <div class="loading-state">Cargando catalogos...</div>
+  }
 
-  <form *ngIf="!cargando" class="feature-panel" [formGroup]="consultaForm" (ngSubmit)="guardar()">
-    <div class="feature-panel-body form-grid">
-      <label class="form-label">
-        Paciente
-        <select class="form-select" formControlName="pacienteId">
-          <option [ngValue]="null">Seleccione paciente</option>
-          <option *ngFor="let paciente of pacientes" [ngValue]="paciente.id">{{ paciente.nombres }} {{ paciente.apellidos }}</option>
-        </select>
-      </label>
-      <label class="form-label">
-        Medico
-        <select class="form-select" formControlName="doctorId">
-          <option [ngValue]="null">Seleccione medico</option>
-          <option *ngFor="let medico of medicos" [ngValue]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
-        </select>
-      </label>
-      <label class="form-label">
-        Sede
-        <select class="form-select" formControlName="sedeId">
-          <option [ngValue]="null">Seleccione sede</option>
-          <option *ngFor="let sede of sedes" [ngValue]="sede.id">{{ sede.nombre }}</option>
-        </select>
-      </label>
-      <label class="form-label">
-        Tipo
-        <select class="form-select" formControlName="tipo">
-          <option value="consulta">Consulta</option>
-          <option value="control">Control</option>
-          <option value="urgencia">Urgencia</option>
-          <option value="procedimiento">Procedimiento</option>
-        </select>
-      </label>
-      <label class="form-label grid-span-2">
-        Motivo
-        <textarea class="form-control" rows="2" formControlName="motivoConsulta"></textarea>
-      </label>
-      <label class="form-label grid-span-2">
-        Diagnostico
-        <textarea class="form-control" rows="2" formControlName="diagnostico"></textarea>
-      </label>
-      <label class="form-label grid-span-2">
-        Observaciones
-        <textarea class="form-control" rows="2" formControlName="observaciones"></textarea>
-      </label>
-
-      <div class="grid-span-2 detail-section" formArrayName="recetas">
-        <div class="section-heading">
-          <h3>Recetas</h3>
-          <button class="btn btn-sm btn-outline-primary" type="button" (click)="agregarReceta()">Agregar receta</button>
-        </div>
-        <div *ngFor="let receta of recetas.controls; let i = index" class="nested-row" [formGroupName]="i">
-          <input class="form-control" placeholder="Medicamento" formControlName="medicamento" />
-          <input class="form-control" placeholder="Dosis" formControlName="dosis" />
-          <input class="form-control" placeholder="Frecuencia" formControlName="frecuencia" />
-          <button class="btn btn-outline-danger" type="button" (click)="eliminarItem(recetas, i)">Quitar</button>
-        </div>
-      </div>
-
-      <div class="grid-span-2 detail-section" formArrayName="indicaciones">
-        <div class="section-heading">
-          <h3>Indicaciones</h3>
-          <button class="btn btn-sm btn-outline-primary" type="button" (click)="agregarIndicacion()">Agregar indicacion</button>
-        </div>
-        <div *ngFor="let indicacion of indicaciones.controls; let i = index" class="nested-row" [formGroupName]="i">
-          <select class="form-select" formControlName="tipo">
-            <option value="reposo">Reposo</option>
-            <option value="derivacion">Derivacion</option>
-            <option value="estudios">Estudios</option>
+  @if (!cargando) {
+    <form class="feature-panel" [formGroup]="consultaForm" (ngSubmit)="guardar()">
+      <div class="feature-panel-body form-grid">
+        <label class="form-label">
+          Paciente
+          <select class="form-select" formControlName="pacienteId">
+            <option [ngValue]="null">Seleccione paciente</option>
+            @for (paciente of pacientes; track paciente) {
+              <option [ngValue]="paciente.id">{{ paciente.nombres }} {{ paciente.apellidos }}</option>
+            }
           </select>
-          <input class="form-control" placeholder="Descripcion" formControlName="descripcion" />
-          <button class="btn btn-outline-danger" type="button" (click)="eliminarItem(indicaciones, i)">Quitar</button>
+        </label>
+        <label class="form-label">
+          Medico
+          <select class="form-select" formControlName="doctorId">
+            <option [ngValue]="null">Seleccione medico</option>
+            @for (medico of medicos; track medico) {
+              <option [ngValue]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
+            }
+          </select>
+        </label>
+        <label class="form-label">
+          Sede
+          <select class="form-select" formControlName="sedeId">
+            <option [ngValue]="null">Seleccione sede</option>
+            @for (sede of sedes; track sede) {
+              <option [ngValue]="sede.id">{{ sede.nombre }}</option>
+            }
+          </select>
+        </label>
+        <label class="form-label">
+          Tipo
+          <select class="form-select" formControlName="tipo">
+            <option value="consulta">Consulta</option>
+            <option value="control">Control</option>
+            <option value="urgencia">Urgencia</option>
+            <option value="procedimiento">Procedimiento</option>
+          </select>
+        </label>
+        <label class="form-label grid-span-2">
+          Motivo
+          <textarea class="form-control" rows="2" formControlName="motivoConsulta"></textarea>
+        </label>
+        <label class="form-label grid-span-2">
+          Diagnostico
+          <textarea class="form-control" rows="2" formControlName="diagnostico"></textarea>
+        </label>
+        <label class="form-label grid-span-2">
+          Observaciones
+          <textarea class="form-control" rows="2" formControlName="observaciones"></textarea>
+        </label>
+        <div class="grid-span-2 detail-section" formArrayName="recetas">
+          <div class="section-heading">
+            <h3>Recetas</h3>
+            <button class="btn btn-sm btn-outline-primary" type="button" (click)="agregarReceta()">Agregar receta</button>
+          </div>
+          @for (receta of recetas.controls; track receta; let i = $index) {
+            <div class="nested-row" [formGroupName]="i">
+              <input class="form-control" placeholder="Medicamento" formControlName="medicamento" />
+              <input class="form-control" placeholder="Dosis" formControlName="dosis" />
+              <input class="form-control" placeholder="Frecuencia" formControlName="frecuencia" />
+              <button class="btn btn-outline-danger" type="button" (click)="eliminarItem(recetas, i)">Quitar</button>
+            </div>
+          }
+        </div>
+        <div class="grid-span-2 detail-section" formArrayName="indicaciones">
+          <div class="section-heading">
+            <h3>Indicaciones</h3>
+            <button class="btn btn-sm btn-outline-primary" type="button" (click)="agregarIndicacion()">Agregar indicacion</button>
+          </div>
+          @for (indicacion of indicaciones.controls; track indicacion; let i = $index) {
+            <div class="nested-row" [formGroupName]="i">
+              <select class="form-select" formControlName="tipo">
+                <option value="reposo">Reposo</option>
+                <option value="derivacion">Derivacion</option>
+                <option value="estudios">Estudios</option>
+              </select>
+              <input class="form-control" placeholder="Descripcion" formControlName="descripcion" />
+              <button class="btn btn-outline-danger" type="button" (click)="eliminarItem(indicaciones, i)">Quitar</button>
+            </div>
+          }
+        </div>
+        <div class="grid-span-2 detail-section" formArrayName="estudios">
+          <div class="section-heading">
+            <h3>Estudios</h3>
+            <button class="btn btn-sm btn-outline-primary" type="button" (click)="agregarEstudio()">Agregar estudio</button>
+          </div>
+          @for (estudio of estudios.controls; track estudio; let i = $index) {
+            <div class="nested-row" [formGroupName]="i">
+              <input class="form-control" placeholder="Tipo de estudio" formControlName="tipoEstudio" />
+              <input class="form-control" placeholder="Detalle" formControlName="detalle" />
+              <button class="btn btn-outline-danger" type="button" (click)="eliminarItem(estudios, i)">Quitar</button>
+            </div>
+          }
+        </div>
+        <label class="form-label grid-span-2">
+          Adjuntos
+          <input class="form-control" type="file" disabled />
+          <span class="form-text">Carga de archivos pendiente de endpoint dedicado.</span>
+        </label>
+        <div class="form-actions grid-span-2">
+          <a class="btn btn-outline-secondary" routerLink="/historial">Cancelar</a>
+          <button class="btn btn-primary" type="submit" [disabled]="guardando">
+            {{ guardando ? 'Registrando...' : 'Guardar consulta' }}
+          </button>
         </div>
       </div>
-
-      <div class="grid-span-2 detail-section" formArrayName="estudios">
-        <div class="section-heading">
-          <h3>Estudios</h3>
-          <button class="btn btn-sm btn-outline-primary" type="button" (click)="agregarEstudio()">Agregar estudio</button>
-        </div>
-        <div *ngFor="let estudio of estudios.controls; let i = index" class="nested-row" [formGroupName]="i">
-          <input class="form-control" placeholder="Tipo de estudio" formControlName="tipoEstudio" />
-          <input class="form-control" placeholder="Detalle" formControlName="detalle" />
-          <button class="btn btn-outline-danger" type="button" (click)="eliminarItem(estudios, i)">Quitar</button>
-        </div>
-      </div>
-
-      <label class="form-label grid-span-2">
-        Adjuntos
-        <input class="form-control" type="file" disabled />
-        <span class="form-text">Carga de archivos pendiente de endpoint dedicado.</span>
-      </label>
-
-      <div class="form-actions grid-span-2">
-        <a class="btn btn-outline-secondary" routerLink="/historial">Cancelar</a>
-        <button class="btn btn-primary" type="submit" [disabled]="guardando">
-          {{ guardando ? 'Registrando...' : 'Guardar consulta' }}
-        </button>
-      </div>
-    </div>
-  </form>
+    </form>
+  }
 </section>

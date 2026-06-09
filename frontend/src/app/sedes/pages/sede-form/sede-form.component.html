@@ -5,25 +5,31 @@
     description="Mantenga los datos operativos de la sede."
   ></app-page-header>
 
-  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
-  <div *ngIf="cargando" class="loading-state">Cargando sede...</div>
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (cargando) {
+    <div class="loading-state">Cargando sede...</div>
+  }
 
-  <form *ngIf="!cargando" class="feature-panel" [formGroup]="sedeForm" (ngSubmit)="guardar()">
-    <div class="feature-panel-body form-grid">
-      <label class="form-label">
-        Nombre
-        <input class="form-control" formControlName="nombre" />
-      </label>
-      <label class="form-label">
-        Direccion
-        <input class="form-control" formControlName="direccion" />
-      </label>
-      <div class="form-actions">
-        <a class="btn btn-outline-secondary" routerLink="/sedes">Cancelar</a>
-        <button class="btn btn-primary" type="submit" [disabled]="guardando">
-          {{ guardando ? 'Guardando...' : 'Guardar sede' }}
-        </button>
+  @if (!cargando) {
+    <form class="feature-panel" [formGroup]="sedeForm" (ngSubmit)="guardar()">
+      <div class="feature-panel-body form-grid">
+        <label class="form-label">
+          Nombre
+          <input class="form-control" formControlName="nombre" />
+        </label>
+        <label class="form-label">
+          Direccion
+          <input class="form-control" formControlName="direccion" />
+        </label>
+        <div class="form-actions">
+          <a class="btn btn-outline-secondary" routerLink="/sedes">Cancelar</a>
+          <button class="btn btn-primary" type="submit" [disabled]="guardando">
+            {{ guardando ? 'Guardando...' : 'Guardar sede' }}
+          </button>
+        </div>
       </div>
-    </div>
-  </form>
+    </form>
+  }
 </section>

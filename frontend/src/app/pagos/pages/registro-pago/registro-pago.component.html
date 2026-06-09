@@ -5,17 +5,23 @@
     description="Registre el pago manual asociado a una cita."
   ></app-page-header>
 
-  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">{{ mensajeError }}</div>
-  <div *ngIf="cargando" class="loading-state">Cargando cita...</div>
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (cargando) {
+    <div class="loading-state">Cargando cita...</div>
+  }
 
-  <div *ngIf="cita" class="feature-panel">
-    <div class="feature-panel-body detail-grid">
-      <div><span>Cita</span><strong>#{{ cita.id }}</strong></div>
-      <div><span>Paciente</span><strong>{{ cita.pacienteNombre }}</strong></div>
-      <div><span>Medico</span><strong>{{ cita.doctorNombre }}</strong></div>
-      <div><span>Fecha</span><strong>{{ cita.fechaHoraInicio | date:'short' }}</strong></div>
+  @if (cita) {
+    <div class="feature-panel">
+      <div class="feature-panel-body detail-grid">
+        <div><span>Cita</span><strong>#{{ cita.id }}</strong></div>
+        <div><span>Paciente</span><strong>{{ cita.pacienteNombre }}</strong></div>
+        <div><span>Medico</span><strong>{{ cita.doctorNombre }}</strong></div>
+        <div><span>Fecha</span><strong>{{ cita.fechaHoraInicio | date:'short' }}</strong></div>
+      </div>
     </div>
-  </div>
+  }
 
   <form class="feature-panel" [formGroup]="pagoForm" (ngSubmit)="registrar()">
     <div class="feature-panel-body form-grid">

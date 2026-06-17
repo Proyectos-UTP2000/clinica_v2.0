@@ -2,7 +2,7 @@
   <app-page-header
     kicker="Roles"
     [title]="rolId ? 'Editar rol' : 'Nuevo rol'"
-    description="Defina el nombre del rol y el checklist de permisos disponibles."
+    description="Defina el nombre del rol y habilite solo los permisos que este perfil debe tener."
   ></app-page-header>
 
   @if (mensajeError) {
@@ -33,28 +33,67 @@
           </label>
         }
 
-        <div class="permissions-panel">
-          <h3>Permisos disponibles</h3>
-          <p>Seleccione los permisos que este rol tendra en el sistema interno.</p>
-          @if (permisos.length === 0) {
-            <div class="empty-state">No hay permisos disponibles.</div>
-          }
-          @for (permiso of permisos; track permiso.id) {
-            <label class="permission-check">
-              <input
-                type="checkbox"
-                [checked]="permisoSeleccionado(permiso.id)"
-                (change)="togglePermiso(permiso.id, $any($event.target).checked)"
-              />
-              <span>
-                <strong>{{ permiso.codigo }}</strong>
-                <small>{{ permiso.descripcion || 'Sin descripcion' }}</small>
-              </span>
-            </label>
-          }
-        </div>
+        <section class="permissions-panel grid-span-2" aria-label="Gestion de permisos del rol">
+          <div class="permissions-header">
+            <div>
+              <h3>Permisos por gestion</h3>
+              <p>Marque exactamente las acciones permitidas. El rol no otorga accesos por nombre: solo cuentan los permisos seleccionados.</p>
+            </div>
+            <span class="status-pill is-active">{{ totalSeleccionados }} seleccionados</span>
+          </div>
 
-        <div class="form-actions">
+          <label class="form-label permissions-search">
+            Buscar permiso
+            <input
+              class="form-control"
+              name="filtroPermisos"
+              [(ngModel)]="filtroPermisos"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Ej. pacientes.crear, citas, dashboard..."
+            />
+          </label>
+
+          @if (gruposPermisos.length === 0) {
+            <div class="empty-state">No hay permisos que coincidan con la busqueda.</div>
+          }
+
+          <div class="permissions-grid">
+            @for (grupo of gruposPermisos; track grupo.codigo) {
+              <article class="permission-group" [class.is-complete]="grupoCompleto(grupo)">
+                <header class="permission-group-header">
+                  <div>
+                    <h4>{{ grupo.titulo }}</h4>
+                    <p>{{ grupo.descripcion }}</p>
+                  </div>
+                  <span class="permission-count">{{ seleccionadosEnGrupo(grupo) }}/{{ grupo.permisos.length }}</span>
+                </header>
+
+                <div class="permission-group-actions">
+                  <button class="btn btn-sm btn-outline-primary" type="button" (click)="seleccionarGrupo(grupo)">Seleccionar gestion</button>
+                  <button class="btn btn-sm btn-outline-secondary" type="button" (click)="limpiarGrupo(grupo)">Quitar gestion</button>
+                </div>
+
+                <div class="permission-list">
+                  @for (permiso of grupo.permisos; track permiso.id) {
+                    <label class="permission-check">
+                      <input
+                        type="checkbox"
+                        [checked]="permisoSeleccionado(permiso.id)"
+                        (change)="togglePermiso(permiso.id, $any($event.target).checked)"
+                      />
+                      <span>
+                        <strong>{{ permiso.codigo }}</strong>
+                        <small>{{ permiso.descripcion || 'Sin descripcion' }}</small>
+                      </span>
+                    </label>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+
+        <div class="form-actions grid-span-2">
           <a class="btn btn-outline-secondary" routerLink="/roles">Cancelar</a>
           <button class="btn btn-primary" type="submit" [disabled]="guardando">
             {{ guardando ? 'Guardando...' : 'Guardar rol' }}

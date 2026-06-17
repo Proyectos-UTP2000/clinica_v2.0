@@ -18,8 +18,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PermisoAspect {
 
-    private static final String ROL_ADMINISTRADOR = "ROLE_Administrador";
-
     /** Verifica que el usuario autenticado tenga el permiso requerido. */
     @Around("@annotation(requierePermiso)")
     public Object verificarPermiso(ProceedingJoinPoint punto, RequierePermiso requierePermiso) throws Throwable {
@@ -30,8 +28,7 @@ public class PermisoAspect {
 
         Set<String> permisosRequeridos = Arrays.stream(requierePermiso.value()).collect(Collectors.toSet());
         boolean tienePermiso = autenticacion.getAuthorities().stream()
-                .anyMatch(autoridad -> Objects.equals(autoridad.getAuthority(), ROL_ADMINISTRADOR)
-                        || permisosRequeridos.stream()
+                .anyMatch(autoridad -> permisosRequeridos.stream()
                         .anyMatch(permiso -> Objects.equals(autoridad.getAuthority(), permiso)));
 
         if (!tienePermiso) {

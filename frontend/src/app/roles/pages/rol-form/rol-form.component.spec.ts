@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { RolFormComponent } from './rol-form.component';
@@ -33,7 +33,7 @@ describe('RolFormComponent', () => {
 
     await TestBed.configureTestingModule({
       declarations: [RolFormComponent],
-      imports: [ReactiveFormsModule],
+      imports: [FormsModule, ReactiveFormsModule],
       providers: [
         { provide: RolService, useValue: service },
         { provide: Router, useValue: router },
@@ -50,6 +50,9 @@ describe('RolFormComponent', () => {
     component.rolForm.patchValue({ nombre: 'Administrador', descripcion: 'Gestion total' });
     component.togglePermiso(1, true);
     component.togglePermiso(2, true);
+
+    expect(component.gruposPermisos.some((grupo) => grupo.codigo === 'roles')).toBeTrue();
+    expect(component.totalSeleccionados).toBe(2);
 
     component.guardar();
 

@@ -23,6 +23,9 @@ import com.web.clinica.dto.request.RolUpdateRequest;
 import com.web.clinica.dto.response.PermisoResponse;
 import com.web.clinica.dto.response.RolResponse;
 import com.web.clinica.exception.BadRequestException;
+import com.web.clinica.exception.AccesoDenegadoException;
+import com.web.clinica.security.PermisoAspect;
+import com.web.clinica.security.RequierePermiso;
 import com.web.clinica.exception.ResourceNotFoundException;
 import com.web.clinica.model.Permiso;
 import com.web.clinica.model.Rol;
@@ -36,7 +39,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -49,6 +57,53 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 class RolPermisoBackendTests {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+
+    @AfterEach
+    void limpiarContextoSeguridad() {
+        SecurityContextHolder.clearContext();
+    }
+
+    @Test
+    void rolAdministradorSinPermisoEspecificoNoDebeSaltarRbac() throws Throwable {
+        PermisoAspect aspect = new PermisoAspect();
+        RequierePermiso requierePermiso = PacienteCreateEndpoint.class
+                .getDeclaredMethod("crear")
+                .getAnnotation(RequierePermiso.class);
+        ProceedingJoinPoint punto = mock(ProceedingJoinPoint.class);
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                "admin",
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_Administrador"))
+        ));
+
+        assertThatThrownBy(() -> aspect.verificarPermiso(punto, requierePermiso))
+                .isInstanceOf(AccesoDenegadoException.class)
+                .hasMessageContaining("pacientes.crear");
+        verify(punto, never()).proceed();
+    }
+
+    @Test
+    void permisoEspecificoAutorizaAunqueSeaAdministrador() throws Throwable {
+        PermisoAspect aspect = new PermisoAspect();
+        RequierePermiso requierePermiso = PacienteCreateEndpoint.class
+                .getDeclaredMethod("crear")
+                .getAnnotation(RequierePermiso.class);
+        ProceedingJoinPoint punto = mock(ProceedingJoinPoint.class);
+        when(punto.proceed()).thenReturn("ok");
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                "admin",
+                null,
+                List.of(
+                        new SimpleGrantedAuthority("ROLE_Administrador"),
+                        new SimpleGrantedAuthority("pacientes.crear")
+                )
+        ));
+
+        Object resultado = aspect.verificarPermiso(punto, requierePermiso);
+
+        assertThat(resultado).isEqualTo("ok");
+    }
 
     @Test
     void endpointsRolesYPermisosRespondenConContratoEsperado() throws Exception {
@@ -282,6 +337,13 @@ class RolPermisoBackendTests {
                     .codigo("roles.ver")
                     .descripcion("Ver lista de roles")
                     .build();
+        }
+    }
+
+    private static class PacienteCreateEndpoint {
+        @RequierePermiso("pacientes.crear")
+        void crear() {
+            // Solo usado para leer la anotacion en pruebas.
         }
     }
 }

@@ -5,6 +5,30 @@ import { finalize } from 'rxjs';
 import { PermisoResponse } from '../../../shared/models/rol.model';
 import { RolService } from '../../services/rol.service';
 
+interface GrupoPermisos {
+  codigo: string;
+  titulo: string;
+  descripcion: string;
+  permisos: PermisoResponse[];
+}
+
+const GRUPOS: Record<string, { titulo: string; descripcion: string }> = {
+  dashboard: { titulo: 'Dashboard', descripcion: 'Acceso al panel general del sistema.' },
+  roles: { titulo: 'Roles y permisos', descripcion: 'Administracion de perfiles y permisos.' },
+  usuarios: { titulo: 'Usuarios / empleados', descripcion: 'Gestion de cuentas internas no medicas.' },
+  pacientes: { titulo: 'Pacientes', descripcion: 'CRUD y consulta de pacientes.' },
+  medicos: { titulo: 'Medicos', descripcion: 'Gestion de medicos y datos asociados.' },
+  sedes: { titulo: 'Sedes', descripcion: 'Administracion de sedes de atencion.' },
+  especialidades: { titulo: 'Especialidades', descripcion: 'Catalogo de especialidades y subespecialidades.' },
+  consultorios: { titulo: 'Consultorios', descripcion: 'Gestion futura de consultorios por sede.' },
+  citas: { titulo: 'Citas y agenda', descripcion: 'Agendamiento, visualizacion y reprogramacion.' },
+  pagos: { titulo: 'Pagos', descripcion: 'Consulta y registro manual de pagos.' },
+  historial: { titulo: 'Historial clinico', descripcion: 'Consultas, evolucion y lectura clinica.' },
+  disponibilidad: { titulo: 'Disponibilidad', descripcion: 'Horarios base y excepciones medicas.' },
+  justificaciones: { titulo: 'Justificaciones', descripcion: 'Gestion de justificaciones medicas.' },
+  reportes: { titulo: 'Reportes', descripcion: 'Analiticas y reportes administrativos.' }
+};
+
 @Component({
     selector: 'app-rol-form',
     templateUrl: './rol-form.component.html',
@@ -17,6 +41,7 @@ export class RolFormComponent implements OnInit {
   cargando = false;
   guardando = false;
   mensajeError = '';
+  filtroPermisos = '';
 
   rolForm = this.fb.group({
     nombre: ['', Validators.required],
@@ -40,6 +65,34 @@ export class RolFormComponent implements OnInit {
     }
   }
 
+  get totalSeleccionados(): number {
+    return this.permisosSeleccionados.size;
+  }
+
+  get gruposPermisos(): GrupoPermisos[] {
+    const filtro = this.filtroPermisos.trim().toLowerCase();
+    const permisosFiltrados = this.permisos.filter((permiso) => {
+      if (!filtro) {
+        return true;
+      }
+      return permiso.codigo.toLowerCase().includes(filtro)
+        || (permiso.descripcion ?? '').toLowerCase().includes(filtro);
+    });
+    const porGrupo = new Map<string, PermisoResponse[]>();
+    permisosFiltrados.forEach((permiso) => {
+      const grupo = permiso.codigo.split('.')[0];
+      porGrupo.set(grupo, [...(porGrupo.get(grupo) ?? []), permiso]);
+    });
+    return Array.from(porGrupo.entries())
+      .map(([codigo, permisos]) => ({
+        codigo,
+        titulo: GRUPOS[codigo]?.titulo ?? this.capitalizar(codigo),
+        descripcion: GRUPOS[codigo]?.descripcion ?? 'Permisos asociados a esta gestion.',
+        permisos: permisos.sort((a, b) => a.codigo.localeCompare(b.codigo))
+      }))
+      .sort((a, b) => a.titulo.localeCompare(b.titulo));
+  }
+
   togglePermiso(permisoId: number, seleccionado: boolean): void {
     if (seleccionado) {
       this.permisosSeleccionados.add(permisoId);
@@ -50,6 +103,22 @@ export class RolFormComponent implements OnInit {
 
   permisoSeleccionado(permisoId: number): boolean {
     return this.permisosSeleccionados.has(permisoId);
+  }
+
+  seleccionadosEnGrupo(grupo: GrupoPermisos): number {
+    return grupo.permisos.filter((permiso) => this.permisosSeleccionados.has(permiso.id)).length;
+  }
+
+  grupoCompleto(grupo: GrupoPermisos): boolean {
+    return grupo.permisos.length > 0 && this.seleccionadosEnGrupo(grupo) === grupo.permisos.length;
+  }
+
+  seleccionarGrupo(grupo: GrupoPermisos): void {
+    grupo.permisos.forEach((permiso) => this.permisosSeleccionados.add(permiso.id));
+  }
+
+  limpiarGrupo(grupo: GrupoPermisos): void {
+    grupo.permisos.forEach((permiso) => this.permisosSeleccionados.delete(permiso.id));
   }
 
   guardar(): void {
@@ -95,5 +164,9 @@ export class RolFormComponent implements OnInit {
         },
         error: () => (this.mensajeError = 'No se pudo cargar el rol.')
       });
+  }
+
+  private capitalizar(valor: string): string {
+    return valor.charAt(0).toUpperCase() + valor.slice(1);
   }
 }

@@ -10,8 +10,6 @@ import { VerificarCodigoRequest } from '../../shared/models/verificar-codigo-req
 const API_URL = 'http://localhost:8080/api';
 const TOKEN_KEY = 'clinica_token';
 const USER_KEY = 'clinica_usuario';
-const ADMIN_ROLE = 'Administrador';
-const ADMIN_AUTHORITY = `ROLE_${ADMIN_ROLE}`;
 
 @Injectable({
   providedIn: 'root'
@@ -68,10 +66,7 @@ export class AuthService {
       return false;
     }
 
-    return usuario.roles?.includes(ADMIN_ROLE)
-      || usuario.roles?.includes(ADMIN_AUTHORITY)
-      || usuario.permisos?.includes(permission)
-      || false;
+    return usuario.permisos?.includes(permission) || false;
   }
 
   hasRole(role: string): boolean {

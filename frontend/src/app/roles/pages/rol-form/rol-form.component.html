@@ -1,0 +1,66 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Roles"
+    [title]="rolId ? 'Editar rol' : 'Nuevo rol'"
+    description="Defina el nombre del rol y el checklist de permisos disponibles."
+  ></app-page-header>
+
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (cargando) {
+    <div class="loading-state">Cargando rol...</div>
+  }
+
+  @if (!cargando) {
+    <form class="feature-panel" [formGroup]="rolForm" (ngSubmit)="guardar()">
+      <div class="feature-panel-body form-grid">
+        <label class="form-label">
+          Nombre
+          <input class="form-control" formControlName="nombre" />
+        </label>
+        <label class="form-label">
+          Descripcion
+          <input class="form-control" formControlName="descripcion" />
+        </label>
+        @if (rolId) {
+          <label class="form-label">
+            Estado
+            <select class="form-select" formControlName="activo">
+              <option [ngValue]="true">Activo</option>
+              <option [ngValue]="false">Inactivo</option>
+            </select>
+          </label>
+        }
+
+        <div class="permissions-panel">
+          <h3>Permisos disponibles</h3>
+          <p>Seleccione los permisos que este rol tendra en el sistema interno.</p>
+          @if (permisos.length === 0) {
+            <div class="empty-state">No hay permisos disponibles.</div>
+          }
+          @for (permiso of permisos; track permiso.id) {
+            <label class="permission-check">
+              <input
+                type="checkbox"
+                [checked]="permisoSeleccionado(permiso.id)"
+                (change)="togglePermiso(permiso.id, $any($event.target).checked)"
+              />
+              <span>
+                <strong>{{ permiso.codigo }}</strong>
+                <small>{{ permiso.descripcion || 'Sin descripcion' }}</small>
+              </span>
+            </label>
+          }
+        </div>
+
+        <div class="form-actions">
+          <a class="btn btn-outline-secondary" routerLink="/roles">Cancelar</a>
+          <button class="btn btn-primary" type="submit" [disabled]="guardando">
+            {{ guardando ? 'Guardando...' : 'Guardar rol' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  }
+</section>

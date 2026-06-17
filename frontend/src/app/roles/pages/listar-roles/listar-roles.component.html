@@ -1,0 +1,62 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Roles"
+    title="Gestion de roles"
+    description="Administre perfiles internos y permisos asociados."
+    >
+    @if (authService.hasPermission('roles.crear')) {
+      <a class="btn btn-primary" routerLink="/roles/crear">Nuevo rol</a>
+    }
+  </app-page-header>
+
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (mensajeExito) {
+    <div class="alert alert-success" role="status">{{ mensajeExito }}</div>
+  }
+
+  <div class="table-shell">
+    @if (cargando) {
+      <div class="loading-state">Cargando roles...</div>
+    }
+    @if (!cargando && roles.length === 0) {
+      <div class="empty-state">No hay roles registrados.</div>
+    }
+    @if (!cargando && roles.length > 0) {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Descripcion</th>
+              <th>Estado</th>
+              <th>Permisos asignados</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (rol of roles; track rol.id) {
+              <tr>
+                <td class="fw-semibold">{{ rol.nombre }}</td>
+                <td>{{ rol.descripcion || 'Sin descripcion' }}</td>
+                <td><span class="status-pill" [class.is-active]="rol.activo">{{ rol.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td>{{ permisosResumen(rol) }}</td>
+                <td class="text-end">
+                  @if (authService.hasPermission('roles.editar')) {
+                    <a class="btn btn-sm btn-outline-secondary me-2" [routerLink]="['/roles/editar', rol.id]">Editar</a>
+                  }
+                  @if (authService.hasPermission('roles.eliminar')) {
+                    <button class="btn btn-sm btn-outline-danger" type="button" (click)="desactivarRol(rol)">Desactivar</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <app-paginator [page]="page" [totalPages]="totalPages" [totalElements]="totalElements" [size]="size" (pageChange)="cargarRoles($event)"></app-paginator>
+</section>

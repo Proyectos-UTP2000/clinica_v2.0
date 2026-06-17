@@ -43,6 +43,10 @@ const routes: Routes = [
         loadChildren: () => import('./sedes/sedes.module').then((m) => m.SedesModule)
       },
       {
+        path: 'roles',
+        loadChildren: () => import('./roles/roles.module').then((m) => m.RolesModule)
+      },
+      {
         path: 'especialidades',
         loadChildren: () => import('./especialidades/especialidades.module').then((m) => m.EspecialidadesModule)
       },

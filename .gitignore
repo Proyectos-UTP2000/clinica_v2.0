@@ -52,3 +52,7 @@ graphify-out/
 .graphifyignore
 .graphifyinclude
 .superpowers/
+## Local secrets ##
+.env
+.env.*
+!.env.example

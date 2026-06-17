@@ -1,13 +1,15 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 spring:
   application:
     name: clinica
+  config:
+    import: "optional:file:.env[.properties]"
   datasource:
-    url: jdbc:postgresql://localhost:5432/clinica_db
-    username: clinica
-    password: clinica123
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: validate
@@ -18,16 +20,22 @@ spring:
 
 app:
   jwt:
-    secret: "uE1qUxiTg2D2W0AHG+hEc8JuR2UYsS93+bFC/YqFcF0="
-    expiration-ms: 86400000
+    secret: ${JWT_SECRET}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
   cors:
-    allowed-origin: "http://localhost:4200"
+    allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:4200}
   mail:
-    from: "no-reply@clinica.local"
-    enabled: false
+    from: ${MAIL_FROM:no-reply@clinica.local}
+    enabled: ${MAIL_ENABLED:false}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
   dni-api:
-    url: "https://miapi.cloud/v1/dni"
-    token: ""
+    url: ${API_PERU_URL_DNI}
+    token: ${API_PERU_TOKEN}
+  cloudinary:
+    cloud-name: ${CLOUDINARY_CLOUD_NAME:}
+    api-key: ${CLOUDINARY_API_KEY:}
+    api-secret: ${CLOUDINARY_API_SECRET:}
 
 logging:
   level:

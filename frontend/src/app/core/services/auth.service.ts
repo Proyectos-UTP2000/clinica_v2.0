@@ -25,6 +25,12 @@ export class AuthService {
     );
   }
 
+  refrescarSesion(): Observable<JwtResponse> {
+    return this.http.get<JwtResponse>(`${API_URL}/auth/me`).pipe(
+      tap((response) => this.guardarSesion(response))
+    );
+  }
+
   cambiarPassword(request: CambioPasswordRequest): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(`${API_URL}/auth/cambiar-password`, request);
   }

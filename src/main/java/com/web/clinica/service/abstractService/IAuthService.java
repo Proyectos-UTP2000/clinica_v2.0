@@ -11,6 +11,9 @@ public interface IAuthService {
     /** Autentica por DNI y password, y devuelve el JWT. */
     JwtResponse iniciarSesion(LoginRequest solicitud);
 
+    /** Reconstruye la sesion del usuario autenticado con roles y permisos vigentes. */
+    JwtResponse obtenerSesionActual(Long usuarioId);
+
     /** Cambia el password del usuario autenticado. */
     void cambiarPassword(Long usuarioId, CambioPasswordRequest solicitud);
 

@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { RolFormComponent } from './rol-form.component';
 import { RolService } from '../../services/rol.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 class RolServiceStub {
   listarPermisos = jasmine.createSpy('listarPermisos').and.returnValue(of([
@@ -26,16 +27,28 @@ describe('RolFormComponent', () => {
   let component: RolFormComponent;
   let service: RolServiceStub;
   let router: jasmine.SpyObj<Router>;
+  let authService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
     service = new RolServiceStub();
     router = jasmine.createSpyObj<Router>('Router', ['navigate']);
+    authService = jasmine.createSpyObj<AuthService>('AuthService', ['refrescarSesion']);
+    authService.refrescarSesion.and.returnValue(of({
+      token: 'token-nuevo',
+      dni: '00000000',
+      nombres: 'Ada',
+      apellidos: 'Lovelace',
+      roles: ['Administrador'],
+      permisos: ['dashboard.ver'],
+      cambioPasswordObligatorio: false
+    }));
 
     await TestBed.configureTestingModule({
       declarations: [RolFormComponent],
       imports: [FormsModule, ReactiveFormsModule],
       providers: [
         { provide: RolService, useValue: service },
+        { provide: AuthService, useValue: authService },
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: new Map() } } }
       ]
@@ -61,6 +74,7 @@ describe('RolFormComponent', () => {
       descripcion: 'Gestion total',
       permisosIds: [1, 2]
     });
+    expect(authService.refrescarSesion).toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith(['/roles']);
   });
 });

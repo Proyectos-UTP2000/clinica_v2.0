@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize } from 'rxjs';
+import { catchError, finalize, of, switchMap } from 'rxjs';
+import { AuthService } from '../../../core/services/auth.service';
 import { PermisoResponse } from '../../../shared/models/rol.model';
 import { RolService } from '../../services/rol.service';
 
@@ -53,7 +54,8 @@ export class RolFormComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly fb: FormBuilder,
-    private readonly rolService: RolService
+    private readonly rolService: RolService,
+    private readonly authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -136,7 +138,10 @@ export class RolFormComponent implements OnInit {
     const operacion = this.rolId
       ? this.rolService.actualizar(this.rolId, { ...request, activo: this.rolForm.value.activo ?? true })
       : this.rolService.crear(request);
-    operacion.pipe(finalize(() => (this.guardando = false))).subscribe({
+    operacion.pipe(
+      switchMap(() => this.authService.refrescarSesion().pipe(catchError(() => of(null)))),
+      finalize(() => (this.guardando = false))
+    ).subscribe({
       next: () => this.router.navigate(['/roles']),
       error: () => (this.mensajeError = 'No se pudo guardar el rol.')
     });

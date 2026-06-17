@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +29,14 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> iniciarSesion(@Valid @RequestBody LoginRequest solicitud) {
         return ResponseEntity.ok(authService.iniciarSesion(solicitud));
+    }
+
+
+    /** Devuelve la sesion vigente con roles y permisos actualizados. */
+    @GetMapping("/me")
+    public ResponseEntity<JwtResponse> obtenerSesionActual(Authentication autenticacion) {
+        Usuario usuario = (Usuario) autenticacion.getPrincipal();
+        return ResponseEntity.ok(authService.obtenerSesionActual(usuario.getId()));
     }
 
     /** Cambia el password del usuario autenticado. */

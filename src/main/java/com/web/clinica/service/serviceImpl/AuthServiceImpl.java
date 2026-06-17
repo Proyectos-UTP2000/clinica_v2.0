@@ -61,6 +61,19 @@ public class AuthServiceImpl implements IAuthService, UserDetailsService {
         return construirJwtResponse(usuario);
     }
 
+
+    /** Reconstruye JWT y permisos vigentes desde base de datos. */
+    @Override
+    @Transactional(readOnly = true)
+    public JwtResponse obtenerSesionActual(Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+        if (!Boolean.TRUE.equals(usuario.getActivo())) {
+            throw new UnauthorizedException("El usuario esta desactivado");
+        }
+        return construirJwtResponse(usuario);
+    }
+
     /** Cambia el password y desactiva la obligacion del primer inicio. */
     @Override
     @Transactional

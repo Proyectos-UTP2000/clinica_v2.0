@@ -2,6 +2,7 @@ package com.web.clinica.util;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.web.clinica.exception.BadRequestException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -18,6 +19,7 @@ public class DniApiClientRest implements DniApiClient {
     private final String urlBase;
     private final String token;
 
+    @Autowired
     public DniApiClientRest(RestTemplateBuilder restTemplateBuilder,
                             @Value("${app.dni-api.url}") String urlBase,
                             @Value("${app.dni-api.token}") String token) {

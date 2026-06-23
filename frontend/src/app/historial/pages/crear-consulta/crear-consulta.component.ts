@@ -58,9 +58,13 @@ export class CrearConsultaComponent implements OnInit {
   ngOnInit(): void {
     const pacienteId = this.route.snapshot.queryParamMap.get('pacienteId');
     const citaId = this.route.snapshot.queryParamMap.get('citaId');
+    const doctorId = this.route.snapshot.queryParamMap.get('doctorId');
+    const sedeId = this.route.snapshot.queryParamMap.get('sedeId');
     this.consultaForm.patchValue({
       pacienteId: pacienteId ? Number(pacienteId) : null,
-      citaId: citaId ? Number(citaId) : null
+      citaId: citaId ? Number(citaId) : null,
+      doctorId: doctorId ? Number(doctorId) : null,
+      sedeId: sedeId ? Number(sedeId) : null
     });
     this.cargarCatalogos();
   }

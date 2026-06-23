@@ -1,0 +1,146 @@
+.doctor-selector-panel {
+  padding: 1.25rem;
+  background: var(--clinic-surface, #ffffff);
+  border: 1px solid var(--clinic-border, #dee2e6);
+  border-radius: var(--clinic-radius-md, 8px);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--clinic-shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+}
+
+.doctor-selector-panel label {
+  font-weight: 700;
+  color: var(--clinic-dark, #212529);
+  margin-bottom: 0.25rem;
+}
+
+.nav-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--clinic-border, #e9ecef);
+  margin-bottom: 1.5rem;
+  gap: 1.5rem;
+}
+
+.nav-tab-item {
+  padding: 0.75rem 0.5rem;
+  border: none;
+  background: none;
+  font-weight: 600;
+  color: var(--clinic-muted, #6c757d);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+.nav-tab-item:hover {
+  color: var(--clinic-primary, #0d6efd);
+}
+
+.nav-tab-item.active {
+  color: var(--clinic-primary, #0d6efd);
+  font-weight: 700;
+}
+
+.nav-tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--clinic-primary, #0d6efd);
+  border-radius: 2px;
+}
+
+.tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.tab-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--clinic-dark, #212529);
+}
+
+/* Estilos de Modales */
+.dialog-backdrop-custom {
+  position: fixed;
+  inset: 0;
+  z-index: 1051;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(33, 37, 41, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.clinic-dialog {
+  width: min(100%, 500px);
+  padding: 1.75rem;
+  background: #ffffff;
+  border: 1px solid var(--clinic-border, #dee2e6);
+  border-radius: var(--clinic-radius-lg, 12px);
+  box-shadow: var(--clinic-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+  animation: modalEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clinic-dialog h3 {
+  margin: 0 0 1.25rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--clinic-dark, #212529);
+  border-bottom: 1px solid var(--clinic-border, #dee2e6);
+  padding-bottom: 0.75rem;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+/* Filtro excepciones */
+.exceptions-filter-panel {
+  margin-bottom: 1.25rem;
+  background: #f8f9fa;
+  border-radius: var(--clinic-radius-sm, 6px);
+  padding: 1rem;
+  border: 1px solid var(--clinic-border, #dee2e6);
+}
+
+.exceptions-filter-panel form {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.exceptions-filter-panel label {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.exceptions-filter-panel .filter-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

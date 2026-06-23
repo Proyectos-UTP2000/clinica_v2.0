@@ -131,6 +131,11 @@ public class HistorialServiceImpl implements IHistorialService {
         validarAlcanceCreacion(doctor);
         validarCitaCompatible(cita, paciente, doctor, sede);
 
+        if (cita != null) {
+            cita.setEstado("atendida");
+            citaRepository.save(cita);
+        }
+
         Consulta consulta = Consulta.builder()
                 .paciente(paciente)
                 .doctor(doctor)

@@ -1,5 +1,8 @@
 export interface CitaResponse {
   id: number;
+  pacienteId: number;
+  doctorId: number;
+  sedeId: number;
   pacienteNombre: string;
   doctorNombre: string;
   sedeNombre: string;

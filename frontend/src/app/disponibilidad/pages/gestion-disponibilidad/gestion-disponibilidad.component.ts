@@ -14,6 +14,7 @@ import { DisponibilidadService } from '../../services/disponibilidad.service';
 @Component({
     selector: 'app-gestion-disponibilidad',
     templateUrl: './gestion-disponibilidad.component.html',
+    styleUrl: './gestion-disponibilidad.component.css',
     standalone: false
 })
 export class GestionDisponibilidadComponent implements OnInit {
@@ -27,6 +28,12 @@ export class GestionDisponibilidadComponent implements OnInit {
   guardandoExcepcion = false;
   mensajeError = '';
   mensajeExito = '';
+  
+  // Variables para la organización de la vista
+  pestanaActiva = 'base';
+  mostrarModalBase = false;
+  mostrarModalExcepcion = false;
+
   dias = [
     { id: 1, nombre: 'Lunes' },
     { id: 2, nombre: 'Martes' },
@@ -134,6 +141,7 @@ export class GestionDisponibilidadComponent implements OnInit {
     }).pipe(finalize(() => (this.guardandoBase = false))).subscribe({
       next: () => {
         this.mensajeExito = 'Horario base guardado correctamente.';
+        this.mostrarModalBase = false;
         this.cargarDisponibilidad();
       },
       error: () => (this.mensajeError = 'No se pudo guardar el horario base.')
@@ -157,6 +165,7 @@ export class GestionDisponibilidadComponent implements OnInit {
       next: () => {
         this.excepcionForm.reset({ fecha: '', horaInicio: '08:00', horaFin: '09:00', motivo: '' });
         this.mensajeExito = 'Excepcion registrada correctamente.';
+        this.mostrarModalExcepcion = false;
         this.cargarDisponibilidad();
       },
       error: () => (this.mensajeError = 'No se pudo registrar la excepcion.')
@@ -187,7 +196,7 @@ export class GestionDisponibilidadComponent implements OnInit {
     return this.dias.find((dia) => dia.id === id)?.nombre ?? String(id);
   }
 
-  private limpiarMensajes(): void {
+  limpiarMensajes(): void {
     this.mensajeError = '';
     this.mensajeExito = '';
   }

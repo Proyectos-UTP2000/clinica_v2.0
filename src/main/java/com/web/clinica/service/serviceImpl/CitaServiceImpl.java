@@ -447,6 +447,9 @@ public class CitaServiceImpl implements ICitaService {
     private CitaResponse convertirRespuesta(Cita cita) {
         return CitaResponse.builder()
                 .id(cita.getId())
+                .pacienteId(cita.getPaciente().getId())
+                .doctorId(cita.getDoctor().getId())
+                .sedeId(cita.getSede().getId())
                 .pacienteNombre(cita.getPaciente().getNombres() + " " + cita.getPaciente().getApellidos())
                 .doctorNombre(cita.getDoctor().getUsuario().getNombres() + " " + cita.getDoctor().getUsuario().getApellidos())
                 .sedeNombre(cita.getSede().getNombre())

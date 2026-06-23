@@ -95,6 +95,15 @@
                 </td>
                 <td class="text-end">
                   <div class="action-group">
+                    @if (authService.hasPermission('historial.crear') && (cita.estado === 'programada' || cita.estado === 'reprogramada')) {
+                      <a
+                        class="btn btn-sm btn-success text-white"
+                        [routerLink]="['/historial/crear']"
+                        [queryParams]="{ pacienteId: cita.pacienteId, citaId: cita.id, doctorId: cita.doctorId, sedeId: cita.sedeId }"
+                        >
+                        Atender
+                      </a>
+                    }
                     @if (authService.hasPermission('citas.editar_propias') || authService.hasPermission('citas.editar_asignados')) {
                       <button
                         type="button"

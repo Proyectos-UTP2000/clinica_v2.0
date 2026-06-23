@@ -9,6 +9,9 @@ import lombok.Data;
 public class CitaResponse {
 
     private Long id;
+    private Long pacienteId;
+    private Long doctorId;
+    private Long sedeId;
     private String pacienteNombre;
     private String doctorNombre;
     private String sedeNombre;

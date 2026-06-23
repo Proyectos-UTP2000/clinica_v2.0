@@ -66,3 +66,15 @@ h1 {
     text-align: left;
   }
 }
+
+.sede-selector-wrapper select {
+  min-height: 36px;
+  border-radius: 2rem;
+  padding: 0.35rem 2rem 0.35rem 0.75rem;
+  border: 1px solid var(--clinic-border);
+  font-weight: 600;
+  color: var(--clinic-ink);
+  background-color: white;
+  cursor: pointer;
+}
+

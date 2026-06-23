@@ -5,6 +5,14 @@
   </div>
 
   <div class="user-actions">
+    <div class="sede-selector-wrapper">
+      <select class="form-select form-select-sm" [value]="selectedSedeId || ''" (change)="onSedeChange($event)" aria-label="Seleccionar sede activa">
+        <option value="">Todas las Sedes</option>
+        @for (sede of sedes$ | async; track sede.id) {
+          <option [value]="sede.id">{{ sede.nombre }}</option>
+        }
+      </select>
+    </div>
     <span class="operation-day">{{ fechaOperativa }}</span>
     <span class="user-name">{{ nombreUsuario }}</span>
     <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cerrarSesion()">

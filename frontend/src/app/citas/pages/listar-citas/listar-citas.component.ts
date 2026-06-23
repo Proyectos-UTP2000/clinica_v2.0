@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { SesionContextService } from '../../../core/services/sesion-context.service';
 import { CitaResponse } from '../../../shared/models/cita.model';
 import { MedicoResponse } from '../../../shared/models/medico.model';
 import { PacienteResponse } from '../../../shared/models/paciente.model';
@@ -43,7 +44,8 @@ export class ListarCitasComponent implements OnInit {
   constructor(
     public readonly authService: AuthService,
     private readonly fb: FormBuilder,
-    private readonly citaService: CitaService
+    private readonly citaService: CitaService,
+    private readonly sesionContextService: SesionContextService
   ) {}
 
   ngOnInit(): void {
@@ -56,7 +58,10 @@ export class ListarCitasComponent implements OnInit {
         this.medicos = medicos;
       }
     });
-    this.cargarCitas();
+
+    this.sesionContextService.selectedSedeId$.subscribe(() => {
+      this.cargarCitas(0);
+    });
   }
 
   get usaAgendaPropia(): boolean {
@@ -161,11 +166,12 @@ export class ListarCitasComponent implements OnInit {
     return new Date(cita.fechaHoraInicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  private obtenerFiltros(): { pacienteId?: number; doctorId?: number; fecha?: string } {
+  private obtenerFiltros(): { pacienteId?: number; doctorId?: number; sedeId?: number; fecha?: string } {
     const raw = this.filtrosForm.getRawValue();
     return {
       pacienteId: raw.pacienteId ? Number(raw.pacienteId) : undefined,
       doctorId: raw.doctorId ? Number(raw.doctorId) : undefined,
+      sedeId: this.sesionContextService.selectedSedeId || undefined,
       fecha: raw.fecha || undefined
     };
   }

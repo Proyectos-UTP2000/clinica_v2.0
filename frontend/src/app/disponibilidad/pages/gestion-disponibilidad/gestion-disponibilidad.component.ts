@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { finalize, forkJoin } from 'rxjs';
+import { finalize, forkJoin, map } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { SesionContextService } from '../../../core/services/sesion-context.service';
 import {
   DisponibilidadBaseResponse,
   ExcepcionDisponibilidadResponse
@@ -58,33 +59,36 @@ export class GestionDisponibilidadComponent implements OnInit {
   constructor(
     public readonly authService: AuthService,
     private readonly fb: FormBuilder,
-    private readonly disponibilidadService: DisponibilidadService
+    private readonly disponibilidadService: DisponibilidadService,
+    private readonly sesionContextService: SesionContextService
   ) {}
 
   ngOnInit(): void {
-    this.cargarInicial();
+    this.disponibilidadService.listarSedes().subscribe({
+      next: (sedes) => {
+        this.sedes = sedes;
+        this.sesionContextService.selectedSedeId$.subscribe((sedeId) => {
+          this.cargarParaSede(sedeId);
+        });
+      },
+      error: () => (this.mensajeError = 'No se pudieron cargar las sedes.')
+    });
   }
 
-  cargarInicial(): void {
+  cargarParaSede(sedeId: number | null): void {
     this.cargando = true;
     this.mensajeError = '';
+    const activeSede = sedeId || undefined;
     const doctor$ = this.authService.hasPermission('disponibilidad.ver_todas')
-      ? this.disponibilidadService.listarMedicos()
-      : this.disponibilidadService.obtenerMedicoAutenticado();
-    forkJoin({
-      sedes: this.disponibilidadService.listarSedes(),
-      doctor: doctor$
-    }).pipe(finalize(() => (this.cargando = false))).subscribe({
-      next: ({ sedes, doctor }) => {
-        this.sedes = sedes;
-        if (Array.isArray(doctor)) {
-          this.medicos = doctor;
-          this.doctorId = doctor[0]?.id ?? null;
-        } else {
-          this.medicos = [doctor];
-          this.doctorId = doctor.id;
-        }
-        this.baseForm.patchValue({ sedeId: sedes[0]?.id ?? null });
+      ? this.disponibilidadService.listarMedicos(activeSede)
+      : this.disponibilidadService.obtenerMedicoAutenticado().pipe(map((doc) => [doc]));
+
+    doctor$.pipe(finalize(() => (this.cargando = false))).subscribe({
+      next: (medicosList) => {
+        this.medicos = medicosList;
+        this.doctorId = medicosList[0]?.id ?? null;
+        const defaultSede = sedeId || this.sedes[0]?.id || null;
+        this.baseForm.patchValue({ sedeId: defaultSede });
         this.cargarDisponibilidad();
       },
       error: () => (this.mensajeError = 'No se pudo cargar la disponibilidad.')

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { finalize, forkJoin } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { SesionContextService } from '../../../core/services/sesion-context.service';
 import { CitaResponse } from '../../../shared/models/cita.model';
 import { EspecialidadResponse } from '../../../shared/models/especialidad.model';
 import { MedicoResponse } from '../../../shared/models/medico.model';
@@ -37,11 +38,17 @@ export class AgendaCalendarComponent implements OnInit {
 
   constructor(
     public readonly authService: AuthService,
-    private readonly agendaService: AgendaService
+    private readonly agendaService: AgendaService,
+    private readonly sesionContextService: SesionContextService
   ) {}
 
   ngOnInit(): void {
     this.cargarCatalogos();
+    this.sesionContextService.selectedSedeId$.subscribe((sedeId) => {
+      this.sedeId = sedeId;
+      this.cargarMedicos();
+      this.cargarAgenda();
+    });
   }
 
   cargarCatalogos(): void {

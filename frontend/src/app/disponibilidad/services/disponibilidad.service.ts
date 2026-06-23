@@ -18,8 +18,11 @@ const API_URL = 'http://localhost:8080/api';
 export class DisponibilidadService {
   constructor(private readonly http: HttpClient) {}
 
-  listarMedicos(): Observable<MedicoResponse[]> {
-    const params = new HttpParams().set('page', 0).set('size', 100);
+  listarMedicos(sedeId?: number): Observable<MedicoResponse[]> {
+    let params = new HttpParams().set('page', 0).set('size', 100);
+    if (sedeId) {
+      params = params.set('sedeId', sedeId);
+    }
     return this.http.get<Page<MedicoResponse>>(`${API_URL}/medicos`, { params }).pipe(map((response) => response.content));
   }
 

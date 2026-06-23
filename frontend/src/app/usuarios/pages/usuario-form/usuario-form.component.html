@@ -1,0 +1,203 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Gestión de empleados"
+    [title]="usuarioId ? 'Editar empleado' : 'Nuevo empleado'"
+    [description]="usuarioId ? 'Modifique la información y roles del empleado.' : 'Registre un nuevo empleado en el sistema y envíe sus credenciales por correo.'"
+    >
+    <a class="btn btn-outline-secondary" routerLink="/usuarios">Cancelar</a>
+  </app-page-header>
+
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (mensajeInfo) {
+    <div class="alert alert-info" role="status">{{ mensajeInfo }}</div>
+  }
+
+  @if (cargando || cargandoCatalogos) {
+    <div class="loading-state">Cargando información del formulario...</div>
+  } @else {
+    <form [formGroup]="usuarioForm" (ngSubmit)="guardar()" class="row g-4 max-w-3xl">
+      <!-- DNI -->
+      <div class="col-md-6">
+        <label for="dni" class="form-label">DNI *</label>
+        <div class="input-group">
+          <input
+            id="dni"
+            type="text"
+            class="form-control"
+            formControlName="dni"
+            [class.is-invalid]="campoInvalido('dni')"
+            placeholder="Ingrese 8 dígitos"
+            maxLength="8"
+            />
+          @if (!usuarioId) {
+            <button
+              class="btn btn-outline-primary"
+              type="button"
+              [disabled]="consultandoDni"
+              (click)="consultarDni()"
+              >
+              {{ consultandoDni ? 'Consultando...' : 'Buscar DNI' }}
+            </button>
+          }
+        </div>
+        @if (campoInvalido('dni')) {
+          <div class="invalid-feedback d-block">
+            El DNI es obligatorio y debe tener exactamente 8 dígitos.
+          </div>
+        }
+      </div>
+
+      <!-- Teléfono -->
+      <div class="col-md-6">
+        <label for="telefono" class="form-label">Teléfono</label>
+        <input
+          id="telefono"
+          type="text"
+          class="form-control"
+          formControlName="telefono"
+          [class.is-invalid]="campoInvalido('telefono')"
+          placeholder="Ej: 999888777"
+          />
+        @if (campoInvalido('telefono')) {
+          <div class="invalid-feedback">
+            El teléfono debe tener entre 7 y 15 dígitos.
+          </div>
+        }
+      </div>
+
+      <!-- Nombres -->
+      <div class="col-md-6">
+        <label for="nombres" class="form-label">Nombres *</label>
+        <input
+          id="nombres"
+          type="text"
+          class="form-control"
+          formControlName="nombres"
+          [class.is-invalid]="campoInvalido('nombres')"
+          />
+        @if (campoInvalido('nombres')) {
+          <div class="invalid-feedback">
+            El nombre es obligatorio (máx. 80 caracteres).
+          </div>
+        }
+      </div>
+
+      <!-- Apellidos -->
+      <div class="col-md-6">
+        <label for="apellidos" class="form-label">Apellidos *</label>
+        <input
+          id="apellidos"
+          type="text"
+          class="form-control"
+          formControlName="apellidos"
+          [class.is-invalid]="campoInvalido('apellidos')"
+          />
+        @if (campoInvalido('apellidos')) {
+          <div class="invalid-feedback">
+            El apellido es obligatorio (máx. 80 caracteres).
+          </div>
+        }
+      </div>
+
+      <!-- Email -->
+      <div class="col-md-6">
+        <label for="email" class="form-label">Email *</label>
+        <input
+          id="email"
+          type="email"
+          class="form-control"
+          formControlName="email"
+          [class.is-invalid]="campoInvalido('email')"
+          placeholder="correo@ejemplo.com"
+          />
+        @if (campoInvalido('email')) {
+          <div class="invalid-feedback">
+            El email es obligatorio y debe tener un formato válido.
+          </div>
+        }
+      </div>
+
+      <!-- Fecha Nacimiento -->
+      <div class="col-md-6">
+        <label for="fechaNacimiento" class="form-label">Fecha de Nacimiento</label>
+        <input
+          id="fechaNacimiento"
+          type="date"
+          class="form-control"
+          formControlName="fechaNacimiento"
+          />
+      </div>
+
+      <!-- Selección de Roles -->
+      <div class="col-12">
+        <h3 class="h5 mt-3">Roles del empleado *</h3>
+        <p class="text-muted small">Seleccione los perfiles de acceso que tendrá en la aplicación.</p>
+        <div class="row row-cols-1 row-cols-md-3 g-3">
+          @for (rol of roles; track rol.id) {
+            <div class="col">
+              <div class="form-check p-3 border rounded">
+                <input
+                  class="form-check-input ms-0 me-2"
+                  type="checkbox"
+                  [id]="'rol-' + rol.id"
+                  [checked]="rolSeleccionado(rol.id)"
+                  (change)="toggleRol(rol.id, $any($event.target).checked)"
+                  />
+                <label class="form-check-label" [for]="'rol-' + rol.id">
+                  <strong>{{ rol.nombre }}</strong>
+                  @if (rol.descripcion) {
+                    <div class="text-muted small">{{ rol.descripcion }}</div>
+                  }
+                </label>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Médicos Asignados (sólo si es Secretaria) -->
+      @if (esSecretaria) {
+        <div class="col-12 mt-4">
+          <div class="card p-3 border">
+            <h3 class="h5">Médicos Asignados</h3>
+            <p class="text-muted small">
+              Seleccione los médicos a los cuales la secretaría podrá gestionar agendas y citas.
+            </p>
+            <div class="row row-cols-1 row-cols-md-2 g-2 overflow-auto" style="max-height: 250px;">
+              @for (medico of medicos; track medico.id) {
+                <div class="col">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      [id]="'medico-' + medico.id"
+                      [checked]="medicoSeleccionado(medico.id)"
+                      (change)="toggleMedico(medico.id, $any($event.target).checked)"
+                      />
+                    <label class="form-check-label" [for]="'medico-' + medico.id">
+                      {{ medico.apellidos }}, {{ medico.nombres }} - <small class="text-muted">{{ medico.especialidadNombre }}</small>
+                    </label>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Acciones de Formulario -->
+      <div class="col-12 mt-4">
+        <button
+          type="submit"
+          class="btn btn-primary me-2"
+          [disabled]="guardando"
+          >
+          {{ guardando ? 'Guardando...' : 'Guardar empleado' }}
+        </button>
+        <a class="btn btn-outline-secondary" routerLink="/usuarios">Cancelar</a>
+      </div>
+    </form>
+  }
+</section>

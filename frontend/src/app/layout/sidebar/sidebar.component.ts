@@ -27,6 +27,7 @@ export class SidebarComponent {
     { label: 'Pagos', route: '/pagos', permiso: 'pagos.ver', code: 'PG', group: 'Administracion' },
     { label: 'Sedes', route: '/sedes', permiso: 'sedes.ver', code: 'SD', group: 'Administracion' },
     { label: 'Roles', route: '/roles', permiso: 'roles.ver', code: 'RL', group: 'Administracion' },
+    { label: 'Usuarios', route: '/usuarios', permiso: 'usuarios.ver', code: 'US', group: 'Administracion' },
     { label: 'Especialidades', route: '/especialidades', permiso: 'especialidades.ver', code: 'ES', group: 'Administracion' }
   ];
 

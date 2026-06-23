@@ -1,0 +1,87 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Administración"
+    title="Gestión de empleados"
+    description="Administre perfiles de personal administrativo, secretaría y recepción."
+    >
+    @if (authService.hasPermission('usuarios.crear')) {
+      <a class="btn btn-primary" routerLink="/usuarios/crear">Nuevo empleado</a>
+    }
+  </app-page-header>
+
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (mensajeExito) {
+    <div class="alert alert-success" role="status">{{ mensajeExito }}</div>
+  }
+
+  <div class="table-shell">
+    @if (cargando) {
+      <div class="loading-state">Cargando empleados...</div>
+    }
+    @if (!cargando && usuarios.length === 0) {
+      <div class="empty-state">No hay empleados registrados.</div>
+    }
+    @if (!cargando && usuarios.length > 0) {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>DNI</th>
+              <th>Nombre Completo</th>
+              <th>Email / Teléfono</th>
+              <th>Roles</th>
+              <th>Estado</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (usuario of usuarios; track usuario.id) {
+              <tr>
+                <td class="fw-semibold">{{ usuario.dni }}</td>
+                <td>{{ usuario.apellidos }}, {{ usuario.nombres }}</td>
+                <td>
+                  <div>{{ usuario.email }}</div>
+                  @if (usuario.telefono) {
+                    <small class="text-muted">{{ usuario.telefono }}</small>
+                  }
+                </td>
+                <td>{{ rolesResumen(usuario) }}</td>
+                <td>
+                  <span class="status-pill" [class.is-active]="usuario.activo">
+                    {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  @if (authService.hasPermission('usuarios.editar')) {
+                    <a class="btn btn-sm btn-outline-secondary me-2" [routerLink]="['/usuarios/editar', usuario.id]">Editar</a>
+                  }
+                  @if (authService.hasPermission('usuarios.desactivar')) {
+                    <button
+                      class="btn btn-sm"
+                      [class.btn-outline-danger]="usuario.activo"
+                      [class.btn-outline-success]="!usuario.activo"
+                      type="button"
+                      (click)="desactivarUsuario(usuario)"
+                      >
+                      {{ usuario.activo ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <app-paginator
+    [page]="page"
+    [totalPages]="totalPages"
+    [totalElements]="totalElements"
+    [size]="size"
+    (pageChange)="cargarUsuarios($event)"
+    ></app-paginator>
+</section>

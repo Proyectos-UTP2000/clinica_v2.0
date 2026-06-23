@@ -19,8 +19,10 @@ export class CrearMedicoComponent implements OnInit {
   subespecialidades: EspecialidadResponse[] = [];
   sedes: SedeResponse[] = [];
   cargandoCatalogos = false;
+  consultandoDni = false;
   guardando = false;
   mensajeError = '';
+  mensajeInfo = '';
 
   medicoForm = this.fb.group({
     dni: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
@@ -50,6 +52,7 @@ export class CrearMedicoComponent implements OnInit {
 
   guardar(): void {
     this.mensajeError = '';
+    this.mensajeInfo = '';
     this.medicoForm.markAllAsTouched();
 
     if (this.medicoForm.invalid) {
@@ -63,6 +66,31 @@ export class CrearMedicoComponent implements OnInit {
         next: () => this.router.navigateByUrl('/medicos'),
         error: () => {
           this.mensajeError = 'No se pudo crear el medico. Revise si el DNI o email ya existen.';
+        }
+      });
+  }
+
+  consultarDni(): void {
+    this.mensajeError = '';
+    this.mensajeInfo = '';
+    const dniControl = this.medicoForm.get('dni');
+    dniControl?.markAsTouched();
+
+    if (dniControl?.invalid) {
+      return;
+    }
+
+    const dni = dniControl?.value ?? '';
+    this.consultandoDni = true;
+    this.medicoService.consultarDni(dni)
+      .pipe(finalize(() => (this.consultandoDni = false)))
+      .subscribe({
+        next: (info) => {
+          this.medicoForm.patchValue({ nombres: info.nombres, apellidos: info.apellidos });
+          this.mensajeInfo = 'Datos encontrados por DNI. Revise y complete los campos restantes.';
+        },
+        error: () => {
+          this.mensajeError = 'No se pudieron consultar los datos del DNI.';
         }
       });
   }

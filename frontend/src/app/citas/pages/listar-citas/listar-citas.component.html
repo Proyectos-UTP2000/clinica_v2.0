@@ -118,6 +118,13 @@
         <form [formGroup]="reprogramarForm" (ngSubmit)="reprogramarCita()">
           <label for="nuevaFechaHora" class="form-label">Nueva fecha y hora</label>
           <input id="nuevaFechaHora" type="datetime-local" class="form-control" formControlName="nuevaFechaHora" />
+          <label for="doctorReprogramarId" class="form-label mt-3">Cambiar medico</label>
+          <select id="doctorReprogramarId" class="form-select" formControlName="doctorId">
+            <option value="">Mantener medico actual</option>
+            @for (medico of medicos; track medico) {
+              <option [value]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
+            }
+          </select>
           <div class="dialog-actions">
             <button type="button" class="btn btn-outline-secondary" [disabled]="procesando" (click)="citaReprogramar = null">Cancelar</button>
             <button type="submit" class="btn btn-primary" [disabled]="procesando">

@@ -36,7 +36,8 @@ export class ListarCitasComponent implements OnInit {
   });
 
   reprogramarForm = this.fb.group({
-    nuevaFechaHora: ['']
+    nuevaFechaHora: [''],
+    doctorId: ['']
   });
 
   constructor(
@@ -114,7 +115,7 @@ export class ListarCitasComponent implements OnInit {
 
   abrirReprogramacion(cita: CitaResponse): void {
     this.citaReprogramar = cita;
-    this.reprogramarForm.reset({ nuevaFechaHora: '' });
+    this.reprogramarForm.reset({ nuevaFechaHora: '', doctorId: '' });
   }
 
   reprogramarCita(): void {
@@ -126,8 +127,9 @@ export class ListarCitasComponent implements OnInit {
       this.reprogramarForm.markAllAsTouched();
       return;
     }
+    const doctorId = this.reprogramarForm.getRawValue().doctorId;
     this.procesando = true;
-    this.citaService.reprogramar(this.citaReprogramar.id, nuevaFechaHora)
+    this.citaService.reprogramar(this.citaReprogramar.id, nuevaFechaHora, doctorId ? Number(doctorId) : undefined)
       .pipe(finalize(() => (this.procesando = false)))
       .subscribe({
         next: () => {

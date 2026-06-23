@@ -13,7 +13,9 @@ import { PacienteService } from '../../services/paciente.service';
 })
 export class CrearPacienteComponent {
   cargando = false;
+  consultandoDni = false;
   mensajeError = '';
+  mensajeInfo = '';
 
   pacienteForm = this.fb.group({
     dni: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
@@ -33,6 +35,7 @@ export class CrearPacienteComponent {
 
   guardar(): void {
     this.mensajeError = '';
+    this.mensajeInfo = '';
     this.pacienteForm.markAllAsTouched();
 
     if (this.pacienteForm.invalid) {
@@ -46,6 +49,31 @@ export class CrearPacienteComponent {
         next: () => this.router.navigateByUrl('/pacientes'),
         error: () => {
           this.mensajeError = 'No se pudo crear el paciente. Revise si el DNI o email ya existen.';
+        }
+      });
+  }
+
+  consultarDni(): void {
+    this.mensajeError = '';
+    this.mensajeInfo = '';
+    const dniControl = this.pacienteForm.get('dni');
+    dniControl?.markAsTouched();
+
+    if (dniControl?.invalid) {
+      return;
+    }
+
+    const dni = dniControl?.value ?? '';
+    this.consultandoDni = true;
+    this.pacienteService.consultarDni(dni)
+      .pipe(finalize(() => (this.consultandoDni = false)))
+      .subscribe({
+        next: (info) => {
+          this.pacienteForm.patchValue({ nombres: info.nombres, apellidos: info.apellidos });
+          this.mensajeInfo = 'Datos encontrados por DNI. Revise y complete los campos restantes.';
+        },
+        error: () => {
+          this.mensajeError = 'No se pudieron consultar los datos del DNI.';
         }
       });
   }

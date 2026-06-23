@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../../shared/models/api-response.model';
+import { DniInfo } from '../../shared/models/dni-info.model';
 import { PacienteCreateRequest, PacienteResponse, PacienteUpdateRequest } from '../../shared/models/paciente.model';
 import { Page } from '../../shared/models/page.model';
 
@@ -24,6 +25,16 @@ export class PacienteService {
 
   crear(request: PacienteCreateRequest): Observable<PacienteResponse> {
     return this.http.post<PacienteResponse>(`${API_URL}/pacientes`, request);
+  }
+
+  buscarPorDni(dni: string): Observable<PacienteResponse> {
+    const params = new HttpParams().set('dni', dni);
+    return this.http.get<PacienteResponse>(`${API_URL}/pacientes/buscar`, { params });
+  }
+
+  consultarDni(dni: string): Observable<DniInfo> {
+    const params = new HttpParams().set('dni', dni);
+    return this.http.get<DniInfo>(`${API_URL}/pacientes/buscar-dni`, { params });
   }
 
   actualizar(id: number, request: PacienteUpdateRequest): Observable<PacienteResponse> {

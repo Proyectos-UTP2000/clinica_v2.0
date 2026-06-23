@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { ApiResponse } from '../../shared/models/api-response.model';
-import { CitaCreateRequest, CitaResponse, DisponibilidadSlotResponse } from '../../shared/models/cita.model';
+import { CitaCreateRequest, CitaResponse, CitaUpdateRequest, DisponibilidadSlotResponse } from '../../shared/models/cita.model';
 import { MedicoResponse } from '../../shared/models/medico.model';
 import { PacienteResponse } from '../../shared/models/paciente.model';
 import { Page } from '../../shared/models/page.model';
@@ -84,8 +84,9 @@ export class CitaService {
     return this.http.post<CitaResponse>(`${API_URL}/citas`, request);
   }
 
-  reprogramar(id: number, nuevaFechaHora: string): Observable<CitaResponse> {
-    return this.http.put<CitaResponse>(`${API_URL}/citas/${id}/reprogramar`, { nuevaFechaHora });
+  reprogramar(id: number, nuevaFechaHora: string, doctorId?: number): Observable<CitaResponse> {
+    const request: CitaUpdateRequest = doctorId ? { nuevaFechaHora, doctorId } : { nuevaFechaHora };
+    return this.http.put<CitaResponse>(`${API_URL}/citas/${id}/reprogramar`, request);
   }
 
   cancelar(id: number): Observable<ApiResponse> {
@@ -113,7 +114,7 @@ export class CitaService {
     if (filtros?.sedeId) {
       params = params.set('sedeId', filtros.sedeId);
     }
-    return this.http.get<Page<MedicoResponse>>(`${API_URL}/medicos`, { params }).pipe(map((response) => response.content));
+    return this.http.get<Page<MedicoResponse>>(`${API_URL}/medicos/buscar`, { params }).pipe(map((response) => response.content));
   }
 
   listarSedes(): Observable<SedeResponse[]> {

@@ -13,7 +13,7 @@ public class PagoCreateRequest {
     private Long citaId;
 
     @NotNull
-    @DecimalMin(value = "0.00")
+    @DecimalMin(value = "0.01", message = "El monto debe ser mayor que cero")
     private BigDecimal monto;
 
     @NotBlank

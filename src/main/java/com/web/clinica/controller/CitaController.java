@@ -77,7 +77,7 @@ public class CitaController {
         if (solicitud.getNuevaFechaHora() == null) {
             throw new BadRequestException("Debe indicar la nueva fecha y hora");
         }
-        return citaService.reprogramar(id, solicitud.getNuevaFechaHora());
+        return citaService.reprogramar(id, solicitud.getNuevaFechaHora(), solicitud.getDoctorId());
     }
 
     /** Cancela una cita vigente. */

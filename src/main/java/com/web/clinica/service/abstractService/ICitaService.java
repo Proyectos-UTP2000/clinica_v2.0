@@ -15,7 +15,7 @@ public interface ICitaService {
     CitaResponse crear(CitaCreateRequest solicitud);
 
     /** Reprograma una cita si quedan intentos disponibles. */
-    CitaResponse reprogramar(Long citaId, LocalDateTime nuevaFechaHora);
+    CitaResponse reprogramar(Long citaId, LocalDateTime nuevaFechaHora, Long doctorId);
 
     /** Cancela una cita vigente. */
     void cancelar(Long citaId);

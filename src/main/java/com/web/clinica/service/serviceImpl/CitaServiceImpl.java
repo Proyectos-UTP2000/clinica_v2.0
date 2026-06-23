@@ -92,7 +92,7 @@ public class CitaServiceImpl implements ICitaService {
     /** Reprograma la cita y consume un intento disponible. */
     @Override
     @Transactional
-    public CitaResponse reprogramar(Long citaId, LocalDateTime nuevaFechaHora) {
+    public CitaResponse reprogramar(Long citaId, LocalDateTime nuevaFechaHora, Long doctorId) {
         Cita cita = obtenerEntidad(citaId);
         verificarPermisoEdicionCita(cita);
         if (ESTADO_CANCELADA.equals(cita.getEstado()) || "atendida".equals(cita.getEstado())) {
@@ -103,14 +103,31 @@ public class CitaServiceImpl implements ICitaService {
         }
 
         LocalDateTime nuevaFechaHoraFin = nuevaFechaHora.plusMinutes(DURACION_CITA_MINUTOS);
-        validarDisponibilidad(cita.getDoctor(), cita.getSede(), nuevaFechaHora, nuevaFechaHoraFin, cita.getId());
+        Doctor doctorDestino = resolverDoctorDestino(cita, doctorId);
+        validarDisponibilidad(doctorDestino, cita.getSede(), nuevaFechaHora, nuevaFechaHoraFin, cita.getId());
         validarPacienteSinCruce(cita.getPaciente(), nuevaFechaHora, nuevaFechaHoraFin, cita.getId());
 
+        cita.setDoctor(doctorDestino);
         cita.setFechaHoraInicio(nuevaFechaHora);
         cita.setFechaHoraFin(nuevaFechaHoraFin);
         cita.setEstado(ESTADO_REPROGRAMADA);
         cita.setReprogramacionesRestantes(cita.getReprogramacionesRestantes() - 1);
         return convertirRespuesta(citaRepository.save(cita));
+    }
+
+    /** Resuelve y valida el doctor destino cuando la reprogramacion reasigna medico. */
+    private Doctor resolverDoctorDestino(Cita cita, Long doctorId) {
+        if (doctorId == null || cita.getDoctor().getId().equals(doctorId)) {
+            return cita.getDoctor();
+        }
+        Doctor doctorDestino = obtenerDoctor(doctorId);
+        Long especialidadActualId = cita.getDoctor().getEspecialidad().getId();
+        Long especialidadDestinoId = doctorDestino.getEspecialidad().getId();
+        if (!especialidadActualId.equals(especialidadDestinoId)) {
+            throw new BadRequestException("El doctor destino debe pertenecer a la misma especialidad");
+        }
+        validarDoctorAtiendeEnSede(doctorDestino, cita.getSede());
+        return doctorDestino;
     }
 
     /** Cancela una cita despues de validar alcance de edicion. */

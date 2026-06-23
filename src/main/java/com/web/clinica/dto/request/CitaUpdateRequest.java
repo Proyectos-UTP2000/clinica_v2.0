@@ -8,4 +8,5 @@ public class CitaUpdateRequest {
 
     private String estado;
     private LocalDateTime nuevaFechaHora;
+    private Long doctorId;
 }

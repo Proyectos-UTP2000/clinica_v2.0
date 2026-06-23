@@ -328,6 +328,8 @@ button,
   border: 1px solid rgba(20, 107, 95, 0.22);
   border-radius: var(--clinic-radius);
   background: rgba(20, 107, 95, 0.09);
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .appointment-block span,

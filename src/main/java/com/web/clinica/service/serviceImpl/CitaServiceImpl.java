@@ -274,6 +274,10 @@ public class CitaServiceImpl implements ICitaService {
             LocalDateTime fin = fecha.atTime(horario.getHoraFin());
             while (!inicio.plusMinutes(DURACION_CITA_MINUTOS).isAfter(fin)) {
                 LocalDateTime finSlot = inicio.plusMinutes(DURACION_CITA_MINUTOS);
+                if (inicio.isBefore(LocalDateTime.now())) {
+                    inicio = finSlot;
+                    continue;
+                }
                 if (!tieneCruceDoctor(doctor, inicio, finSlot, null)
                         && !tieneCruceExcepcion(doctor, fecha, inicio.toLocalTime(), finSlot.toLocalTime())) {
                     slots.add(new DisponibilidadSlotResponse(inicio, finSlot));

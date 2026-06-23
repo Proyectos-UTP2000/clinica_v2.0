@@ -84,15 +84,15 @@
                         <a class="agenda-slot-link" [routerLink]="rutaNuevaCita(dia, hora)" [queryParams]="queryNuevaCita(dia, hora)">+</a>
                       }
                       @for (cita of citasEnFranja(dia, hora); track cita) {
-                        <button
+                        <a
                           class="appointment-block"
-                          type="button"
-                          (click)="citaSeleccionada = cita"
+                          [routerLink]="['/historial/crear']"
+                          [queryParams]="{ pacienteId: cita.pacienteId, citaId: cita.id, doctorId: cita.doctorId, sedeId: cita.sedeId }"
                           >
                           <strong>{{ cita.pacienteNombre }}</strong>
                           <span>{{ cita.doctorNombre }}</span>
                           <small>{{ cita.estado }} / {{ cita.estadoPago }}</small>
-                        </button>
+                        </a>
                       }
                     </td>
                   }

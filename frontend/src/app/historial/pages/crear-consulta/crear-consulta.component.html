@@ -15,15 +15,22 @@
   @if (!cargando) {
     <form class="feature-panel" [formGroup]="consultaForm" (ngSubmit)="guardar()">
       <div class="feature-panel-body form-grid">
-        <label class="form-label">
-          Paciente
-          <select class="form-select" formControlName="pacienteId">
-            <option [ngValue]="null">Seleccione paciente</option>
-            @for (paciente of pacientes; track paciente) {
-              <option [ngValue]="paciente.id">{{ paciente.nombres }} {{ paciente.apellidos }}</option>
+        <div>
+          <label class="form-label d-block">Paciente</label>
+          <div class="d-flex gap-2">
+            <select class="form-select" formControlName="pacienteId">
+              <option [ngValue]="null">Seleccione paciente</option>
+              @for (paciente of pacientes; track paciente) {
+                <option [ngValue]="paciente.id">{{ paciente.nombres }} {{ paciente.apellidos }}</option>
+              }
+            </select>
+            @if (consultaForm.get('pacienteId')?.value) {
+              <a class="btn btn-outline-info text-nowrap" [routerLink]="['/historial/paciente', consultaForm.get('pacienteId')?.value]" target="_blank">
+                Ver Historial
+              </a>
             }
-          </select>
-        </label>
+          </div>
+        </div>
         <label class="form-label">
           Medico
           <select class="form-select" formControlName="doctorId">

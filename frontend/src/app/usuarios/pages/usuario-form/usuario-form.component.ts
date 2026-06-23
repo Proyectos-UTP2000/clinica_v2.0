@@ -5,6 +5,7 @@ import { finalize } from 'rxjs';
 import { RolResponse } from '../../../shared/models/rol.model';
 import { MedicoResponse } from '../../../shared/models/medico.model';
 import { UsuarioService } from '../../services/usuario.service';
+import { ApiErrorService } from '../../../core/services/api-error.service';
 
 @Component({
   selector: 'app-usuario-form',
@@ -39,7 +40,8 @@ export class UsuarioFormComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly fb: FormBuilder,
-    private readonly usuarioService: UsuarioService
+    private readonly usuarioService: UsuarioService,
+    private readonly apiErrorService: ApiErrorService
   ) {}
 
   ngOnInit(): void {
@@ -193,7 +195,7 @@ export class UsuarioFormComponent implements OnInit {
         .subscribe({
           next: () => this.router.navigate(['/usuarios']),
           error: (err) => {
-            this.mensajeError = err.error?.mensaje || 'No se pudo actualizar el empleado.';
+            this.mensajeError = this.apiErrorService.obtenerMensajeError(err);
           }
         });
     } else {
@@ -213,7 +215,7 @@ export class UsuarioFormComponent implements OnInit {
         .subscribe({
           next: () => this.router.navigate(['/usuarios']),
           error: (err) => {
-            this.mensajeError = err.error?.mensaje || 'No se pudo crear el empleado. Verifique si el DNI o correo ya existen.';
+            this.mensajeError = this.apiErrorService.obtenerMensajeError(err);
           }
         });
     }

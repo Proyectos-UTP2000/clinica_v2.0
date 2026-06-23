@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 import { EspecialidadResponse } from '../../../shared/models/especialidad.model';
 import { EspecialidadService } from '../../services/especialidad.service';
+import { ApiErrorService } from '../../../core/services/api-error.service';
 
 @Component({
     selector: 'app-especialidad-form',
@@ -28,7 +29,8 @@ export class EspecialidadFormComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly fb: FormBuilder,
-    private readonly especialidadService: EspecialidadService
+    private readonly especialidadService: EspecialidadService,
+    private readonly apiErrorService: ApiErrorService
   ) {}
 
   ngOnInit(): void {
@@ -54,7 +56,7 @@ export class EspecialidadFormComponent implements OnInit {
       : this.especialidadService.crear(request);
     operacion.pipe(finalize(() => (this.guardando = false))).subscribe({
       next: () => this.router.navigate(['/especialidades']),
-      error: () => (this.mensajeError = 'No se pudo guardar la especialidad.')
+      error: (err) => (this.mensajeError = this.apiErrorService.obtenerMensajeError(err))
     });
   }
 
@@ -83,7 +85,7 @@ export class EspecialidadFormComponent implements OnInit {
           });
         }
       },
-      error: () => (this.mensajeError = 'No se pudo cargar la informacion de especialidades.')
+      error: (err) => (this.mensajeError = this.apiErrorService.obtenerMensajeError(err))
     });
   }
 }

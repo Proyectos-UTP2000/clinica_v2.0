@@ -78,7 +78,7 @@ class CitaReprogramacionTests {
         LocalDateTime nuevaFecha = LocalDateTime.of(2026, 6, 22, 10, 0);
         autenticarDoctor(doctorActual.getUsuario());
 
-        when(citaRepository.findByIdAndEstadoNot(5L, "cancelada")).thenReturn(Optional.of(cita));
+        when(citaRepository.findById(5L)).thenReturn(Optional.of(cita));
         when(doctorRepository.findById(2L)).thenReturn(Optional.of(doctorNuevo));
         when(disponibilidadBaseRepository.findByDoctorAndSedeAndDiaSemana(doctorNuevo, sede, 1))
                 .thenReturn(List.of(disponibilidad(doctorNuevo, sede)));
@@ -105,12 +105,98 @@ class CitaReprogramacionTests {
         Cita cita = cita(doctorActual, sede);
         autenticarDoctor(doctorActual.getUsuario());
 
-        when(citaRepository.findByIdAndEstadoNot(5L, "cancelada")).thenReturn(Optional.of(cita));
+        when(citaRepository.findById(5L)).thenReturn(Optional.of(cita));
         when(doctorRepository.findById(2L)).thenReturn(Optional.of(doctorNuevo));
 
         assertThatThrownBy(() -> service.reprogramar(5L, LocalDateTime.of(2026, 6, 22, 10, 0), 2L))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("misma especialidad");
+    }
+
+    @Test
+    void reprogramarCitaNoAsistidaSinPagoAnticipadoLanzaExcepcion() {
+        Especialidad cardiologia = especialidad(1L, "Cardiologia");
+        Sede sede = sede(1L, "Central");
+        Doctor doctorActual = doctor(1L, "Ana", "Ruiz", cardiologia, sede, 10L);
+        Cita cita = cita(doctorActual, sede);
+        cita.setEstado("no_asistida");
+        cita.setPagoAnticipado(false);
+        autenticarDoctor(doctorActual.getUsuario());
+
+        when(citaRepository.findById(5L)).thenReturn(Optional.of(cita));
+
+        assertThatThrownBy(() -> service.reprogramar(5L, LocalDateTime.of(2026, 6, 22, 10, 0), null))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("sin pago anticipado");
+    }
+
+    @Test
+    void reprogramarCitaNoAsistidaConPagoAnticipadoExito() {
+        Especialidad cardiologia = especialidad(1L, "Cardiologia");
+        Sede sede = sede(1L, "Central");
+        Doctor doctorActual = doctor(1L, "Ana", "Ruiz", cardiologia, sede, 10L);
+        Cita cita = cita(doctorActual, sede);
+        cita.setEstado("no_asistida");
+        cita.setPagoAnticipado(true);
+        cita.setReprogramacionesRestantes(2);
+        autenticarDoctor(doctorActual.getUsuario());
+
+        when(citaRepository.findById(5L)).thenReturn(Optional.of(cita));
+        when(disponibilidadBaseRepository.findByDoctorAndSedeAndDiaSemana(doctorActual, sede, 1))
+                .thenReturn(List.of(disponibilidad(doctorActual, sede)));
+        when(excepcionDisponibilidadRepository.findByDoctorAndFecha(any(), any())).thenReturn(List.of());
+        when(citaRepository.findByDoctorAndFechaHoraInicioBetween(any(), any(), any())).thenReturn(List.of());
+        when(citaRepository.findByPacienteAndFechaHoraInicioBetween(any(), any(), any())).thenReturn(List.of());
+        when(citaRepository.save(any(Cita.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        CitaResponse respuesta = service.reprogramar(5L, LocalDateTime.of(2026, 6, 22, 10, 0), null);
+
+        assertThat(respuesta).isNotNull();
+        assertThat(cita.getEstado()).isEqualTo("reprogramada");
+        assertThat(cita.getReprogramacionesRestantes()).isEqualTo(1);
+    }
+
+    @Test
+    void reprogramarCitaCanceladaSinPagoAnticipadoLanzaExcepcion() {
+        Especialidad cardiologia = especialidad(1L, "Cardiologia");
+        Sede sede = sede(1L, "Central");
+        Doctor doctorActual = doctor(1L, "Ana", "Ruiz", cardiologia, sede, 10L);
+        Cita cita = cita(doctorActual, sede);
+        cita.setEstado("cancelada");
+        cita.setPagoAnticipado(false);
+        autenticarDoctor(doctorActual.getUsuario());
+
+        when(citaRepository.findById(5L)).thenReturn(Optional.of(cita));
+
+        assertThatThrownBy(() -> service.reprogramar(5L, LocalDateTime.of(2026, 6, 22, 10, 0), null))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("estado actual");
+    }
+
+    @Test
+    void reprogramarCitaCanceladaConPagoAnticipadoExito() {
+        Especialidad cardiologia = especialidad(1L, "Cardiologia");
+        Sede sede = sede(1L, "Central");
+        Doctor doctorActual = doctor(1L, "Ana", "Ruiz", cardiologia, sede, 10L);
+        Cita cita = cita(doctorActual, sede);
+        cita.setEstado("cancelada");
+        cita.setPagoAnticipado(true);
+        cita.setReprogramacionesRestantes(2);
+        autenticarDoctor(doctorActual.getUsuario());
+
+        when(citaRepository.findById(5L)).thenReturn(Optional.of(cita));
+        when(disponibilidadBaseRepository.findByDoctorAndSedeAndDiaSemana(doctorActual, sede, 1))
+                .thenReturn(List.of(disponibilidad(doctorActual, sede)));
+        when(excepcionDisponibilidadRepository.findByDoctorAndFecha(any(), any())).thenReturn(List.of());
+        when(citaRepository.findByDoctorAndFechaHoraInicioBetween(any(), any(), any())).thenReturn(List.of());
+        when(citaRepository.findByPacienteAndFechaHoraInicioBetween(any(), any(), any())).thenReturn(List.of());
+        when(citaRepository.save(any(Cita.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        CitaResponse respuesta = service.reprogramar(5L, LocalDateTime.of(2026, 6, 22, 10, 0), null);
+
+        assertThat(respuesta).isNotNull();
+        assertThat(cita.getEstado()).isEqualTo("reprogramada");
+        assertThat(cita.getReprogramacionesRestantes()).isEqualTo(1);
     }
 
     private Cita cita(Doctor doctor, Sede sede) {

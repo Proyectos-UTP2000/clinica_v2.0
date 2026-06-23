@@ -75,7 +75,11 @@ public class CitaServiceImpl implements ICitaService {
         cita.setFechaHoraInicio(solicitud.getFechaHoraInicio());
         cita.setFechaHoraFin(fechaHoraFin);
         cita.setEstado(ESTADO_PROGRAMADA);
-        cita.setEstadoPago("pendiente");
+        
+        boolean pagoAnticipado = Boolean.TRUE.equals(solicitud.getPagoAnticipado());
+        cita.setPagoAnticipado(pagoAnticipado);
+        cita.setEstadoPago(pagoAnticipado ? "pagado" : "pendiente");
+        
         cita.setReprogramacionesRestantes(2);
         cita.setOrigen("interno");
         cita.setCreadoPorUsuario(obtenerUsuarioActual());
@@ -95,11 +99,29 @@ public class CitaServiceImpl implements ICitaService {
     public CitaResponse reprogramar(Long citaId, LocalDateTime nuevaFechaHora, Long doctorId) {
         Cita cita = obtenerEntidad(citaId);
         verificarPermisoEdicionCita(cita);
-        if (ESTADO_CANCELADA.equals(cita.getEstado()) || "atendida".equals(cita.getEstado())) {
+
+        boolean esCancelada = "cancelada".equalsIgnoreCase(cita.getEstado());
+        boolean esNoAsistida = "no_asistida".equalsIgnoreCase(cita.getEstado());
+        boolean esAtendida = "atendida".equalsIgnoreCase(cita.getEstado());
+
+        if (esAtendida) {
             throw new BadRequestException("La cita no puede reprogramarse en su estado actual");
         }
-        if (cita.getReprogramacionesRestantes() == null || cita.getReprogramacionesRestantes() <= 0) {
-            throw new BadRequestException("La cita ya no tiene reprogramaciones disponibles");
+
+        if (Boolean.TRUE.equals(cita.getPagoAnticipado())) {
+            if (cita.getReprogramacionesRestantes() == null || cita.getReprogramacionesRestantes() <= 0) {
+                throw new BadRequestException("La cita ya no tiene reprogramaciones disponibles");
+            }
+        } else {
+            if (esCancelada) {
+                throw new BadRequestException("La cita no puede reprogramarse en su estado actual");
+            }
+            if (esNoAsistida) {
+                throw new BadRequestException("No se puede reprogramar una cita no asistida sin pago anticipado");
+            }
+            if (cita.getReprogramacionesRestantes() == null || cita.getReprogramacionesRestantes() <= 0) {
+                throw new BadRequestException("La cita ya no tiene reprogramaciones disponibles");
+            }
         }
 
         LocalDateTime nuevaFechaHoraFin = nuevaFechaHora.plusMinutes(DURACION_CITA_MINUTOS);
@@ -393,7 +415,7 @@ public class CitaServiceImpl implements ICitaService {
 
     /** Obtiene cita vigente o lanza 404. */
     private Cita obtenerEntidad(Long id) {
-        return citaRepository.findByIdAndEstadoNot(id, ESTADO_CANCELADA)
+        return citaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cita no encontrada"));
     }
 
@@ -409,6 +431,9 @@ public class CitaServiceImpl implements ICitaService {
                 .estado(cita.getEstado())
                 .estadoPago(cita.getEstadoPago())
                 .origen(cita.getOrigen())
+                .pagoAnticipado(cita.getPagoAnticipado())
+                .beneficiosPagoAnticipado(Boolean.TRUE.equals(cita.getPagoAnticipado()))
+                .reprogramacionesRestantes(cita.getReprogramacionesRestantes())
                 .build();
     }
 }

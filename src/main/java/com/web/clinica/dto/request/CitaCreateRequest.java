@@ -18,4 +18,6 @@ public class CitaCreateRequest {
 
     @NotNull
     private LocalDateTime fechaHoraInicio;
+
+    private Boolean pagoAnticipado;
 }

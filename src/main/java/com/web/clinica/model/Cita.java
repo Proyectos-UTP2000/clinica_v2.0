@@ -47,6 +47,9 @@ public class Cita {
     @Column(name = "estado_pago", nullable = false, length = 20)
     private String estadoPago = "pendiente";
 
+    @Column(name = "pago_anticipado", nullable = false)
+    private Boolean pagoAnticipado = false;
+
     @Column(name = "reprogramaciones_restantes", nullable = false)
     private Integer reprogramacionesRestantes = 2;
 

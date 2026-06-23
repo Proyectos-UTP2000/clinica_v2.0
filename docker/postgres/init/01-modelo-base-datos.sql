@@ -142,6 +142,7 @@ CREATE TABLE cita (
     fecha_hora_fin TIMESTAMP NOT NULL,
     estado VARCHAR(20) NOT NULL CHECK (estado IN ('programada', 'confirmada', 'cancelada', 'reprogramada', 'atendida', 'no_asistida')),
     estado_pago VARCHAR(20) NOT NULL DEFAULT 'pendiente' CHECK (estado_pago IN ('pendiente', 'pagado')),
+    pago_anticipado BOOLEAN NOT NULL DEFAULT FALSE,
     reprogramaciones_restantes INT NOT NULL DEFAULT 2 CHECK (reprogramaciones_restantes BETWEEN 0 AND 2),
     origen VARCHAR(20) NOT NULL CHECK (origen IN ('web', 'interno')),
     creado_por_usuario_id BIGINT REFERENCES usuario(id) ON DELETE SET NULL,

@@ -17,4 +17,7 @@ public class CitaResponse {
     private String estado;
     private String estadoPago;
     private String origen;
+    private Boolean pagoAnticipado;
+    private Boolean beneficiosPagoAnticipado;
+    private Integer reprogramacionesRestantes;
 }

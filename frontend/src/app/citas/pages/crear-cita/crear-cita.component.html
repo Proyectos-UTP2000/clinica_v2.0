@@ -54,6 +54,15 @@
               <input id="fecha" type="date" class="form-control" formControlName="fecha" [class.is-invalid]="campoInvalido('fecha')" />
               <div class="invalid-feedback">Seleccione una fecha.</div>
             </div>
+            <div class="form-grid-full mt-2">
+              <div class="form-check p-2 border rounded">
+                <input id="pagoAnticipado" type="checkbox" class="form-check-input ms-0 me-2" formControlName="pagoAnticipado" />
+                <label for="pagoAnticipado" class="form-check-label">
+                  <strong>Realizar pago anticipado</strong>
+                  <div class="text-muted small">Permite hasta 2 reprogramaciones incluso en caso de inasistencia (no asistida) o cancelación.</div>
+                </label>
+              </div>
+            </div>
           </div>
           <div class="slots-panel">
             <div class="slots-header">

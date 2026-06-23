@@ -118,6 +118,13 @@ export class ListarCitasComponent implements OnInit {
       });
   }
 
+  puedeReprogramar(cita: CitaResponse): boolean {
+    if (cita.estado === 'no_asistida' && !cita.pagoAnticipado) {
+      return false;
+    }
+    return true;
+  }
+
   abrirReprogramacion(cita: CitaResponse): void {
     this.citaReprogramar = cita;
     this.reprogramarForm.reset({ nuevaFechaHora: '', doctorId: '' });

@@ -8,6 +8,9 @@ export interface CitaResponse {
   estado: string;
   estadoPago: string;
   origen: string;
+  pagoAnticipado?: boolean;
+  beneficiosPagoAnticipado?: boolean;
+  reprogramacionesRestantes?: number;
 }
 
 export interface CitaCreateRequest {
@@ -15,6 +18,7 @@ export interface CitaCreateRequest {
   doctorId: number;
   sedeId: number;
   fechaHoraInicio: string;
+  pagoAnticipado?: boolean;
 }
 
 export interface CitaUpdateRequest {

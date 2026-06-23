@@ -30,7 +30,8 @@ export class CrearCitaComponent implements OnInit {
     doctorId: ['', [Validators.required]],
     sedeId: ['', [Validators.required]],
     fecha: ['', [Validators.required]],
-    fechaHoraInicio: ['', [Validators.required]]
+    fechaHoraInicio: ['', [Validators.required]],
+    pagoAnticipado: [false]
   });
 
   constructor(
@@ -147,7 +148,8 @@ export class CrearCitaComponent implements OnInit {
       pacienteId: Number(raw.pacienteId),
       doctorId: Number(raw.doctorId),
       sedeId: Number(raw.sedeId),
-      fechaHoraInicio: raw.fechaHoraInicio ?? ''
+      fechaHoraInicio: raw.fechaHoraInicio ?? '',
+      pagoAnticipado: Boolean(raw.pagoAnticipado)
     };
   }
 

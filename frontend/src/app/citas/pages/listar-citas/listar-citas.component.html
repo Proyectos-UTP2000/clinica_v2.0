@@ -89,11 +89,22 @@
                   <span class="status-pill" [class.is-paid]="cita.estadoPago === 'pagado'" [class.is-pending]="cita.estadoPago !== 'pagado'">
                     {{ cita.estadoPago }}
                   </span>
+                  @if (cita.pagoAnticipado) {
+                    <span class="badge bg-info text-white ms-1" style="font-size: 0.7rem;" title="Disfruta de beneficios de reprogramación">Anticipado</span>
+                  }
                 </td>
                 <td class="text-end">
                   <div class="action-group">
                     @if (authService.hasPermission('citas.editar_propias') || authService.hasPermission('citas.editar_asignados')) {
-                      <button type="button" class="btn btn-sm btn-outline-primary" (click)="abrirReprogramacion(cita)">Reprogramar</button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        [disabled]="!puedeReprogramar(cita)"
+                        [title]="puedeReprogramar(cita) ? 'Reprogramar cita' : 'No se puede reprogramar una cita no asistida sin pago anticipado'"
+                        (click)="abrirReprogramacion(cita)"
+                        >
+                        Reprogramar
+                      </button>
                     }
                     @if (authService.hasPermission('citas.cancelar')) {
                       <button type="button" class="btn btn-sm btn-outline-danger" (click)="abrirCancelacion(cita)">Cancelar</button>
@@ -115,6 +126,14 @@
       <section class="reschedule-dialog" role="dialog" aria-modal="true" aria-label="Reprogramar cita">
         <h3>Reprogramar cita</h3>
         <p>{{ citaReprogramar.pacienteNombre }} con {{ citaReprogramar.doctorNombre }}</p>
+        <p class="small text-muted mb-2">
+          Reprogramaciones restantes: {{ citaReprogramar.reprogramacionesRestantes ?? 2 }}
+        </p>
+        @if (citaReprogramar.estado === 'no_asistida' && !citaReprogramar.pagoAnticipado) {
+          <div class="alert alert-danger small p-2">
+            No se puede reprogramar una cita no asistida sin pago anticipado.
+          </div>
+        }
         <form [formGroup]="reprogramarForm" (ngSubmit)="reprogramarCita()">
           <label for="nuevaFechaHora" class="form-label">Nueva fecha y hora</label>
           <input id="nuevaFechaHora" type="datetime-local" class="form-control" formControlName="nuevaFechaHora" />

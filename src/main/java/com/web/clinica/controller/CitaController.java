@@ -73,10 +73,7 @@ public class CitaController {
     /** Reprograma una cita existente. */
     @PutMapping("/{id}/reprogramar")
     @RequierePermiso({"citas.editar_propias", "citas.editar_asignados"})
-    public CitaResponse reprogramar(@PathVariable Long id, @RequestBody CitaUpdateRequest solicitud) {
-        if (solicitud.getNuevaFechaHora() == null) {
-            throw new BadRequestException("Debe indicar la nueva fecha y hora");
-        }
+    public CitaResponse reprogramar(@PathVariable Long id, @Valid @RequestBody CitaUpdateRequest solicitud) {
         return citaService.reprogramar(id, solicitud.getNuevaFechaHora(), solicitud.getDoctorId());
     }
 

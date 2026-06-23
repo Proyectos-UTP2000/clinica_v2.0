@@ -1,5 +1,6 @@
 package com.web.clinica.dto.request;
 
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -10,6 +11,7 @@ import lombok.Data;
 public class ExcepcionDisponibilidadCreateRequest {
 
     @NotNull
+    @FutureOrPresent(message = "La fecha de la excepción debe ser presente o futura")
     private LocalDate fecha;
 
     @NotNull

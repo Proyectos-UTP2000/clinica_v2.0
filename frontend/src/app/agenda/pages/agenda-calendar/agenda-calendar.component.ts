@@ -8,11 +8,12 @@ import { MedicoResponse } from '../../../shared/models/medico.model';
 import { SedeResponse } from '../../../shared/models/sede.model';
 import { AgendaService } from '../../services/agenda.service';
 
-type VistaAgenda = 'dia' | 'semana';
+type VistaAgenda = 'dia' | 'semana' | 'mes';
 
 @Component({
     selector: 'app-agenda-calendar',
     templateUrl: './agenda-calendar.component.html',
+    styleUrl: './agenda-calendar.component.css',
     standalone: false
 })
 export class AgendaCalendarComponent implements OnInit {
@@ -96,7 +97,13 @@ export class AgendaCalendarComponent implements OnInit {
 
   cambiarFecha(delta: number): void {
     const fecha = new Date(`${this.fechaActual}T00:00:00`);
-    fecha.setDate(fecha.getDate() + (this.vista === 'semana' ? delta * 7 : delta));
+    if (this.vista === 'mes') {
+      fecha.setMonth(fecha.getMonth() + delta);
+    } else if (this.vista === 'semana') {
+      fecha.setDate(fecha.getDate() + delta * 7);
+    } else {
+      fecha.setDate(fecha.getDate() + delta);
+    }
     this.fechaActual = this.formatearFecha(fecha);
     this.cargarAgenda();
   }
@@ -105,14 +112,48 @@ export class AgendaCalendarComponent implements OnInit {
     if (this.vista === 'dia') {
       return [this.fechaActual];
     }
-    const fecha = new Date(`${this.fechaActual}T00:00:00`);
-    const lunes = new Date(fecha);
-    lunes.setDate(fecha.getDate() - ((fecha.getDay() + 6) % 7));
-    return Array.from({ length: 7 }, (_, index) => {
-      const dia = new Date(lunes);
-      dia.setDate(lunes.getDate() + index);
+    if (this.vista === 'semana') {
+      const fecha = new Date(`${this.fechaActual}T00:00:00`);
+      const lunes = new Date(fecha);
+      lunes.setDate(fecha.getDate() - ((fecha.getDay() + 6) % 7));
+      return Array.from({ length: 7 }, (_, index) => {
+        const dia = new Date(lunes);
+        dia.setDate(lunes.getDate() + index);
+        return this.formatearFecha(dia);
+      });
+    }
+    // vista === 'mes'
+    const date = new Date(`${this.fechaActual}T00:00:00`);
+    const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+    const startMonday = new Date(startOfMonth);
+    const day = startOfMonth.getDay();
+    const diff = day === 0 ? 6 : day - 1;
+    startMonday.setDate(startOfMonth.getDate() - diff);
+
+    return Array.from({ length: 42 }, (_, index) => {
+      const dia = new Date(startMonday);
+      dia.setDate(startMonday.getDate() + index);
       return this.formatearFecha(dia);
     });
+  }
+
+  citasEnDia(dia: string): CitaResponse[] {
+    return this.citas.filter((cita) => {
+      const inicio = new Date(cita.fechaHoraInicio);
+      return this.formatearFecha(inicio) === dia;
+    });
+  }
+
+  esMismoMes(dia: string): boolean {
+    const date = new Date(`${dia}T00:00:00`);
+    const current = new Date(`${this.fechaActual}T00:00:00`);
+    return date.getMonth() === current.getMonth();
+  }
+
+  seleccionarDia(dia: string): void {
+    this.fechaActual = dia;
+    this.vista = 'dia';
+    this.cargarAgenda();
   }
 
   citasEnFranja(dia: string, hora: string): CitaResponse[] {

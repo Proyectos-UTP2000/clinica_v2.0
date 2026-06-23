@@ -50,6 +50,7 @@
         <div class="btn-group" role="group" aria-label="Vista de agenda">
           <button class="btn" [class.btn-primary]="vista === 'dia'" [class.btn-outline-secondary]="vista !== 'dia'" type="button" (click)="vista = 'dia'; cargarAgenda()">Dia</button>
           <button class="btn" [class.btn-primary]="vista === 'semana'" [class.btn-outline-secondary]="vista !== 'semana'" type="button" (click)="vista = 'semana'; cargarAgenda()">Semana</button>
+          <button class="btn" [class.btn-primary]="vista === 'mes'" [class.btn-outline-secondary]="vista !== 'mes'" type="button" (click)="vista = 'mes'; cargarAgenda()">Mes</button>
         </div>
         <button class="btn btn-outline-secondary" type="button" (click)="cambiarFecha(-1)">Anterior</button>
         <button class="btn btn-outline-secondary" type="button" (click)="cambiarFecha(1)">Siguiente</button>
@@ -62,43 +63,75 @@
       <div class="loading-state">Cargando agenda...</div>
     }
     @if (!cargando) {
-      <div class="table-responsive">
-        <table class="table agenda-table align-middle">
-          <thead>
-            <tr>
-              <th>Hora</th>
-              @for (dia of diasVisibles(); track dia) {
-                <th>{{ dia | date:'EEE d/M' }}</th>
-              }
-            </tr>
-          </thead>
-          <tbody>
-            @for (hora of horas; track hora) {
+      @if (vista !== 'mes') {
+        <div class="table-responsive">
+          <table class="table agenda-table align-middle">
+            <thead>
               <tr>
-                <td class="agenda-time">{{ hora }}</td>
+                <th>Hora</th>
                 @for (dia of diasVisibles(); track dia) {
-                  <td class="agenda-cell">
-                    @if (authService.hasPermission('citas.crear')) {
-                      <a class="agenda-slot-link" [routerLink]="rutaNuevaCita(dia, hora)" [queryParams]="queryNuevaCita(dia, hora)">+</a>
-                    }
-                    @for (cita of citasEnFranja(dia, hora); track cita) {
-                      <button
-                        class="appointment-block"
-                        type="button"
-                        (click)="citaSeleccionada = cita"
-                        >
-                        <strong>{{ cita.pacienteNombre }}</strong>
-                        <span>{{ cita.doctorNombre }}</span>
-                        <small>{{ cita.estado }} / {{ cita.estadoPago }}</small>
-                      </button>
-                    }
-                  </td>
+                  <th>{{ dia | date:'EEE d/M' }}</th>
                 }
               </tr>
+            </thead>
+            <tbody>
+              @for (hora of horas; track hora) {
+                <tr>
+                  <td class="agenda-time">{{ hora }}</td>
+                  @for (dia of diasVisibles(); track dia) {
+                    <td class="agenda-cell">
+                      @if (authService.hasPermission('citas.crear')) {
+                        <a class="agenda-slot-link" [routerLink]="rutaNuevaCita(dia, hora)" [queryParams]="queryNuevaCita(dia, hora)">+</a>
+                      }
+                      @for (cita of citasEnFranja(dia, hora); track cita) {
+                        <button
+                          class="appointment-block"
+                          type="button"
+                          (click)="citaSeleccionada = cita"
+                          >
+                          <strong>{{ cita.pacienteNombre }}</strong>
+                          <span>{{ cita.doctorNombre }}</span>
+                          <small>{{ cita.estado }} / {{ cita.estadoPago }}</small>
+                        </button>
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="calendar-month-grid">
+          <div class="calendar-weekday-header">
+            <div>Lun</div>
+            <div>Mar</div>
+            <div>Mié</div>
+            <div>Jue</div>
+            <div>Vie</div>
+            <div>Sáb</div>
+            <div>Dom</div>
+          </div>
+          <div class="calendar-days-grid">
+            @for (dia of diasVisibles(); track dia) {
+              <div
+                class="calendar-day-cell"
+                [class.other-month]="!esMismoMes(dia)"
+                (click)="seleccionarDia(dia)"
+                >
+                <div class="day-number">{{ dia | date:'d' }}</div>
+                <div class="day-content">
+                  @if (citasEnDia(dia).length > 0) {
+                    <span class="badge bg-primary rounded-pill">
+                      {{ citasEnDia(dia).length }} Cita{{ citasEnDia(dia).length === 1 ? '' : 's' }}
+                    </span>
+                  }
+                </div>
+              </div>
             }
-          </tbody>
-        </table>
-      </div>
+          </div>
+        </div>
+      }
     }
   </div>
 

@@ -54,7 +54,7 @@
               @for (parent of especialidadesJerarquicas; track parent.id) {
                 <tr class="table-light fw-bold" style="background-color: #f8fafc;">
                   <td>
-                    📁 {{ parent.nombre }}
+                    {{ parent.nombre }}
                     <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">
                       {{ parent.subespecialidades.length }} subespecialidades
                     </span>

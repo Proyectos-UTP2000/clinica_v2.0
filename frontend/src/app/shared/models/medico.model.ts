@@ -10,6 +10,7 @@ export interface MedicoResponse {
   especialidadNombre: string;
   subespecialidadNombre?: string;
   sedes: string[];
+  consultorioIds?: number[];
   activo: boolean;
 }
 
@@ -23,6 +24,7 @@ export interface MedicoCreateRequest {
   especialidadId: number;
   subespecialidadId?: number;
   sedesIds: number[];
+  consultorioIds?: number[];
 }
 
 export interface MedicoUpdateRequest {
@@ -34,4 +36,5 @@ export interface MedicoUpdateRequest {
   especialidadId: number;
   subespecialidadId?: number;
   sedesIds: number[];
+  consultorioIds?: number[];
 }

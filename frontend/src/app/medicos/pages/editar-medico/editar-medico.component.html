@@ -77,6 +77,24 @@
         @if (campoInvalido('sedesIds')) {
           <div class="text-danger small fw-semibold mt-2">Seleccione al menos una sede.</div>
         }
+
+        @if (consultoriosAgrupadosPorSede.length > 0) {
+          <div class="form-section-title mt-4">Consultorios asignados (Sugerencia para citas)</div>
+          @for (grupo of consultoriosAgrupadosPorSede; track grupo.sedeNombre) {
+            <fieldset class="sede-picker mt-2">
+              <legend>Sede: {{ grupo.sedeNombre }}</legend>
+              @for (c of grupo.list; track c.id) {
+                <label class="sede-option">
+                  <input type="checkbox" [checked]="consultorioSeleccionado(c.id)" (change)="toggleConsultorio(c.id, $any($event.target).checked)" />
+                  <span>
+                    <strong>{{ c.nombre }}</strong>
+                    <small>Piso {{ c.piso || 'N/A' }} · {{ c.area || 'General' }}</small>
+                  </span>
+                </label>
+              }
+            </fieldset>
+          }
+        }
         <div class="form-actions">
           <a class="btn btn-outline-secondary" routerLink="/medicos">Cancelar</a>
           <button type="submit" class="btn btn-primary" [disabled]="guardando">

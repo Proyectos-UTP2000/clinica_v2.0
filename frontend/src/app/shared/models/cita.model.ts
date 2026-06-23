@@ -11,12 +11,15 @@ export interface CitaResponse {
   pagoAnticipado?: boolean;
   beneficiosPagoAnticipado?: boolean;
   reprogramacionesRestantes?: number;
+  consultorioId?: number;
+  consultorioNombre?: string;
 }
 
 export interface CitaCreateRequest {
   pacienteId: number;
   doctorId: number;
   sedeId: number;
+  consultorioId: number;
   fechaHoraInicio: string;
   pagoAnticipado?: boolean;
 }

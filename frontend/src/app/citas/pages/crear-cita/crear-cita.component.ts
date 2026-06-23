@@ -7,7 +7,10 @@ import { CitaCreateRequest, DisponibilidadSlotResponse } from '../../../shared/m
 import { MedicoResponse } from '../../../shared/models/medico.model';
 import { PacienteResponse } from '../../../shared/models/paciente.model';
 import { SedeResponse } from '../../../shared/models/sede.model';
+import { ConsultorioResponse } from '../../../shared/models/consultorio.model';
 import { CitaService } from '../../services/cita.service';
+import { ConsultorioService } from '../../../consultorios/services/consultorio.service';
+import { ApiErrorService } from '../../../core/services/api-error.service';
 
 @Component({
     selector: 'app-crear-cita',
@@ -19,9 +22,11 @@ export class CrearCitaComponent implements OnInit {
   pacientes: PacienteResponse[] = [];
   medicos: MedicoResponse[] = [];
   sedes: SedeResponse[] = [];
+  consultorios: ConsultorioResponse[] = [];
   slots: DisponibilidadSlotResponse[] = [];
   cargandoCatalogos = false;
   cargandoSlots = false;
+  cargandoConsultorios = false;
   guardando = false;
   mensajeError = '';
 
@@ -29,6 +34,7 @@ export class CrearCitaComponent implements OnInit {
     pacienteId: ['', [Validators.required]],
     doctorId: ['', [Validators.required]],
     sedeId: ['', [Validators.required]],
+    consultorioId: ['', [Validators.required]],
     fecha: ['', [Validators.required]],
     fechaHoraInicio: ['', [Validators.required]],
     pagoAnticipado: [false]
@@ -37,6 +43,8 @@ export class CrearCitaComponent implements OnInit {
   constructor(
     private readonly fb: FormBuilder,
     private readonly citaService: CitaService,
+    private readonly consultorioService: ConsultorioService,
+    private readonly apiErrorService: ApiErrorService,
     private readonly route: ActivatedRoute,
     private readonly router: Router
   ) {}
@@ -51,6 +59,43 @@ export class CrearCitaComponent implements OnInit {
         this.slots = [];
       }
     });
+
+    this.citaForm.get('sedeId')?.valueChanges.subscribe((sedeId) => {
+      if (sedeId) {
+        this.cargarConsultorios(Number(sedeId));
+      } else {
+        this.consultorios = [];
+        this.citaForm.patchValue({ consultorioId: '' });
+      }
+    });
+
+    this.citaForm.get('doctorId')?.valueChanges.subscribe(() => {
+      this.sugerirConsultorio();
+    });
+  }
+
+  cargarConsultorios(sedeId: number): void {
+    this.cargandoConsultorios = true;
+    this.consultorioService.listarPorSede(sedeId)
+      .pipe(finalize(() => (this.cargandoConsultorios = false)))
+      .subscribe({
+        next: (res) => {
+          this.consultorios = res;
+          this.sugerirConsultorio();
+        },
+        error: (err) => (this.mensajeError = this.apiErrorService.obtenerMensajeError(err))
+      });
+  }
+
+  sugerirConsultorio(): void {
+    const doctorId = Number(this.citaForm.value.doctorId);
+    const doctor = this.medicos.find(d => d.id === doctorId);
+    if (doctor && doctor.consultorioIds && doctor.consultorioIds.length > 0) {
+      const sugerido = this.consultorios.find(c => doctor.consultorioIds!.includes(c.id));
+      if (sugerido) {
+        this.citaForm.patchValue({ consultorioId: String(sugerido.id) });
+      }
+    }
   }
 
   cargarSlots(): void {
@@ -87,8 +132,8 @@ export class CrearCitaComponent implements OnInit {
       .pipe(finalize(() => (this.guardando = false)))
       .subscribe({
         next: () => this.router.navigateByUrl('/citas'),
-        error: () => {
-          this.mensajeError = 'No se pudo agendar la cita. Verifique disponibilidad y datos seleccionados.';
+        error: (err) => {
+          this.mensajeError = this.apiErrorService.obtenerMensajeError(err);
         }
       });
   }
@@ -121,6 +166,11 @@ export class CrearCitaComponent implements OnInit {
     return this.sedes.find((sede) => sede.id === id);
   }
 
+  get consultorioSeleccionado(): ConsultorioResponse | undefined {
+    const id = Number(this.citaForm.getRawValue().consultorioId);
+    return this.consultorios.find((c) => c.id === id);
+  }
+
   private cargarCatalogos(): void {
     this.cargandoCatalogos = true;
     forkJoin({
@@ -148,6 +198,7 @@ export class CrearCitaComponent implements OnInit {
       pacienteId: Number(raw.pacienteId),
       doctorId: Number(raw.doctorId),
       sedeId: Number(raw.sedeId),
+      consultorioId: Number(raw.consultorioId),
       fechaHoraInicio: raw.fechaHoraInicio ?? '',
       pagoAnticipado: Boolean(raw.pagoAnticipado)
     };

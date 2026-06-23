@@ -50,6 +50,16 @@
               <div class="invalid-feedback">Seleccione un medico.</div>
             </div>
             <div>
+              <label for="consultorioId" class="form-label">Consultorio</label>
+              <select id="consultorioId" class="form-select" formControlName="consultorioId" [class.is-invalid]="campoInvalido('consultorioId')">
+                <option value="">Seleccione</option>
+                @for (consultorio of consultorios; track consultorio.id) {
+                  <option [value]="consultorio.id">{{ consultorio.nombre }} {{ consultorio.piso ? '· Piso ' + consultorio.piso : '' }}</option>
+                }
+              </select>
+              <div class="invalid-feedback">Seleccione un consultorio.</div>
+            </div>
+            <div>
               <label for="fecha" class="form-label">Fecha</label>
               <input id="fecha" type="date" class="form-control" formControlName="fecha" [class.is-invalid]="campoInvalido('fecha')" />
               <div class="invalid-feedback">Seleccione una fecha.</div>
@@ -111,6 +121,10 @@
           <div>
             <dt>Sede</dt>
             <dd>{{ sedeSeleccionada?.nombre || 'Sin seleccionar' }}</dd>
+          </div>
+          <div>
+            <dt>Consultorio</dt>
+            <dd>{{ consultorioSeleccionado ? consultorioSeleccionado.nombre : 'Sin seleccionar' }}</dd>
           </div>
           <div>
             <dt>Horario</dt>

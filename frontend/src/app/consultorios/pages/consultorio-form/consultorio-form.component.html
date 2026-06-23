@@ -1,0 +1,64 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Consultorios"
+    [title]="consultorioId ? 'Editar consultorio' : 'Nuevo consultorio'"
+    description="Registre o actualice la información del consultorio y su ubicación."
+  ></app-page-header>
+
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (cargando) {
+    <div class="loading-state">Cargando datos del consultorio...</div>
+  }
+
+  @if (!cargando) {
+    <form class="feature-panel" [formGroup]="consultorioForm" (ngSubmit)="guardar()">
+      <div class="feature-panel-body form-grid">
+        <label class="form-label">
+          Sede
+          <select class="form-select" formControlName="sedeId" [class.is-invalid]="campoInvalido('sedeId')">
+            <option [ngValue]="null" disabled>Seleccione una sede</option>
+            @for (sede of sedes; track sede.id) {
+              <option [ngValue]="sede.id">{{ sede.nombre }}</option>
+            }
+          </select>
+          @if (campoInvalido('sedeId')) {
+            <span class="invalid-feedback">La sede es requerida.</span>
+          }
+        </label>
+
+        <label class="form-label">
+          Nombre o Código
+          <input class="form-control" formControlName="nombre" placeholder="Ej. Consultorio 101" [class.is-invalid]="campoInvalido('nombre')" />
+          @if (campoInvalido('nombre')) {
+            <span class="invalid-feedback">El nombre es requerido (máx. 50 caracteres).</span>
+          }
+        </label>
+
+        <label class="form-label">
+          Piso
+          <input class="form-control" formControlName="piso" placeholder="Ej. 1" [class.is-invalid]="campoInvalido('piso')" />
+          @if (campoInvalido('piso')) {
+            <span class="invalid-feedback">El piso supera los 10 caracteres permitidos.</span>
+          }
+        </label>
+
+        <label class="form-label">
+          Área o Especialidad Asignada
+          <input class="form-control" formControlName="area" placeholder="Ej. Cardiología" [class.is-invalid]="campoInvalido('area')" />
+          @if (campoInvalido('area')) {
+            <span class="invalid-feedback">El área supera los 50 caracteres permitidos.</span>
+          }
+        </label>
+
+        <div class="form-actions grid-span-2">
+          <a class="btn btn-outline-secondary" routerLink="/consultorios">Cancelar</a>
+          <button class="btn btn-primary" type="submit" [disabled]="guardando">
+            {{ guardando ? 'Guardando...' : 'Guardar consultorio' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  }
+</section>

@@ -28,7 +28,8 @@ export class SidebarComponent {
     { label: 'Sedes', route: '/sedes', permiso: 'sedes.ver', code: 'SD', group: 'Administracion' },
     { label: 'Roles', route: '/roles', permiso: 'roles.ver', code: 'RL', group: 'Administracion' },
     { label: 'Usuarios', route: '/usuarios', permiso: 'usuarios.ver', code: 'US', group: 'Administracion' },
-    { label: 'Especialidades', route: '/especialidades', permiso: 'especialidades.ver', code: 'ES', group: 'Administracion' }
+    { label: 'Especialidades', route: '/especialidades', permiso: 'especialidades.ver', code: 'ES', group: 'Administracion' },
+    { label: 'Consultorios', route: '/consultorios', permiso: 'consultorios.ver', code: 'CS', group: 'Administracion' }
   ];
 
   groups: MenuItem['group'][] = ['Operacion', 'Administracion'];

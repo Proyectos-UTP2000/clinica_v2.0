@@ -1,15 +1,24 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { ApiResponse } from '../../shared/models/api-response.model';
 import { Page } from '../../shared/models/page.model';
 import { SedeCreateRequest, SedeResponse, SedeUpdateRequest } from '../../shared/models/sede.model';
 
 const API_URL = 'http://localhost:8080/api';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SedeService {
   constructor(private readonly http: HttpClient) {}
+
+  listarTodas(): Observable<SedeResponse[]> {
+    const params = new HttpParams().set('page', 0).set('size', 100);
+    return this.http.get<Page<SedeResponse>>(`${API_URL}/sedes`, { params }).pipe(
+      map((response) => response.content)
+    );
+  }
 
   listar(page = 0, size = 10): Observable<Page<SedeResponse>> {
     const params = new HttpParams().set('page', page).set('size', size);

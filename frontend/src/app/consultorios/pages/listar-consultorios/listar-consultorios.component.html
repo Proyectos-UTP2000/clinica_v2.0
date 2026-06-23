@@ -1,0 +1,64 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Infraestructura"
+    title="Gestión de consultorios"
+    description="Controle los consultorios físicos asignados a cada sede médica."
+    >
+    @if (authService.hasPermission('consultorios.crear')) {
+      <a class="btn btn-primary" routerLink="/consultorios/crear">Nuevo consultorio</a>
+    }
+  </app-page-header>
+
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (mensajeExito) {
+    <div class="alert alert-success" role="status">{{ mensajeExito }}</div>
+  }
+
+  <div class="table-shell">
+    @if (cargando) {
+      <div class="loading-state">Cargando consultorios...</div>
+    }
+    @if (!cargando && consultorios.length === 0) {
+      <div class="empty-state">No hay consultorios registrados.</div>
+    }
+    @if (!cargando && consultorios.length > 0) {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Sede</th>
+              <th>Nombre / Código</th>
+              <th>Piso</th>
+              <th>Área / Especialidad</th>
+              <th>Estado</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (consultorio of consultorios; track consultorio.id) {
+              <tr>
+                <td class="fw-semibold">{{ consultorio.sedeNombre }}</td>
+                <td>{{ consultorio.nombre }}</td>
+                <td>{{ consultorio.piso || 'N/A' }}</td>
+                <td>{{ consultorio.area || 'N/A' }}</td>
+                <td><span class="status-pill" [class.is-active]="consultorio.activo">{{ consultorio.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td class="text-end">
+                  @if (authService.hasPermission('consultorios.editar')) {
+                    <a class="btn btn-sm btn-outline-secondary me-2" [routerLink]="['/consultorios/editar', consultorio.id]">Editar</a>
+                  }
+                  @if (authService.hasPermission('consultorios.eliminar') && consultorio.activo) {
+                    <button class="btn btn-sm btn-outline-danger" type="button" (click)="desactivarConsultorio(consultorio)">Desactivar</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <app-paginator [page]="page" [totalPages]="totalPages" [totalElements]="totalElements" [size]="size" (pageChange)="cargarConsultorios($event)"></app-paginator>
+</section>

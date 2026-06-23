@@ -55,6 +55,10 @@ const routes: Routes = [
         loadChildren: () => import('./especialidades/especialidades.module').then((m) => m.EspecialidadesModule)
       },
       {
+        path: 'consultorios',
+        loadChildren: () => import('./consultorios/consultorios.module').then((m) => m.ConsultoriosModule)
+      },
+      {
         path: 'disponibilidad',
         loadChildren: () => import('./disponibilidad/disponibilidad.module').then((m) => m.DisponibilidadModule)
       }

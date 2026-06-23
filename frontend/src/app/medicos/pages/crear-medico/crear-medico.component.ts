@@ -5,7 +5,10 @@ import { finalize, forkJoin } from 'rxjs';
 import { EspecialidadResponse } from '../../../shared/models/especialidad.model';
 import { MedicoCreateRequest } from '../../../shared/models/medico.model';
 import { SedeResponse } from '../../../shared/models/sede.model';
+import { ConsultorioResponse } from '../../../shared/models/consultorio.model';
 import { MedicoService } from '../../services/medico.service';
+import { ConsultorioService } from '../../../consultorios/services/consultorio.service';
+import { ApiErrorService } from '../../../core/services/api-error.service';
 
 @Component({
     selector: 'app-crear-medico',
@@ -18,6 +21,7 @@ export class CrearMedicoComponent implements OnInit {
   especialidades: EspecialidadResponse[] = [];
   subespecialidades: EspecialidadResponse[] = [];
   sedes: SedeResponse[] = [];
+  consultorios: ConsultorioResponse[] = [];
   cargandoCatalogos = false;
   consultandoDni = false;
   guardando = false;
@@ -33,12 +37,15 @@ export class CrearMedicoComponent implements OnInit {
     fechaNacimiento: [''],
     especialidadId: ['', [Validators.required]],
     subespecialidadId: [''],
-    sedesIds: [[] as number[], [this.alMenosUnaSede]]
+    sedesIds: [[] as number[], [this.alMenosUnaSede]],
+    consultorioIds: [[] as number[]]
   });
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly medicoService: MedicoService,
+    private readonly consultorioService: ConsultorioService,
+    private readonly apiErrorService: ApiErrorService,
     private readonly router: Router
   ) {}
 
@@ -64,8 +71,8 @@ export class CrearMedicoComponent implements OnInit {
       .pipe(finalize(() => (this.guardando = false)))
       .subscribe({
         next: () => this.router.navigateByUrl('/medicos'),
-        error: () => {
-          this.mensajeError = 'No se pudo crear el medico. Revise si el DNI o email ya existen.';
+        error: (err) => {
+          this.mensajeError = this.apiErrorService.obtenerMensajeError(err);
         }
       });
   }
@@ -107,6 +114,37 @@ export class CrearMedicoComponent implements OnInit {
     return ((this.medicoForm.get('sedesIds')?.value as number[]) ?? []).includes(sedeId);
   }
 
+  toggleConsultorio(consultorioId: number, checked: boolean): void {
+    const control = this.medicoForm.get('consultorioIds');
+    const actuales = [...((control?.value as number[]) ?? [])];
+    const siguiente = checked ? [...actuales, consultorioId] : actuales.filter((id) => id !== consultorioId);
+    control?.setValue(siguiente);
+    control?.markAsTouched();
+  }
+
+  consultorioSeleccionado(consultorioId: number): boolean {
+    return ((this.medicoForm.get('consultorioIds')?.value as number[]) ?? []).includes(consultorioId);
+  }
+
+  get consultoriosAgrupadosPorSede(): { sedeNombre: string, list: ConsultorioResponse[] }[] {
+    const sedesSeleccionadas = (this.medicoForm.get('sedesIds')?.value as number[]) ?? [];
+    const agrupados: { [key: number]: { name: string, list: ConsultorioResponse[] } } = {};
+    
+    this.consultorios.forEach(c => {
+      if (sedesSeleccionadas.includes(c.sedeId)) {
+        if (!agrupados[c.sedeId]) {
+          agrupados[c.sedeId] = { name: c.sedeNombre, list: [] };
+        }
+        agrupados[c.sedeId].list.push(c);
+      }
+    });
+    
+    return Object.values(agrupados).map(item => ({
+      sedeNombre: item.name,
+      list: item.list
+    }));
+  }
+
   campoInvalido(campo: string): boolean {
     const control = this.medicoForm.get(campo);
     return Boolean(control?.invalid && (control.dirty || control.touched));
@@ -116,17 +154,19 @@ export class CrearMedicoComponent implements OnInit {
     this.cargandoCatalogos = true;
     forkJoin({
       especialidades: this.medicoService.getEspecialidades(),
-      sedes: this.medicoService.getSedes()
+      sedes: this.medicoService.getSedes(),
+      consultorios: this.consultorioService.listar(0, 100)
     })
       .pipe(finalize(() => (this.cargandoCatalogos = false)))
       .subscribe({
-        next: ({ especialidades, sedes }) => {
+        next: ({ especialidades, sedes, consultorios }) => {
           this.todasEspecialidades = especialidades;
           this.especialidades = especialidades.filter((item) => !item.especialidadPadreId);
           this.sedes = sedes;
+          this.consultorios = consultorios.content;
         },
         error: () => {
-          this.mensajeError = 'No se pudieron cargar especialidades o sedes.';
+          this.mensajeError = 'No se pudieron cargar especialidades, sedes o consultorios.';
         }
       });
   }
@@ -146,7 +186,8 @@ export class CrearMedicoComponent implements OnInit {
       fechaNacimiento: raw.fechaNacimiento || undefined,
       especialidadId: Number(raw.especialidadId),
       subespecialidadId: raw.subespecialidadId ? Number(raw.subespecialidadId) : undefined,
-      sedesIds: raw.sedesIds ?? []
+      sedesIds: raw.sedesIds ?? [],
+      consultorioIds: raw.consultorioIds ?? []
     };
   }
 

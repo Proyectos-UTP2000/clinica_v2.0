@@ -28,4 +28,5 @@ public class MedicoUpdateRequest {
 
     private Long subespecialidadId;
     private List<Long> sedesIds;
+    private List<Long> consultorioIds;
 }

@@ -20,4 +20,6 @@ public class CitaResponse {
     private Boolean pagoAnticipado;
     private Boolean beneficiosPagoAnticipado;
     private Integer reprogramacionesRestantes;
+    private Long consultorioId;
+    private String consultorioNombre;
 }

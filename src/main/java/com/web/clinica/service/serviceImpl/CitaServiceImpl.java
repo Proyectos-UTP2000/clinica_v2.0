@@ -13,7 +13,9 @@ import com.web.clinica.model.ExcepcionDisponibilidad;
 import com.web.clinica.model.Paciente;
 import com.web.clinica.model.Sede;
 import com.web.clinica.model.Usuario;
+import com.web.clinica.model.Consultorio;
 import com.web.clinica.repository.CitaRepository;
+import com.web.clinica.repository.ConsultorioRepository;
 import com.web.clinica.repository.DisponibilidadBaseRepository;
 import com.web.clinica.repository.DoctorRepository;
 import com.web.clinica.repository.ExcepcionDisponibilidadRepository;
@@ -53,6 +55,7 @@ public class CitaServiceImpl implements ICitaService {
     private final DisponibilidadBaseRepository disponibilidadBaseRepository;
     private final ExcepcionDisponibilidadRepository excepcionDisponibilidadRepository;
     private final SecretariaRepository secretariaRepository;
+    private final ConsultorioRepository consultorioRepository;
     private final EmailService emailService;
 
     /** Agenda una cita interna validando disponibilidad y conflictos. */
@@ -68,10 +71,24 @@ public class CitaServiceImpl implements ICitaService {
         validarDisponibilidad(doctor, sede, solicitud.getFechaHoraInicio(), fechaHoraFin, null);
         validarPacienteSinCruce(paciente, solicitud.getFechaHoraInicio(), fechaHoraFin, null);
 
+        Consultorio consultorio = consultorioRepository.findById(solicitud.getConsultorioId())
+                .orElseThrow(() -> new ResourceNotFoundException("Consultorio no encontrado"));
+        if (!consultorio.getSede().getId().equals(sede.getId())) {
+            throw new BadRequestException("El consultorio no pertenece a la sede seleccionada");
+        }
+        if (!Boolean.TRUE.equals(consultorio.getActivo())) {
+            throw new BadRequestException("El consultorio no está activo");
+        }
+        long solapadas = citaRepository.countCitasSolapadasEnConsultorio(consultorio.getId(), solicitud.getFechaHoraInicio(), fechaHoraFin, null);
+        if (solapadas > 0) {
+            throw new BadRequestException("El consultorio ya está ocupado en ese horario");
+        }
+
         Cita cita = new Cita();
         cita.setPaciente(paciente);
         cita.setDoctor(doctor);
         cita.setSede(sede);
+        cita.setConsultorio(consultorio);
         cita.setFechaHoraInicio(solicitud.getFechaHoraInicio());
         cita.setFechaHoraFin(fechaHoraFin);
         cita.setEstado(ESTADO_PROGRAMADA);
@@ -128,6 +145,13 @@ public class CitaServiceImpl implements ICitaService {
         Doctor doctorDestino = resolverDoctorDestino(cita, doctorId);
         validarDisponibilidad(doctorDestino, cita.getSede(), nuevaFechaHora, nuevaFechaHoraFin, cita.getId());
         validarPacienteSinCruce(cita.getPaciente(), nuevaFechaHora, nuevaFechaHoraFin, cita.getId());
+
+        if (cita.getConsultorio() != null) {
+            long solapadas = citaRepository.countCitasSolapadasEnConsultorio(cita.getConsultorio().getId(), nuevaFechaHora, nuevaFechaHoraFin, cita.getId());
+            if (solapadas > 0) {
+                throw new BadRequestException("El consultorio asignado ya está ocupado en ese horario");
+            }
+        }
 
         cita.setDoctor(doctorDestino);
         cita.setFechaHoraInicio(nuevaFechaHora);
@@ -434,6 +458,8 @@ public class CitaServiceImpl implements ICitaService {
                 .pagoAnticipado(cita.getPagoAnticipado())
                 .beneficiosPagoAnticipado(Boolean.TRUE.equals(cita.getPagoAnticipado()))
                 .reprogramacionesRestantes(cita.getReprogramacionesRestantes())
+                .consultorioId(cita.getConsultorio() != null ? cita.getConsultorio().getId() : null)
+                .consultorioNombre(cita.getConsultorio() != null ? cita.getConsultorio().getNombre() : null)
                 .build();
     }
 }

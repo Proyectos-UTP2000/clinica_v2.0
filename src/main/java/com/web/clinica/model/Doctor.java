@@ -43,4 +43,10 @@ public class Doctor {
             joinColumns = @JoinColumn(name = "doctor_id"),
             inverseJoinColumns = @JoinColumn(name = "sede_id"))
     private Set<Sede> sedes = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(name = "doctor_consultorio",
+            joinColumns = @JoinColumn(name = "doctor_id"),
+            inverseJoinColumns = @JoinColumn(name = "consultorio_id"))
+    private Set<Consultorio> consultorios = new HashSet<>();
 }

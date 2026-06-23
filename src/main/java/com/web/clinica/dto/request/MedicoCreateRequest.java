@@ -31,4 +31,5 @@ public class MedicoCreateRequest {
 
     private Long subespecialidadId;
     private List<Long> sedesIds;
+    private List<Long> consultorioIds;
 }

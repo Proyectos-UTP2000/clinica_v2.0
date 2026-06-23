@@ -63,4 +63,8 @@ public class Cita {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "justificacion_id")
     private Justificacion justificacion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "consultorio_id", nullable = false)
+    private Consultorio consultorio;
 }

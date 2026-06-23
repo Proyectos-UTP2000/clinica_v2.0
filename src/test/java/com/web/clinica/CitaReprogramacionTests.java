@@ -16,6 +16,7 @@ import com.web.clinica.model.Paciente;
 import com.web.clinica.model.Sede;
 import com.web.clinica.model.Usuario;
 import com.web.clinica.repository.CitaRepository;
+import com.web.clinica.repository.ConsultorioRepository;
 import com.web.clinica.repository.DisponibilidadBaseRepository;
 import com.web.clinica.repository.DoctorRepository;
 import com.web.clinica.repository.ExcepcionDisponibilidadRepository;
@@ -59,6 +60,7 @@ class CitaReprogramacionTests {
                 disponibilidadBaseRepository,
                 excepcionDisponibilidadRepository,
                 secretariaRepository,
+                mock(ConsultorioRepository.class),
                 mock(EmailService.class)
         );
     }

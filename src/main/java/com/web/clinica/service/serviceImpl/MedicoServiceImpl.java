@@ -5,11 +5,13 @@ import com.web.clinica.dto.request.MedicoUpdateRequest;
 import com.web.clinica.dto.response.MedicoResponse;
 import com.web.clinica.exception.BadRequestException;
 import com.web.clinica.exception.ResourceNotFoundException;
+import com.web.clinica.model.Consultorio;
 import com.web.clinica.model.Doctor;
 import com.web.clinica.model.Especialidad;
 import com.web.clinica.model.Rol;
 import com.web.clinica.model.Sede;
 import com.web.clinica.model.Usuario;
+import com.web.clinica.repository.ConsultorioRepository;
 import com.web.clinica.repository.DoctorRepository;
 import com.web.clinica.repository.EspecialidadRepository;
 import com.web.clinica.repository.RolRepository;
@@ -47,6 +49,7 @@ public class MedicoServiceImpl implements IMedicoService {
     private final RolRepository rolRepository;
     private final EspecialidadRepository especialidadRepository;
     private final SedeRepository sedeRepository;
+    private final ConsultorioRepository consultorioRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final SecureRandom generadorSeguro;
@@ -78,7 +81,7 @@ public class MedicoServiceImpl implements IMedicoService {
 
         Doctor doctor = new Doctor();
         doctor.setUsuario(usuarioRepository.save(usuario));
-        aplicarDatosMedicos(doctor, solicitud.getEspecialidadId(), solicitud.getSubespecialidadId(), solicitud.getSedesIds());
+        aplicarDatosMedicos(doctor, solicitud.getEspecialidadId(), solicitud.getSubespecialidadId(), solicitud.getSedesIds(), solicitud.getConsultorioIds());
         Doctor doctorGuardado = doctorRepository.save(doctor);
 
         emailService.enviarCorreo(
@@ -100,7 +103,7 @@ public class MedicoServiceImpl implements IMedicoService {
         usuario.setEmail(solicitud.getEmail());
         usuario.setTelefono(solicitud.getTelefono());
         usuario.setFechaNacimiento(solicitud.getFechaNacimiento());
-        aplicarDatosMedicos(doctor, solicitud.getEspecialidadId(), solicitud.getSubespecialidadId(), solicitud.getSedesIds());
+        aplicarDatosMedicos(doctor, solicitud.getEspecialidadId(), solicitud.getSubespecialidadId(), solicitud.getSedesIds(), solicitud.getConsultorioIds());
         usuarioRepository.save(usuario);
         return convertirRespuesta(doctorRepository.save(doctor));
     }
@@ -169,14 +172,27 @@ public class MedicoServiceImpl implements IMedicoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Medico no encontrado"));
     }
 
-    /** Aplica especialidad, subespecialidad y sedes al doctor. */
-    private void aplicarDatosMedicos(Doctor doctor, Long especialidadId, Long subespecialidadId, List<Long> sedesIds) {
+    /** Aplica especialidad, subespecialidad, sedes y consultorios al doctor. */
+    private void aplicarDatosMedicos(Doctor doctor, Long especialidadId, Long subespecialidadId, List<Long> sedesIds, List<Long> consultorioIds) {
         Especialidad especialidad = especialidadRepository.findById(especialidadId)
                 .orElseThrow(() -> new ResourceNotFoundException("Especialidad no encontrada"));
         doctor.setEspecialidad(especialidad);
         doctor.setSubespecialidad(subespecialidadId == null ? null : especialidadRepository.findById(subespecialidadId)
                 .orElseThrow(() -> new ResourceNotFoundException("Subespecialidad no encontrada")));
         doctor.setSedes(obtenerSedes(sedesIds));
+        doctor.setConsultorios(obtenerConsultorios(consultorioIds));
+    }
+
+    /** Obtiene los consultorios solicitados y valida que existan todos. */
+    private Set<Consultorio> obtenerConsultorios(List<Long> consultorioIds) {
+        if (CollectionUtils.isEmpty(consultorioIds)) {
+            return new HashSet<>();
+        }
+        List<Consultorio> consultorios = consultorioRepository.findAllById(consultorioIds);
+        if (consultorios.size() != new HashSet<>(consultorioIds).size()) {
+            throw new ResourceNotFoundException("Uno o mas consultorios no existen");
+        }
+        return new HashSet<>(consultorios);
     }
 
     /** Obtiene las sedes solicitadas y valida que existan todas. */
@@ -242,6 +258,7 @@ public class MedicoServiceImpl implements IMedicoService {
                 .especialidadNombre(doctor.getEspecialidad().getNombre())
                 .subespecialidadNombre(doctor.getSubespecialidad() == null ? null : doctor.getSubespecialidad().getNombre())
                 .sedes(doctor.getSedes().stream().map(Sede::getNombre).sorted().toList())
+                .consultorioIds(doctor.getConsultorios().stream().map(Consultorio::getId).toList())
                 .activo(usuario.getActivo())
                 .build();
     }

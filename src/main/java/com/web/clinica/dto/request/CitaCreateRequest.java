@@ -19,5 +19,8 @@ public class CitaCreateRequest {
     @NotNull
     private LocalDateTime fechaHoraInicio;
 
+    @NotNull(message = "El consultorio es obligatorio")
+    private Long consultorioId;
+
     private Boolean pagoAnticipado;
 }

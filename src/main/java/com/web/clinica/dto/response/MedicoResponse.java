@@ -20,5 +20,6 @@ public class MedicoResponse {
     private String especialidadNombre;
     private String subespecialidadNombre;
     private List<String> sedes;
+    private List<Long> consultorioIds;
     private Boolean activo;
 }

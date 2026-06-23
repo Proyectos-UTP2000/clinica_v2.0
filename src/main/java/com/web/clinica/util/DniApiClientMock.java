@@ -1,8 +1,5 @@
 package com.web.clinica.util;
 
-import org.springframework.stereotype.Component;
-
-@Component
 public class DniApiClientMock implements DniApiClient {
 
     /** Devuelve informacion mock hasta integrar la API externa real. */

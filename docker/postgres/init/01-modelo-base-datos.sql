@@ -91,6 +91,24 @@ CREATE TABLE doctor_sede (
 );
 COMMENT ON TABLE doctor_sede IS 'Sedes donde atiende cada doctor.';
 
+CREATE TABLE consultorio (
+    id BIGSERIAL PRIMARY KEY,
+    sede_id BIGINT NOT NULL REFERENCES sede(id) ON DELETE RESTRICT,
+    nombre VARCHAR(50) NOT NULL,
+    piso VARCHAR(10),
+    area VARCHAR(50),
+    activo BOOLEAN DEFAULT TRUE,
+    UNIQUE(sede_id, nombre)
+);
+COMMENT ON TABLE consultorio IS 'Consultorios fisicos de cada sede.';
+
+CREATE TABLE doctor_consultorio (
+    doctor_id BIGINT NOT NULL REFERENCES doctor(id) ON DELETE CASCADE,
+    consultorio_id BIGINT NOT NULL REFERENCES consultorio(id) ON DELETE CASCADE,
+    PRIMARY KEY (doctor_id, consultorio_id)
+);
+COMMENT ON TABLE doctor_consultorio IS 'Relacion de consultorios preferidos/asignados por doctor.';
+
 CREATE TABLE secretaria (
     id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT NOT NULL UNIQUE REFERENCES usuario(id) ON DELETE RESTRICT
@@ -147,6 +165,7 @@ CREATE TABLE cita (
     origen VARCHAR(20) NOT NULL CHECK (origen IN ('web', 'interno')),
     creado_por_usuario_id BIGINT REFERENCES usuario(id) ON DELETE SET NULL,
     justificacion_id BIGINT REFERENCES justificacion(id) ON DELETE SET NULL,
+    consultorio_id BIGINT NOT NULL REFERENCES consultorio(id) ON DELETE RESTRICT,
     CONSTRAINT ck_cita_rango_horario CHECK (fecha_hora_fin > fecha_hora_inicio),
     CONSTRAINT ck_cita_creador_origen CHECK (
         (origen = 'interno' AND creado_por_usuario_id IS NOT NULL)

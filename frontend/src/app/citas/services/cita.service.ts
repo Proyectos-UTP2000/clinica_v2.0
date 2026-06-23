@@ -121,4 +121,8 @@ export class CitaService {
     const params = new HttpParams().set('page', 0).set('size', 100);
     return this.http.get<Page<SedeResponse>>(`${API_URL}/sedes`, { params }).pipe(map((response) => response.content));
   }
+
+  listarDisponibilidadBase(doctorId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${API_URL}/disponibilidad/doctor/${doctorId}/base`);
+  }
 }

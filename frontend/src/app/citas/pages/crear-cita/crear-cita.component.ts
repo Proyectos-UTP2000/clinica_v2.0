@@ -30,6 +30,7 @@ export class CrearCitaComponent implements OnInit {
   guardando = false;
   mensajeError = '';
   today = new Date().toISOString().split('T')[0];
+  diasAtencion = '';
 
   citaForm = this.fb.group({
     pacienteId: ['', [Validators.required]],
@@ -70,8 +71,9 @@ export class CrearCitaComponent implements OnInit {
       }
     });
 
-    this.citaForm.get('doctorId')?.valueChanges.subscribe(() => {
+    this.citaForm.get('doctorId')?.valueChanges.subscribe((doctorId) => {
       this.sugerirConsultorio();
+      this.cargarDiasAtencion(Number(doctorId));
     });
   }
 
@@ -97,6 +99,29 @@ export class CrearCitaComponent implements OnInit {
         this.citaForm.patchValue({ consultorioId: String(sugerido.id) });
       }
     }
+  }
+
+  cargarDiasAtencion(doctorId: number): void {
+    if (!doctorId) {
+      this.diasAtencion = '';
+      return;
+    }
+    this.citaService.listarDisponibilidadBase(doctorId).subscribe({
+      next: (bases) => {
+        if (!bases || bases.length === 0) {
+          this.diasAtencion = 'Este médico no tiene días de atención configurados.';
+          return;
+        }
+        const nombresDias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+        const dias = Array.from(new Set(bases.map(b => b.diaSemana)))
+          .sort((a, b) => (a as number) - (b as number))
+          .map(d => nombresDias[(d as number) - 1]);
+        this.diasAtencion = 'Días de atención: ' + dias.join(', ');
+      },
+      error: () => {
+        this.diasAtencion = '';
+      }
+    });
   }
 
   cargarSlots(): void {

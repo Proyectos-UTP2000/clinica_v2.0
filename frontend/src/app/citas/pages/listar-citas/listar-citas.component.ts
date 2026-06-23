@@ -29,6 +29,10 @@ export class ListarCitasComponent implements OnInit {
   mensajeExito = '';
   citaCancelar: CitaResponse | null = null;
   citaReprogramar: CitaResponse | null = null;
+  today = new Date().toISOString().split('T')[0];
+  slotsReprogramar: any[] = [];
+  cargandoSlotsReprogramar = false;
+  diasAtencionReprogramar = '';
 
   filtrosForm = this.fb.group({
     pacienteId: [''],
@@ -37,6 +41,7 @@ export class ListarCitasComponent implements OnInit {
   });
 
   reprogramarForm = this.fb.group({
+    fecha: [''],
     nuevaFechaHora: [''],
     doctorId: ['']
   });
@@ -61,6 +66,18 @@ export class ListarCitasComponent implements OnInit {
 
     this.sesionContextService.selectedSedeId$.subscribe(() => {
       this.cargarCitas(0);
+    });
+
+    this.reprogramarForm.get('fecha')?.valueChanges.subscribe(() => {
+      this.cargarSlotsReprogramar();
+    });
+
+    this.reprogramarForm.get('doctorId')?.valueChanges.subscribe((doctorId) => {
+      const docId = doctorId ? Number(doctorId) : this.citaReprogramar?.doctorId;
+      if (docId) {
+        this.cargarDiasAtencionReprogramar(docId);
+      }
+      this.cargarSlotsReprogramar();
     });
   }
 
@@ -127,7 +144,80 @@ export class ListarCitasComponent implements OnInit {
 
   abrirReprogramacion(cita: CitaResponse): void {
     this.citaReprogramar = cita;
-    this.reprogramarForm.reset({ nuevaFechaHora: '', doctorId: '' });
+    this.slotsReprogramar = [];
+    this.diasAtencionReprogramar = '';
+    this.reprogramarForm.reset({ fecha: '', nuevaFechaHora: '', doctorId: '' });
+    this.cargarDiasAtencionReprogramar(cita.doctorId);
+  }
+
+  medicosFiltrados(): MedicoResponse[] {
+    if (!this.citaReprogramar) {
+      return [];
+    }
+    const currentDoc = this.medicos.find(m => m.id === this.citaReprogramar!.doctorId);
+    if (!currentDoc) {
+      return this.medicos;
+    }
+    return this.medicos.filter(m => 
+      m.especialidadNombre === currentDoc.especialidadNombre && 
+      m.id !== currentDoc.id
+    );
+  }
+
+  cargarSlotsReprogramar(): void {
+    if (!this.citaReprogramar) {
+      return;
+    }
+    const raw = this.reprogramarForm.getRawValue();
+    const doctorId = raw.doctorId ? Number(raw.doctorId) : this.citaReprogramar.doctorId;
+    const sedeId = this.citaReprogramar.sedeId;
+    const fecha = raw.fecha;
+
+    if (!fecha) {
+      this.slotsReprogramar = [];
+      return;
+    }
+
+    this.cargandoSlotsReprogramar = true;
+    this.citaService.obtenerSlotsDisponibles(doctorId, sedeId, fecha)
+      .pipe(finalize(() => (this.cargandoSlotsReprogramar = false)))
+      .subscribe({
+        next: (slots) => this.slotsReprogramar = slots,
+        error: () => {
+          this.slotsReprogramar = [];
+        }
+      });
+  }
+
+  cargarDiasAtencionReprogramar(doctorId: number): void {
+    if (!doctorId) {
+      this.diasAtencionReprogramar = '';
+      return;
+    }
+    this.citaService.listarDisponibilidadBase(doctorId).subscribe({
+      next: (bases) => {
+        if (!bases || bases.length === 0) {
+          this.diasAtencionReprogramar = 'Este médico no tiene días de atención configurados.';
+          return;
+        }
+        const nombresDias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+        const dias = Array.from(new Set(bases.map(b => b.diaSemana)))
+          .sort((a, b) => (a as number) - (b as number))
+          .map(d => nombresDias[(d as number) - 1]);
+        this.diasAtencionReprogramar = 'Días de atención: ' + dias.join(', ');
+      },
+      error: () => {
+        this.diasAtencionReprogramar = '';
+      }
+    });
+  }
+
+  seleccionarSlotReprogramar(slot: any): void {
+    this.reprogramarForm.patchValue({ nuevaFechaHora: slot.inicio });
+  }
+
+  horaSlot(slot: any): string {
+    return new Date(slot.inicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
   reprogramarCita(): void {

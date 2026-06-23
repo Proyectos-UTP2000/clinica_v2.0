@@ -144,18 +144,51 @@
           </div>
         }
         <form [formGroup]="reprogramarForm" (ngSubmit)="reprogramarCita()">
-          <label for="nuevaFechaHora" class="form-label">Nueva fecha y hora</label>
-          <input id="nuevaFechaHora" type="datetime-local" class="form-control" formControlName="nuevaFechaHora" />
-          <label for="doctorReprogramarId" class="form-label mt-3">Cambiar medico</label>
+          <label for="doctorReprogramarId" class="form-label">Cambiar médico (Opcional)</label>
           <select id="doctorReprogramarId" class="form-select" formControlName="doctorId">
-            <option value="">Mantener medico actual</option>
-            @for (medico of medicos; track medico) {
+            <option value="">Mantener médico actual</option>
+            @for (medico of medicosFiltrados(); track medico.id) {
               <option [value]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
             }
           </select>
-          <div class="dialog-actions">
+
+          <label for="fechaReprogramar" class="form-label mt-3">Fecha</label>
+          <input id="fechaReprogramar" type="date" class="form-control" formControlName="fecha" [min]="today" />
+          @if (diasAtencionReprogramar) {
+            <div class="text-info small mt-1 fw-semibold">{{ diasAtencionReprogramar }}</div>
+          }
+
+          <div class="mt-3">
+            <label class="form-label"><strong>Horarios disponibles</strong></label>
+            @if (cargandoSlotsReprogramar) {
+              <span class="text-muted small ms-2">Consultando...</span>
+            }
+            
+            @if (!cargandoSlotsReprogramar && slotsReprogramar.length === 0) {
+              <div class="text-muted small p-2 border rounded bg-light">
+                Seleccione una fecha para consultar disponibilidad.
+              </div>
+            }
+            
+            @if (slotsReprogramar.length > 0) {
+              <div class="d-flex flex-wrap gap-2 border rounded p-2 bg-light" style="max-height: 140px; overflow-y: auto;">
+                @for (slot of slotsReprogramar; track slot) {
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary"
+                    [class.active]="reprogramarForm.getRawValue().nuevaFechaHora === slot.inicio"
+                    (click)="seleccionarSlotReprogramar(slot)"
+                    >
+                    {{ horaSlot(slot) }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="dialog-actions mt-3">
             <button type="button" class="btn btn-outline-secondary" [disabled]="procesando" (click)="citaReprogramar = null">Cancelar</button>
-            <button type="submit" class="btn btn-primary" [disabled]="procesando">
+            <button type="submit" class="btn btn-primary" [disabled]="procesando || !reprogramarForm.getRawValue().nuevaFechaHora">
               @if (procesando) {
                 <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
               }

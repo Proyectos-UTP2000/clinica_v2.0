@@ -63,6 +63,9 @@
               <label for="fecha" class="form-label">Fecha</label>
               <input id="fecha" type="date" class="form-control" formControlName="fecha" [min]="today" [class.is-invalid]="campoInvalido('fecha')" />
               <div class="invalid-feedback">Seleccione una fecha.</div>
+              @if (diasAtencion) {
+                <div class="text-info small mt-1 fw-semibold">{{ diasAtencion }}</div>
+              }
             </div>
             <div class="form-grid-full mt-2">
               <div class="form-check p-2 border rounded">

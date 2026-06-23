@@ -96,4 +96,7 @@ public interface CitaRepository extends JpaRepository<Cita, Long>, JpaSpecificat
 
     @Query("SELECT COUNT(c) FROM Cita c WHERE c.consultorio.id = :consultorioId AND c.estado <> 'cancelada' AND c.fechaHoraInicio < :fin AND c.fechaHoraFin > :inicio AND (:excludeCitaId IS NULL OR c.id <> :excludeCitaId)")
     long countCitasSolapadasEnConsultorio(@Param("consultorioId") Long consultorioId, @Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin, @Param("excludeCitaId") Long excludeCitaId);
+
+    @Query("SELECT c FROM Cita c WHERE c.fechaHoraFin < :ahora AND c.estado IN :estados")
+    List<Cita> buscarCitasVencidas(@Param("ahora") LocalDateTime ahora, @Param("estados") List<String> estados);
 }

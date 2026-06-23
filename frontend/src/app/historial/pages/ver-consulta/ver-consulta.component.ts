@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs';
-import { ConsultaResponse } from '../../../shared/models/consulta.model';
+import { AdjuntoResponse, ConsultaResponse } from '../../../shared/models/consulta.model';
 import { HistorialService } from '../../services/historial.service';
 
 @Component({
@@ -14,6 +14,7 @@ export class VerConsultaComponent implements OnInit {
   consulta?: ConsultaResponse;
   cargando = false;
   guardandoNota = false;
+  descargandoAdjuntoId?: number;
   mensajeError = '';
   mensajeExito = '';
 
@@ -48,6 +49,24 @@ export class VerConsultaComponent implements OnInit {
           this.mensajeExito = 'Nota agregada correctamente.';
         },
         error: () => (this.mensajeError = 'No se pudo agregar la nota.')
+      });
+  }
+
+  descargarAdjunto(adjunto: AdjuntoResponse): void {
+    this.descargandoAdjuntoId = adjunto.id;
+    this.mensajeError = '';
+    this.historialService.descargarAdjunto(adjunto.id)
+      .pipe(finalize(() => (this.descargandoAdjuntoId = undefined)))
+      .subscribe({
+        next: (blob) => {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = adjunto.nombreArchivo;
+          link.click();
+          URL.revokeObjectURL(url);
+        },
+        error: () => (this.mensajeError = 'No se pudo descargar el adjunto.')
       });
   }
 

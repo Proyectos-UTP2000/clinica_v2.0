@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { ConsultaCreateRequest, ConsultaResponse } from '../../shared/models/consulta.model';
+import { AdjuntoResponse, ConsultaCreateRequest, ConsultaResponse } from '../../shared/models/consulta.model';
 import { MedicoResponse } from '../../shared/models/medico.model';
 import { PacienteResponse } from '../../shared/models/paciente.model';
 import { Page } from '../../shared/models/page.model';
@@ -48,5 +48,15 @@ export class HistorialService {
 
   agregarNota(consultaId: number, nota: string): Observable<ConsultaResponse> {
     return this.http.post<ConsultaResponse>(`${API_URL}/consultas/${consultaId}/notas`, { nota });
+  }
+
+  subirAdjunto(consultaId: number, archivo: File): Observable<AdjuntoResponse> {
+    const formData = new FormData();
+    formData.append('archivo', archivo);
+    return this.http.post<AdjuntoResponse>(`${API_URL}/consultas/${consultaId}/adjuntos`, formData);
+  }
+
+  descargarAdjunto(adjuntoId: number): Observable<Blob> {
+    return this.http.get(`${API_URL}/adjuntos/${adjuntoId}`, { responseType: 'blob' });
   }
 }

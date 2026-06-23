@@ -78,6 +78,17 @@
             <p class="text-muted">Sin estudios.</p>
           }
         </div>
+        <div class="grid-span-2">
+          <h3>Adjuntos</h3>
+          @for (adjunto of consulta.adjuntos; track adjunto) {
+            <button class="btn btn-sm btn-outline-primary me-2 mb-2" type="button" [disabled]="descargandoAdjuntoId === adjunto.id" (click)="descargarAdjunto(adjunto)">
+              {{ descargandoAdjuntoId === adjunto.id ? 'Descargando...' : adjunto.nombreArchivo }}
+            </button>
+          }
+          @if (consulta.adjuntos.length === 0) {
+            <p class="text-muted">Sin adjuntos.</p>
+          }
+        </div>
       </div>
     </div>
     <form class="feature-panel" [formGroup]="notaForm" (ngSubmit)="agregarNota()">

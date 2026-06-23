@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize, forkJoin } from 'rxjs';
+import { finalize, forkJoin, of, switchMap } from 'rxjs';
 import { EstudioRequest, IndicacionRequest, RecetaRequest } from '../../../shared/models/consulta.model';
 import { MedicoResponse } from '../../../shared/models/medico.model';
 import { PacienteResponse } from '../../../shared/models/paciente.model';
@@ -20,6 +20,7 @@ export class CrearConsultaComponent implements OnInit {
   cargando = false;
   guardando = false;
   mensajeError = '';
+  adjuntos: File[] = [];
 
   consultaForm = this.fb.group({
     pacienteId: [null as number | null, Validators.required],
@@ -92,6 +93,15 @@ export class CrearConsultaComponent implements OnInit {
     array.removeAt(index);
   }
 
+  seleccionarAdjuntos(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.adjuntos = Array.from(input.files ?? []);
+  }
+
+  quitarAdjunto(index: number): void {
+    this.adjuntos = this.adjuntos.filter((_, posicion) => posicion !== index);
+  }
+
   guardar(): void {
     if (this.consultaForm.invalid) {
       this.consultaForm.markAllAsTouched();
@@ -112,7 +122,16 @@ export class CrearConsultaComponent implements OnInit {
       recetas: (value.recetas ?? []) as RecetaRequest[],
       indicaciones: (value.indicaciones ?? []) as IndicacionRequest[],
       estudios: (value.estudios ?? []) as EstudioRequest[]
-    }).pipe(finalize(() => (this.guardando = false))).subscribe({
+    }).pipe(
+      switchMap((consulta) => {
+        if (this.adjuntos.length === 0) {
+          return of(consulta);
+        }
+        return forkJoin(this.adjuntos.map((archivo) => this.historialService.subirAdjunto(consulta.id, archivo)))
+          .pipe(switchMap(() => of(consulta)));
+      }),
+      finalize(() => (this.guardando = false))
+    ).subscribe({
       next: (consulta) => this.router.navigate(['/historial/ver', consulta.id]),
       error: () => (this.mensajeError = 'No se pudo registrar la consulta.')
     });

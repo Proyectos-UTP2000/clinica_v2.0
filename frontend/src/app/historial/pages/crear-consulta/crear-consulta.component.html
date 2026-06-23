@@ -109,9 +109,20 @@
         </div>
         <label class="form-label grid-span-2">
           Adjuntos
-          <input class="form-control" type="file" disabled />
-          <span class="form-text">Carga de archivos pendiente de endpoint dedicado.</span>
+          <input class="form-control" type="file" multiple (change)="seleccionarAdjuntos($event)" />
+          <span class="form-text">Los archivos se subiran despues de crear la consulta.</span>
         </label>
+        @if (adjuntos.length > 0) {
+          <div class="grid-span-2 detail-section">
+            @for (archivo of adjuntos; track archivo; let i = $index) {
+              <div class="nested-row">
+                <span>{{ archivo.name }}</span>
+                <small>{{ archivo.type || 'application/octet-stream' }}</small>
+                <button class="btn btn-outline-danger" type="button" (click)="quitarAdjunto(i)">Quitar</button>
+              </div>
+            }
+          </div>
+        }
         <div class="form-actions grid-span-2">
           <a class="btn btn-outline-secondary" routerLink="/historial">Cancelar</a>
           <button class="btn btn-primary" type="submit" [disabled]="guardando">

@@ -28,7 +28,7 @@
 
   @if (!cargando) {
     <div class="row g-3">
-      @for (metrica of metricas; track metrica) {
+      @for (metrica of metricas; track metrica.codigo) {
         <div class="col-12 col-md-6 col-xl-3">
           <article class="metric-card" [ngClass]="metrica.clase">
             <div class="metric-topline">
@@ -52,7 +52,7 @@
     </div>
 
     <div class="row g-3">
-      @for (link of quickLinks; track link) {
+      @for (link of quickLinks; track link.code) {
         <div class="col-12 col-md-6 col-xl-3">
           <a class="quick-card" [routerLink]="link.route">
             <div class="quick-card-heading">

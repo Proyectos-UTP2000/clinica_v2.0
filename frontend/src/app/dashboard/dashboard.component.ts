@@ -27,6 +27,7 @@ export class DashboardComponent implements OnInit {
   totales: DashboardTotalesResponse | null = null;
   cargando = true;
   mensajeError = '';
+  metricas: MetricCard[] = [];
 
   quickLinks: QuickLink[] = [
     { label: 'Pacientes', route: '/pacientes', description: 'Gestionar registro y contacto', code: 'PX' },
@@ -38,9 +39,11 @@ export class DashboardComponent implements OnInit {
   constructor(private readonly dashboardService: DashboardService) {}
 
   ngOnInit(): void {
+    this.actualizarMetricas();
     this.dashboardService.obtenerTotales().subscribe({
       next: (response) => {
         this.totales = response;
+        this.actualizarMetricas();
         this.cargando = false;
       },
       error: () => {
@@ -50,8 +53,8 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  get metricas(): MetricCard[] {
-    return [
+  private actualizarMetricas(): void {
+    this.metricas = [
       {
         titulo: 'Pacientes',
         valor: this.totales?.totalPacientes ?? 0,

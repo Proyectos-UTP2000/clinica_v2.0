@@ -23,6 +23,9 @@ public interface IMedicoService {
     /** Lista medicos activos con filtros opcionales. */
     Page<MedicoResponse> listarActivos(String texto, Long especialidadId, Long sedeId, Pageable pageable);
 
+    /** Consulta datos civiles externos para prellenar formularios de medicos. */
+    MedicoResponse consultarDni(String dni);
+
     /** Desactiva el usuario asociado al medico. */
     void desactivar(Long id);
 }

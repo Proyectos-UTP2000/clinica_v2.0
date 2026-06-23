@@ -17,6 +17,12 @@ public interface IPacienteService {
     /** Obtiene un paciente por identificador. */
     PacienteResponse obtenerPorId(Long id);
 
+    /** Busca un paciente registrado por DNI. */
+    PacienteResponse buscarPorDni(String dni);
+
+    /** Consulta datos civiles externos para prellenar formularios. */
+    PacienteResponse consultarDni(String dni);
+
     /** Lista pacientes activos con paginacion. */
     Page<PacienteResponse> listarActivos(Pageable pageable);
 

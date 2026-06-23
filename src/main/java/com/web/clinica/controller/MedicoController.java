@@ -33,10 +33,26 @@ public class MedicoController {
     @GetMapping
     @RequierePermiso({"medicos.ver", "usuarios.ver"})
     public Page<MedicoResponse> listar(@RequestParam(required = false) String texto,
-                                       @RequestParam(required = false) Long especialidadId,
-                                       @RequestParam(required = false) Long sedeId,
-                                       Pageable pageable) {
+                                        @RequestParam(required = false) Long especialidadId,
+                                        @RequestParam(required = false) Long sedeId,
+                                        Pageable pageable) {
         return medicoService.listarActivos(texto, especialidadId, sedeId, pageable);
+    }
+
+    /** Busca medicos activos por sede y especialidad para agenda/reprogramacion. */
+    @GetMapping("/buscar")
+    @RequierePermiso({"medicos.ver", "citas.crear", "citas.editar_propias", "citas.editar_asignados"})
+    public Page<MedicoResponse> buscar(@RequestParam(required = false) Long sedeId,
+                                       @RequestParam(required = false) Long especialidadId,
+                                       Pageable pageable) {
+        return medicoService.listarActivos(null, especialidadId, sedeId, pageable);
+    }
+
+    /** Consulta datos externos por DNI para prellenar formularios de medicos. */
+    @GetMapping("/buscar-dni")
+    @RequierePermiso({"medicos.crear", "medicos.editar", "usuarios.crear"})
+    public MedicoResponse consultarDni(@RequestParam String dni) {
+        return medicoService.consultarDni(dni);
     }
 
     /** Obtiene el medico autenticado para pantallas de disponibilidad propia. */

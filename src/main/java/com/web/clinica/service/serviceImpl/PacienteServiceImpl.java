@@ -8,6 +8,8 @@ import com.web.clinica.exception.ResourceNotFoundException;
 import com.web.clinica.model.Paciente;
 import com.web.clinica.repository.PacienteRepository;
 import com.web.clinica.service.abstractService.IPacienteService;
+import com.web.clinica.util.DniApiClient;
+import com.web.clinica.util.DniInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,7 @@ public class PacienteServiceImpl implements IPacienteService {
 
     private final PacienteRepository pacienteRepository;
     private final PasswordEncoder passwordEncoder;
+    private final DniApiClient dniApiClient;
 
     /** Crea un paciente y encripta password web cuando se proporciona. */
     @Override
@@ -67,6 +70,26 @@ public class PacienteServiceImpl implements IPacienteService {
     @Transactional(readOnly = true)
     public PacienteResponse obtenerPorId(Long id) {
         return convertirRespuesta(obtenerEntidad(id));
+    }
+
+    /** Busca un paciente existente por DNI. */
+    @Override
+    @Transactional(readOnly = true)
+    public PacienteResponse buscarPorDni(String dni) {
+        return pacienteRepository.findByDni(dni)
+                .map(this::convertirRespuesta)
+                .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado"));
+    }
+
+    /** Consulta el servicio externo de DNI y devuelve un DTO sin persistir. */
+    @Override
+    public PacienteResponse consultarDni(String dni) {
+        DniInfo info = dniApiClient.consultarDni(dni);
+        return PacienteResponse.builder()
+                .dni(info.dni())
+                .nombres(info.nombres())
+                .apellidos(info.apellidos())
+                .build();
     }
 
     /** Lista solo pacientes activos. */

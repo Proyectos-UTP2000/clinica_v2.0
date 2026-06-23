@@ -16,6 +16,8 @@ import com.web.clinica.repository.RolRepository;
 import com.web.clinica.repository.SedeRepository;
 import com.web.clinica.repository.UsuarioRepository;
 import com.web.clinica.service.abstractService.IMedicoService;
+import com.web.clinica.util.DniApiClient;
+import com.web.clinica.util.DniInfo;
 import com.web.clinica.util.EmailService;
 import java.security.SecureRandom;
 import java.util.Comparator;
@@ -48,6 +50,7 @@ public class MedicoServiceImpl implements IMedicoService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final SecureRandom generadorSeguro;
+    private final DniApiClient dniApiClient;
 
     /** Crea usuario interno, asigna rol medico y crea perfil doctor. */
     @Override
@@ -138,6 +141,17 @@ public class MedicoServiceImpl implements IMedicoService {
                 .sorted(Comparator.comparing(MedicoResponse::getApellidos).thenComparing(MedicoResponse::getNombres))
                 .toList();
         return paginar(medicos, pageable);
+    }
+
+    /** Consulta el servicio externo de DNI y devuelve un DTO sin persistir. */
+    @Override
+    public MedicoResponse consultarDni(String dni) {
+        DniInfo info = dniApiClient.consultarDni(dni);
+        return MedicoResponse.builder()
+                .dni(info.dni())
+                .nombres(info.nombres())
+                .apellidos(info.apellidos())
+                .build();
     }
 
     /** Desactiva el usuario asociado al doctor. */

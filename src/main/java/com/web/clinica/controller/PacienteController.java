@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -40,6 +41,20 @@ public class PacienteController {
     @RequierePermiso({"pacientes.ver", "usuarios.ver"})
     public PacienteResponse obtenerPorId(@PathVariable Long id) {
         return pacienteService.obtenerPorId(id);
+    }
+
+    /** Busca un paciente registrado por DNI para flujos de citas/consultas. */
+    @GetMapping("/buscar")
+    @RequierePermiso({"pacientes.ver", "citas.crear", "historial.crear"})
+    public PacienteResponse buscarPorDni(@RequestParam String dni) {
+        return pacienteService.buscarPorDni(dni);
+    }
+
+    /** Consulta datos externos por DNI para prellenar formularios de pacientes. */
+    @GetMapping("/buscar-dni")
+    @RequierePermiso({"pacientes.crear", "pacientes.editar", "usuarios.crear"})
+    public PacienteResponse consultarDni(@RequestParam String dni) {
+        return pacienteService.consultarDni(dni);
     }
 
     /** Crea un nuevo paciente. */

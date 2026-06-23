@@ -19,15 +19,21 @@
           Nombre
           <input class="form-control" formControlName="nombre" />
         </label>
-        <label class="form-label">
-          Especialidad padre
-          <select class="form-select" formControlName="especialidadPadreId">
-            <option [ngValue]="null">Principal</option>
-            @for (especialidad of especialidades; track especialidad) {
-              <option [ngValue]="especialidad.id">{{ especialidad.nombre }}</option>
-            }
-          </select>
-        </label>
+        <div>
+          <label class="form-label mb-1">
+            Especialidad padre
+            <select class="form-select" formControlName="especialidadPadreId">
+              <option [ngValue]="null">Principal</option>
+              @for (especialidad of especialidadesPadreDisponibles; track especialidad.id) {
+                <option [ngValue]="especialidad.id">{{ especialidad.nombre }}</option>
+              }
+            </select>
+          </label>
+          <div class="form-check form-switch">
+            <input id="soloPrincipalesDropdown" type="checkbox" class="form-check-input" [(ngModel)]="soloPrincipalesDropdown" [ngModelOptions]="{standalone: true}" />
+            <label for="soloPrincipalesDropdown" class="form-check-label text-muted" style="font-size: 0.8rem;">Filtrar solo especialidades principales</label>
+          </div>
+        </div>
         <label class="form-label grid-span-2">
           Descripcion
           <textarea class="form-control" rows="3" formControlName="descripcion"></textarea>

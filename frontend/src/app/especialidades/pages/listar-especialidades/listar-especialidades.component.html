@@ -16,16 +16,31 @@
     <div class="alert alert-success" role="status">{{ mensajeExito }}</div>
   }
 
+  <div class="feature-panel mb-3">
+    <div class="feature-panel-body d-flex flex-wrap gap-4 align-items-center">
+      <div class="form-check form-switch m-0">
+        <input id="vistaJerarquica" type="checkbox" class="form-check-input" [(ngModel)]="vistaJerarquica" />
+        <label for="vistaJerarquica" class="form-check-label fw-semibold">Vista jerárquica (agrupada)</label>
+      </div>
+      @if (vistaJerarquica) {
+        <div class="form-check form-switch m-0">
+          <input id="soloPrincipales" type="checkbox" class="form-check-input" [(ngModel)]="soloPrincipales" />
+          <label for="soloPrincipales" class="form-check-label fw-semibold">Mostrar solo especialidades principales</label>
+        </div>
+      }
+    </div>
+  </div>
+
   <div class="table-shell">
     @if (cargando) {
       <div class="loading-state">Cargando especialidades...</div>
     }
-    @if (!cargando && especialidades.length === 0) {
+    @if (!cargando && (vistaJerarquica ? todasEspecialidades.length === 0 : especialidades.length === 0)) {
       <div class="empty-state">No hay especialidades registradas.</div>
     }
-    @if (!cargando && especialidades.length > 0) {
+    @if (!cargando && (vistaJerarquica ? todasEspecialidades.length > 0 : especialidades.length > 0)) {
       <div class="table-responsive">
-        <table class="table table-striped align-middle">
+        <table class="table align-middle">
           <thead>
             <tr>
               <th>Nombre</th>
@@ -35,20 +50,62 @@
             </tr>
           </thead>
           <tbody>
-            @for (especialidad of especialidades; track especialidad) {
-              <tr>
-                <td class="fw-semibold">{{ especialidad.nombre }}</td>
-                <td>{{ especialidad.descripcion || 'Sin descripcion' }}</td>
-                <td>{{ especialidad.especialidadPadreNombre || 'Principal' }}</td>
-                <td class="text-end">
-                  @if (authService.hasPermission('especialidades.editar')) {
-                    <a class="btn btn-sm btn-outline-secondary me-2" [routerLink]="['/especialidades/editar', especialidad.id]">Editar</a>
+            @if (vistaJerarquica) {
+              @for (parent of especialidadesJerarquicas; track parent.id) {
+                <tr class="table-light fw-bold" style="background-color: #f8fafc;">
+                  <td>
+                    📁 {{ parent.nombre }}
+                    <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">
+                      {{ parent.subespecialidades.length }} subespecialidades
+                    </span>
+                  </td>
+                  <td>{{ parent.descripcion || 'Sin descripcion' }}</td>
+                  <td>Principal</td>
+                  <td class="text-end">
+                    @if (authService.hasPermission('especialidades.editar')) {
+                      <a class="btn btn-sm btn-outline-secondary me-2" [routerLink]="['/especialidades/editar', parent.id]">Editar</a>
+                    }
+                    @if (authService.hasPermission('especialidades.eliminar')) {
+                      <button class="btn btn-sm btn-outline-danger" type="button" (click)="eliminarEspecialidad(parent)">Eliminar</button>
+                    }
+                  </td>
+                </tr>
+                @if (!soloPrincipales) {
+                  @for (sub of parent.subespecialidades; track sub.id) {
+                    <tr>
+                      <td class="ps-5 text-muted">
+                        ↳ 📄 {{ sub.nombre }}
+                      </td>
+                      <td class="text-muted">{{ sub.descripcion || 'Sin descripcion' }}</td>
+                      <td class="text-muted">{{ parent.nombre }}</td>
+                      <td class="text-end">
+                        @if (authService.hasPermission('especialidades.editar')) {
+                          <a class="btn btn-sm btn-outline-secondary me-2" [routerLink]="['/especialidades/editar', sub.id]">Editar</a>
+                        }
+                        @if (authService.hasPermission('especialidades.eliminar')) {
+                          <button class="btn btn-sm btn-outline-danger" type="button" (click)="eliminarEspecialidad(sub)">Eliminar</button>
+                        }
+                      </td>
+                    </tr>
                   }
-                  @if (authService.hasPermission('especialidades.eliminar')) {
-                    <button class="btn btn-sm btn-outline-danger" type="button" (click)="eliminarEspecialidad(especialidad)">Eliminar</button>
-                  }
-                </td>
-              </tr>
+                }
+              }
+            } @else {
+              @for (especialidad of especialidades; track especialidad.id) {
+                <tr>
+                  <td class="fw-semibold">{{ especialidad.nombre }}</td>
+                  <td>{{ especialidad.descripcion || 'Sin descripcion' }}</td>
+                  <td>{{ especialidad.especialidadPadreNombre || 'Principal' }}</td>
+                  <td class="text-end">
+                    @if (authService.hasPermission('especialidades.editar')) {
+                      <a class="btn btn-sm btn-outline-secondary me-2" [routerLink]="['/especialidades/editar', especialidad.id]">Editar</a>
+                    }
+                    @if (authService.hasPermission('especialidades.eliminar')) {
+                      <button class="btn btn-sm btn-outline-danger" type="button" (click)="eliminarEspecialidad(especialidad)">Eliminar</button>
+                    }
+                  </td>
+                </tr>
+              }
             }
           </tbody>
         </table>
@@ -56,5 +113,7 @@
     }
   </div>
 
-  <app-paginator [page]="page" [totalPages]="totalPages" [totalElements]="totalElements" [size]="size" (pageChange)="cargarEspecialidades($event)"></app-paginator>
+  @if (!vistaJerarquica) {
+    <app-paginator [page]="page" [totalPages]="totalPages" [totalElements]="totalElements" [size]="size" (pageChange)="cargarEspecialidades($event)"></app-paginator>
+  }
 </section>

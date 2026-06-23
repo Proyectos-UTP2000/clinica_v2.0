@@ -13,6 +13,7 @@ import { EspecialidadService } from '../../services/especialidad.service';
 export class EspecialidadFormComponent implements OnInit {
   especialidadId: number | null = null;
   especialidades: EspecialidadResponse[] = [];
+  soloPrincipalesDropdown = true;
   cargando = false;
   guardando = false;
   mensajeError = '';
@@ -55,6 +56,13 @@ export class EspecialidadFormComponent implements OnInit {
       next: () => this.router.navigate(['/especialidades']),
       error: () => (this.mensajeError = 'No se pudo guardar la especialidad.')
     });
+  }
+
+  get especialidadesPadreDisponibles(): EspecialidadResponse[] {
+    if (this.soloPrincipalesDropdown) {
+      return this.especialidades.filter(e => !e.especialidadPadreId);
+    }
+    return this.especialidades;
   }
 
   private cargarDatos(): void {

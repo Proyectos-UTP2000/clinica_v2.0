@@ -12,6 +12,10 @@ import { EspecialidadService } from '../../services/especialidad.service';
 })
 export class ListarEspecialidadesComponent implements OnInit {
   especialidades: EspecialidadResponse[] = [];
+  todasEspecialidades: EspecialidadResponse[] = [];
+  vistaJerarquica = true;
+  soloPrincipales = false;
+
   page = 0;
   size = 10;
   totalPages = 0;
@@ -27,6 +31,7 @@ export class ListarEspecialidadesComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarEspecialidades();
+    this.cargarTodas();
   }
 
   cargarEspecialidades(page = this.page): void {
@@ -40,14 +45,30 @@ export class ListarEspecialidadesComponent implements OnInit {
       });
   }
 
+  cargarTodas(): void {
+    this.especialidadService.listarTodas().subscribe({
+      next: (res) => (this.todasEspecialidades = res),
+      error: () => (this.mensajeError = 'No se pudo cargar la jerarquía de especialidades.')
+    });
+  }
+
   eliminarEspecialidad(especialidad: EspecialidadResponse): void {
     this.especialidadService.eliminar(especialidad.id).subscribe({
       next: () => {
         this.mensajeExito = 'Especialidad eliminada correctamente.';
         this.cargarEspecialidades();
+        this.cargarTodas();
       },
       error: () => (this.mensajeError = 'No se pudo eliminar la especialidad.')
     });
+  }
+
+  get especialidadesJerarquicas() {
+    const principales = this.todasEspecialidades.filter(e => !e.especialidadPadreId);
+    return principales.map(p => ({
+      ...p,
+      subespecialidades: this.todasEspecialidades.filter(e => e.especialidadPadreId === p.id)
+    }));
   }
 
   private aplicarPagina(response: Page<EspecialidadResponse>): void {

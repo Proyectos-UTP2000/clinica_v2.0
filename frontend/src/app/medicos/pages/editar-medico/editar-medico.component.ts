@@ -28,8 +28,8 @@ export class EditarMedicoComponent implements OnInit {
   mensajeError = '';
 
   medicoForm = this.fb.group({
-    nombres: ['', [Validators.required, Validators.maxLength(80)]],
-    apellidos: ['', [Validators.required, Validators.maxLength(80)]],
+    nombres: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+    apellidos: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     email: ['', [Validators.required, Validators.email]],
     telefono: ['', [Validators.pattern(/^\d{7,15}$/)]],
     fechaNacimiento: [''],

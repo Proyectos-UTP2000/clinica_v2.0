@@ -18,8 +18,8 @@ export class EditarPacienteComponent implements OnInit {
   mensajeError = '';
 
   pacienteForm = this.fb.group({
-    nombres: ['', [Validators.required, Validators.maxLength(80)]],
-    apellidos: ['', [Validators.required, Validators.maxLength(80)]],
+    nombres: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+    apellidos: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     sexo: [''],
     fechaNacimiento: ['', [Validators.required]],
     telefono: ['', [Validators.required, Validators.pattern(/^\d{7,15}$/)]],

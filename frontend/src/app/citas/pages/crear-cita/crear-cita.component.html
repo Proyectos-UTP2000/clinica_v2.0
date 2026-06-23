@@ -61,7 +61,7 @@
             </div>
             <div>
               <label for="fecha" class="form-label">Fecha</label>
-              <input id="fecha" type="date" class="form-control" formControlName="fecha" [class.is-invalid]="campoInvalido('fecha')" />
+              <input id="fecha" type="date" class="form-control" formControlName="fecha" [min]="today" [class.is-invalid]="campoInvalido('fecha')" />
               <div class="invalid-feedback">Seleccione una fecha.</div>
             </div>
             <div class="form-grid-full mt-2">

@@ -29,6 +29,7 @@ export class CrearCitaComponent implements OnInit {
   cargandoConsultorios = false;
   guardando = false;
   mensajeError = '';
+  today = new Date().toISOString().split('T')[0];
 
   citaForm = this.fb.group({
     pacienteId: ['', [Validators.required]],

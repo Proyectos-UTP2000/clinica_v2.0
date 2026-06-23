@@ -2,12 +2,14 @@ package com.web.clinica;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.web.clinica.controller.ConsultaController;
+import com.web.clinica.controller.AdjuntoController;
 import com.web.clinica.controller.DashboardController;
 import com.web.clinica.controller.EspecialidadController;
 import com.web.clinica.controller.PagoController;
@@ -24,6 +26,8 @@ import com.web.clinica.dto.response.DashboardTotalesResponse;
 import com.web.clinica.dto.response.EspecialidadResponse;
 import com.web.clinica.dto.response.PagoResponse;
 import com.web.clinica.dto.response.SedeResponse;
+import com.web.clinica.dto.response.AdjuntoDownloadResponse;
+import com.web.clinica.dto.response.AdjuntoResponse;
 import com.web.clinica.service.abstractService.IDashboardService;
 import com.web.clinica.service.abstractService.IEspecialidadService;
 import com.web.clinica.service.abstractService.IHistorialService;
@@ -39,6 +43,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -54,6 +60,7 @@ class Prompt4ControllerSmokeTests {
                 new SedeController(new SedeServiceStub()),
                 new EspecialidadController(new EspecialidadServiceStub()),
                 new ConsultaController(new HistorialServiceStub()),
+                new AdjuntoController(new HistorialServiceStub()),
                 new PagoController(new PagoServiceStub()),
                 new DashboardController(new DashboardServiceStub())
         ).setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver()).build();
@@ -94,6 +101,13 @@ class Prompt4ControllerSmokeTests {
         mockMvc.perform(get("/api/consultas/doctor")).andExpect(status().isOk());
         mockMvc.perform(post("/api/consultas/1/notas").contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(notaCrear()))).andExpect(status().isOk());
+        MockMultipartFile archivo = new MockMultipartFile(
+                "archivo",
+                "resultado.pdf",
+                MediaType.APPLICATION_PDF_VALUE,
+                "PDF".getBytes());
+        mockMvc.perform(multipart("/api/consultas/1/adjuntos").file(archivo)).andExpect(status().isCreated());
+        mockMvc.perform(get("/api/adjuntos/1")).andExpect(status().isOk());
     }
 
     /** Verifica endpoints de pagos. */
@@ -256,6 +270,23 @@ class Prompt4ControllerSmokeTests {
         @Override
         public ConsultaResponse agregarNotaEvolucion(Long consultaId, NotaEvolucionRequest solicitud) {
             return respuesta();
+        }
+
+        @Override
+        public AdjuntoResponse agregarAdjunto(Long consultaId, org.springframework.web.multipart.MultipartFile archivo) {
+            return AdjuntoResponse.builder()
+                    .id(1L)
+                    .nombreArchivo(archivo.getOriginalFilename())
+                    .tipoMime(archivo.getContentType())
+                    .build();
+        }
+
+        @Override
+        public AdjuntoDownloadResponse descargarAdjunto(Long adjuntoId) {
+            return new AdjuntoDownloadResponse(
+                    "resultado.pdf",
+                    MediaType.APPLICATION_PDF_VALUE,
+                    new ByteArrayResource("PDF".getBytes()));
         }
 
         private ConsultaResponse respuesta() {

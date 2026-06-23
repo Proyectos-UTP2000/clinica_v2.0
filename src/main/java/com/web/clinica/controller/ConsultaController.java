@@ -2,6 +2,7 @@ package com.web.clinica.controller;
 
 import com.web.clinica.dto.request.ConsultaCreateRequest;
 import com.web.clinica.dto.request.NotaEvolucionRequest;
+import com.web.clinica.dto.response.AdjuntoResponse;
 import com.web.clinica.dto.response.ConsultaResponse;
 import com.web.clinica.security.RequierePermiso;
 import com.web.clinica.service.abstractService.IHistorialService;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/consultas")
@@ -57,7 +60,15 @@ public class ConsultaController {
     @PostMapping("/{id}/notas")
     @RequierePermiso("historial.editar")
     public ConsultaResponse agregarNotaEvolucion(@PathVariable Long id,
-                                                 @Valid @RequestBody NotaEvolucionRequest solicitud) {
+                                                  @Valid @RequestBody NotaEvolucionRequest solicitud) {
         return historialService.agregarNotaEvolucion(id, solicitud);
+    }
+
+    /** Agrega un archivo adjunto a una consulta existente. */
+    @PostMapping(value = "/{id}/adjuntos", consumes = "multipart/form-data")
+    @RequierePermiso("historial.editar")
+    public ResponseEntity<AdjuntoResponse> agregarAdjunto(@PathVariable Long id,
+                                                          @RequestPart("archivo") MultipartFile archivo) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(historialService.agregarAdjunto(id, archivo));
     }
 }

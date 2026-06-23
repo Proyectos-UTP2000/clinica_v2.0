@@ -6,6 +6,7 @@ import com.web.clinica.dto.request.EstudioRequest;
 import com.web.clinica.dto.request.IndicacionRequest;
 import com.web.clinica.dto.request.NotaEvolucionRequest;
 import com.web.clinica.dto.request.RecetaRequest;
+import com.web.clinica.dto.response.AdjuntoDownloadResponse;
 import com.web.clinica.dto.response.AdjuntoResponse;
 import com.web.clinica.dto.response.ConsultaResponse;
 import com.web.clinica.dto.response.EstudioResponse;
@@ -39,7 +40,15 @@ import com.web.clinica.repository.SedeRepository;
 import com.web.clinica.service.abstractService.IHistorialService;
 import java.time.LocalDateTime;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -47,9 +56,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
-@RequiredArgsConstructor
 public class HistorialServiceImpl implements IHistorialService {
 
     private static final List<String> TIPOS_CONSULTA = List.of("consulta", "control", "urgencia", "procedimiento");
@@ -65,6 +75,48 @@ public class HistorialServiceImpl implements IHistorialService {
     private final DoctorRepository doctorRepository;
     private final SedeRepository sedeRepository;
     private final CitaRepository citaRepository;
+    private final Path adjuntosStorageDir;
+
+    @Autowired
+    public HistorialServiceImpl(ConsultaRepository consultaRepository,
+                                RecetaRepository recetaRepository,
+                                IndicacionMedicaRepository indicacionMedicaRepository,
+                                EstudioComplementarioRepository estudioComplementarioRepository,
+                                AdjuntoRepository adjuntoRepository,
+                                NotaEvolucionRepository notaEvolucionRepository,
+                                PacienteRepository pacienteRepository,
+                                DoctorRepository doctorRepository,
+                                SedeRepository sedeRepository,
+                                CitaRepository citaRepository,
+                                @Value("${app.storage.adjuntos-dir:uploads/adjuntos}") String adjuntosStorageDir) {
+        this(consultaRepository, recetaRepository, indicacionMedicaRepository, estudioComplementarioRepository,
+                adjuntoRepository, notaEvolucionRepository, pacienteRepository, doctorRepository, sedeRepository,
+                citaRepository, Path.of(adjuntosStorageDir));
+    }
+
+    public HistorialServiceImpl(ConsultaRepository consultaRepository,
+                                RecetaRepository recetaRepository,
+                                IndicacionMedicaRepository indicacionMedicaRepository,
+                                EstudioComplementarioRepository estudioComplementarioRepository,
+                                AdjuntoRepository adjuntoRepository,
+                                NotaEvolucionRepository notaEvolucionRepository,
+                                PacienteRepository pacienteRepository,
+                                DoctorRepository doctorRepository,
+                                SedeRepository sedeRepository,
+                                CitaRepository citaRepository,
+                                Path adjuntosStorageDir) {
+        this.consultaRepository = consultaRepository;
+        this.recetaRepository = recetaRepository;
+        this.indicacionMedicaRepository = indicacionMedicaRepository;
+        this.estudioComplementarioRepository = estudioComplementarioRepository;
+        this.adjuntoRepository = adjuntoRepository;
+        this.notaEvolucionRepository = notaEvolucionRepository;
+        this.pacienteRepository = pacienteRepository;
+        this.doctorRepository = doctorRepository;
+        this.sedeRepository = sedeRepository;
+        this.citaRepository = citaRepository;
+        this.adjuntosStorageDir = adjuntosStorageDir;
+    }
 
     /** Crea una consulta clinica y sus detalles en una sola transaccion. */
     @Override
@@ -141,6 +193,55 @@ public class HistorialServiceImpl implements IHistorialService {
         return convertirRespuesta(consulta);
     }
 
+    /** Guarda fisicamente un adjunto y registra sus metadatos. */
+    @Override
+    @Transactional
+    public AdjuntoResponse agregarAdjunto(Long consultaId, MultipartFile archivo) {
+        if (archivo == null || archivo.isEmpty()) {
+            throw new BadRequestException("Debe enviar un archivo adjunto");
+        }
+        Consulta consulta = obtenerEntidad(consultaId);
+        validarAlcanceLectura(consulta);
+        String nombreOriginal = StringUtils.cleanPath(archivo.getOriginalFilename() == null
+                ? "adjunto"
+                : archivo.getOriginalFilename());
+        String nombreAlmacenado = UUID.randomUUID() + extension(nombreOriginal);
+        try {
+            Files.createDirectories(adjuntosStorageDir);
+            Path destino = adjuntosStorageDir.resolve(nombreAlmacenado).normalize();
+            Files.copy(archivo.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException excepcion) {
+            throw new BadRequestException("No se pudo guardar el archivo adjunto");
+        }
+        Adjunto adjunto = adjuntoRepository.save(Adjunto.builder()
+                .consulta(consulta)
+                .nombreArchivo(nombreOriginal)
+                .ruta(nombreAlmacenado)
+                .tipoMime(archivo.getContentType() == null ? MediaTypeFallback.APPLICATION_OCTET_STREAM : archivo.getContentType())
+                .fechaSubida(LocalDateTime.now())
+                .build());
+        return mapearAdjunto(adjunto);
+    }
+
+    /** Recupera el recurso fisico de un adjunto validando alcance de lectura. */
+    @Override
+    @Transactional(readOnly = true)
+    public AdjuntoDownloadResponse descargarAdjunto(Long adjuntoId) {
+        Adjunto adjunto = adjuntoRepository.findById(adjuntoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Adjunto no encontrado"));
+        validarAlcanceLectura(adjunto.getConsulta());
+        try {
+            Path ruta = adjuntosStorageDir.resolve(adjunto.getRuta()).normalize();
+            Resource resource = new UrlResource(ruta.toUri());
+            if (!resource.exists() || !resource.isReadable()) {
+                throw new ResourceNotFoundException("Archivo adjunto no encontrado");
+            }
+            return new AdjuntoDownloadResponse(adjunto.getNombreArchivo(), adjunto.getTipoMime(), resource);
+        } catch (IOException excepcion) {
+            throw new ResourceNotFoundException("Archivo adjunto no encontrado");
+        }
+    }
+
     /** Guarda recetas asociadas a la consulta. */
     private void guardarRecetas(Consulta consulta, List<RecetaRequest> recetas) {
         if (recetas == null) {
@@ -205,6 +306,14 @@ public class HistorialServiceImpl implements IHistorialService {
         if (!TIPOS_CONSULTA.contains(tipo)) {
             throw new BadRequestException("Tipo de consulta invalido");
         }
+    }
+
+    private String extension(String nombreArchivo) {
+        int posicion = nombreArchivo.lastIndexOf('.');
+        if (posicion < 0 || posicion == nombreArchivo.length() - 1) {
+            return "";
+        }
+        return nombreArchivo.substring(posicion);
     }
 
     /** Limita a doctores para que creen solo su propio historial. */
@@ -357,14 +466,22 @@ public class HistorialServiceImpl implements IHistorialService {
     /** Convierte adjuntos. */
     private List<AdjuntoResponse> mapearAdjuntos(Long consultaId) {
         return adjuntoRepository.findByConsultaId(consultaId).stream()
-                .map(adjunto -> AdjuntoResponse.builder()
-                        .id(adjunto.getId())
-                        .nombreArchivo(adjunto.getNombreArchivo())
-                        .ruta(adjunto.getRuta())
-                        .tipoMime(adjunto.getTipoMime())
-                        .fechaSubida(adjunto.getFechaSubida())
-                        .build())
+                .map(this::mapearAdjunto)
                 .toList();
+    }
+
+    private AdjuntoResponse mapearAdjunto(Adjunto adjunto) {
+        return AdjuntoResponse.builder()
+                .id(adjunto.getId())
+                .nombreArchivo(adjunto.getNombreArchivo())
+                .ruta(adjunto.getRuta())
+                .tipoMime(adjunto.getTipoMime())
+                .fechaSubida(adjunto.getFechaSubida())
+                .build();
+    }
+
+    private static class MediaTypeFallback {
+        private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
     }
 
     /** Convierte notas de evolucion. */

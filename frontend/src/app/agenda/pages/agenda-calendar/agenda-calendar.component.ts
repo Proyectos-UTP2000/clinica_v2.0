@@ -22,7 +22,7 @@ export class AgendaCalendarComponent implements OnInit {
   medicos: MedicoResponse[] = [];
   citas: CitaResponse[] = [];
   fechaActual = this.formatearFecha(new Date());
-  vista: VistaAgenda = 'dia';
+  vista: VistaAgenda = 'semana';
   sedeId: number | null = null;
   especialidadId: number | null = null;
   doctorId: number | null = null;

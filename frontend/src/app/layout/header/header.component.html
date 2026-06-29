@@ -6,10 +6,12 @@
 
   <div class="user-actions">
     <div class="sede-selector-wrapper">
-      <select class="form-select form-select-sm" [value]="selectedSedeId || ''" (change)="onSedeChange($event)" aria-label="Seleccionar sede activa">
-        <option value="">Todas las Sedes</option>
+      <select class="form-select form-select-sm" [(ngModel)]="selectedSedeId" aria-label="Seleccionar sede activa">
+        @if (esAdmin) {
+          <option [ngValue]="null">Todas las Sedes</option>
+        }
         @for (sede of sedes$ | async; track sede.id) {
-          <option [value]="sede.id">{{ sede.nombre }}</option>
+          <option [ngValue]="sede.id">{{ sede.nombre }}</option>
         }
       </select>
     </div>

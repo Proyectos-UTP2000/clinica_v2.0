@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, map, Observable } from 'rxjs';
 import { SedeResponse } from '../../shared/models/sede.model';
 import { Page } from '../../shared/models/page.model';
+import { AuthService } from './auth.service';
+import { MedicoResponse } from '../../shared/models/medico.model';
 
 const API_URL = 'http://localhost:8080/api';
 
@@ -16,7 +18,10 @@ export class SesionContextService {
   private readonly sedesSubject = new BehaviorSubject<SedeResponse[]>([]);
   readonly sedes$ = this.sedesSubject.asObservable();
 
-  constructor(private readonly http: HttpClient) {
+  constructor(
+    private readonly http: HttpClient,
+    private readonly authService: AuthService
+  ) {
     this.cargarSedes();
   }
 
@@ -28,13 +33,40 @@ export class SesionContextService {
     this.selectedSedeIdSubject.next(sedeId);
   }
 
-  private cargarSedes(): void {
-    const params = new HttpParams().set('page', 0).set('size', 100);
-    this.http.get<Page<SedeResponse>>(`${API_URL}/sedes`, { params })
-      .pipe(map((res) => res.content))
-      .subscribe({
-        next: (sedes) => this.sedesSubject.next(sedes),
-        error: () => console.error('No se pudieron cargar las sedes para el contexto global.')
+  cargarSedes(): void {
+    if (!this.authService.isLoggedIn()) {
+      return;
+    }
+
+    if (this.authService.hasRole('Doctor')) {
+      this.http.get<MedicoResponse>(`${API_URL}/medicos/me`).subscribe({
+        next: (medico) => {
+          const doctorSedes: SedeResponse[] = (medico.sedesIds || []).map((id, index) => ({
+            id,
+            nombre: medico.sedes[index] || 'Sede',
+            direccion: '',
+            activo: true
+          }));
+          this.sedesSubject.next(doctorSedes);
+          if (doctorSedes.length > 0 && !this.selectedSedeId) {
+            this.setSede(doctorSedes[0].id);
+          }
+        },
+        error: () => console.error('No se pudieron cargar las sedes del médico.')
       });
+    } else {
+      const params = new HttpParams().set('page', 0).set('size', 100);
+      this.http.get<Page<SedeResponse>>(`${API_URL}/sedes`, { params })
+        .pipe(map((res) => res.content))
+        .subscribe({
+          next: (sedes) => {
+            this.sedesSubject.next(sedes);
+            if (sedes.length > 0 && !this.authService.hasRole('Administrador') && !this.selectedSedeId) {
+              this.setSede(sedes[0].id);
+            }
+          },
+          error: () => console.error('No se pudieron cargar las sedes para el contexto global.')
+        });
+    }
   }
 }

@@ -28,20 +28,28 @@ export class HeaderComponent implements OnInit {
     this.sedes$ = this.sesionContextService.sedes$;
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    if (this.authService.isLoggedIn()) {
+      this.sesionContextService.cargarSedes();
+    }
+  }
 
   get nombreUsuario(): string {
     return this.authService.getNombreUsuario();
+  }
+
+  get esAdmin(): boolean {
+    return this.authService.hasRole('Administrador');
   }
 
   get selectedSedeId(): number | null {
     return this.sesionContextService.selectedSedeId;
   }
 
-  onSedeChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    const sedeId = value ? Number(value) : null;
-    this.sesionContextService.setSede(sedeId);
+  set selectedSedeId(value: number | null) {
+    // When binded via ngModel, string empty is received for 'Todas', map to null
+    const val = value === null || value === undefined || String(value) === '' ? null : Number(value);
+    this.sesionContextService.setSede(val);
   }
 
   cerrarSesion(): void {

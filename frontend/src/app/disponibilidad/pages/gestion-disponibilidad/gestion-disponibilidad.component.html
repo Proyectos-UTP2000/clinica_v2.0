@@ -52,7 +52,7 @@
       <div class="tab-header">
         <h3>Horarios de atención regulares</h3>
         @if (authService.hasPermission('disponibilidad.editar_propia') || authService.hasPermission('ROLE_Administrador')) {
-          <button class="btn btn-primary btn-sm" (click)="mostrarModalBase = true">
+          <button class="btn btn-primary btn-sm" (click)="abrirModalBase()">
             + Registrar Horario Base
           </button>
         }
@@ -129,7 +129,7 @@
       <div class="tab-header">
         <h3>Excepciones temporales (Bloqueos/Descansos)</h3>
         @if (authService.hasPermission('disponibilidad.editar_propia') || authService.hasPermission('ROLE_Administrador')) {
-          <button class="btn btn-primary btn-sm" (click)="mostrarModalExcepcion = true">
+          <button class="btn btn-primary btn-sm" (click)="abrirModalExcepcion()">
             + Agregar Excepción
           </button>
         }
@@ -189,11 +189,14 @@
       <section class="clinic-dialog" role="dialog" aria-modal="true" aria-labelledby="modalBaseTitle">
         <h3 id="modalBaseTitle">Registrar Horario Base Semanal</h3>
         <form [formGroup]="baseForm" (ngSubmit)="guardarBase()">
+          @if (mensajeError) {
+            <div class="alert alert-danger p-2 small mb-3" role="alert">{{ mensajeError }}</div>
+          }
           <div class="mb-3">
             <label for="baseSede" class="form-label">Sede de atención</label>
             <select id="baseSede" class="form-select" formControlName="sedeId">
               <option [ngValue]="null">Seleccione sede</option>
-              @for (sede of sedes; track sede.id) {
+              @for (sede of sedesDelMedicoSeleccionado; track sede.id) {
                 <option [ngValue]="sede.id">{{ sede.nombre }}</option>
               }
             </select>
@@ -232,7 +235,7 @@
             <button class="btn btn-outline-secondary" type="button" [disabled]="guardandoBase" (click)="mostrarModalBase = false">
               Cancelar
             </button>
-            <button class="btn btn-primary" type="submit" [disabled]="guardandoBase">
+            <button class="btn btn-primary" type="button" [disabled]="guardandoBase" (click)="guardarBase()">
               @if (guardandoBase) {
                 <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
               }
@@ -250,6 +253,9 @@
       <section class="clinic-dialog" role="dialog" aria-modal="true" aria-labelledby="modalExTitle">
         <h3 id="modalExTitle">Agregar Excepción / Bloqueo</h3>
         <form [formGroup]="excepcionForm" (ngSubmit)="guardarExcepcion()">
+          @if (mensajeError) {
+            <div class="alert alert-danger p-2 small mb-3" role="alert">{{ mensajeError }}</div>
+          }
           <div class="mb-3">
             <label for="exFecha" class="form-label">Fecha del evento</label>
             <input id="exFecha" class="form-control" type="date" formControlName="fecha" />
@@ -287,7 +293,7 @@
             <button class="btn btn-outline-secondary" type="button" [disabled]="guardandoExcepcion" (click)="mostrarModalExcepcion = false">
               Cancelar
             </button>
-            <button class="btn btn-primary" type="submit" [disabled]="guardandoExcepcion">
+            <button class="btn btn-primary" type="button" [disabled]="guardandoExcepcion" (click)="guardarExcepcion()">
               @if (guardandoExcepcion) {
                 <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
               }

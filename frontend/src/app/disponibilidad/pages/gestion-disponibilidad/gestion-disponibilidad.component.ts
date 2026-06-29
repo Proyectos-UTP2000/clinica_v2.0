@@ -71,14 +71,11 @@ export class GestionDisponibilidadComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.disponibilidadService.listarSedes().subscribe({
-      next: (sedes) => {
-        this.sedes = sedes;
-        this.sesionContextService.selectedSedeId$.subscribe((sedeId) => {
-          this.cargarParaSede(sedeId);
-        });
-      },
-      error: () => (this.mensajeError = 'No se pudieron cargar las sedes.')
+    this.sesionContextService.sedes$.subscribe((sedes) => {
+      this.sedes = sedes;
+      this.sesionContextService.selectedSedeId$.subscribe((sedeId) => {
+        this.cargarParaSede(sedeId);
+      });
     });
   }
 
@@ -125,14 +122,72 @@ export class GestionDisponibilidadComponent implements OnInit {
     });
   }
 
+  get sedesDelMedicoSeleccionado(): SedeResponse[] {
+    if (!this.doctorId) {
+      return [];
+    }
+    const medico = this.medicos.find(m => m.id === this.doctorId);
+    if (!medico || !medico.sedesIds) {
+      return this.sedes;
+    }
+    return medico.sedesIds.map((id, index) => ({
+      id,
+      nombre: medico.sedes[index] || 'Sede',
+      direccion: '',
+      activo: true
+    }));
+  }
+
+  abrirModalBase(): void {
+    this.limpiarMensajes();
+    this.mostrarModalBase = true;
+    setTimeout(() => {
+      const list = this.sedesDelMedicoSeleccionado;
+      const defaultSede = this.sesionContextService.selectedSedeId || (list.length > 0 ? list[0].id : null);
+      this.baseForm.patchValue({
+        sedeId: defaultSede,
+        diaSemana: 1,
+        horaInicio: '08:00',
+        horaFin: '13:00'
+      });
+      this.baseForm.markAsPristine();
+      this.baseForm.markAsUntouched();
+    }, 0);
+  }
+
+  abrirModalExcepcion(): void {
+    this.limpiarMensajes();
+    this.mostrarModalExcepcion = true;
+    setTimeout(() => {
+      this.excepcionForm.patchValue({
+        fecha: this.hoy(),
+        horaInicio: '08:00',
+        horaFin: '09:00',
+        motivo: ''
+      });
+      this.excepcionForm.markAsPristine();
+      this.excepcionForm.markAsUntouched();
+    }, 0);
+  }
+
   guardarBase(): void {
-    if (!this.doctorId || this.baseForm.invalid) {
+    this.limpiarMensajes();
+    if (!this.doctorId) {
+      this.mensajeError = 'No se ha seleccionado ningún médico.';
+      return;
+    }
+    if (this.baseForm.invalid) {
       this.baseForm.markAllAsTouched();
+      const invalidFields = [];
+      if (this.baseForm.get('sedeId')?.invalid) invalidFields.push('Sede');
+      if (this.baseForm.get('diaSemana')?.invalid) invalidFields.push('Día');
+      if (this.baseForm.get('horaInicio')?.invalid) invalidFields.push('Hora Inicio');
+      if (this.baseForm.get('horaFin')?.invalid) invalidFields.push('Hora Fin');
+      this.mensajeError = 'Por favor complete todos los campos obligatorios: ' + invalidFields.join(', ') + '.';
       return;
     }
     const value = this.baseForm.getRawValue();
     this.guardandoBase = true;
-    this.limpiarMensajes();
     this.disponibilidadService.guardarBase(this.doctorId, {
       sedeId: Number(value.sedeId),
       diaSemana: Number(value.diaSemana),
@@ -144,18 +199,28 @@ export class GestionDisponibilidadComponent implements OnInit {
         this.mostrarModalBase = false;
         this.cargarDisponibilidad();
       },
-      error: () => (this.mensajeError = 'No se pudo guardar el horario base.')
+      error: (err) => (this.mensajeError = err.error?.mensaje || 'No se pudo guardar el horario base.')
     });
   }
 
   guardarExcepcion(): void {
-    if (!this.doctorId || this.excepcionForm.invalid) {
+    this.limpiarMensajes();
+    if (!this.doctorId) {
+      this.mensajeError = 'No se ha seleccionado ningún médico.';
+      return;
+    }
+    if (this.excepcionForm.invalid) {
       this.excepcionForm.markAllAsTouched();
+      const invalidFields = [];
+      if (this.excepcionForm.get('fecha')?.invalid) invalidFields.push('Fecha');
+      if (this.excepcionForm.get('horaInicio')?.invalid) invalidFields.push('Hora Inicio');
+      if (this.excepcionForm.get('horaFin')?.invalid) invalidFields.push('Hora Fin');
+      if (this.excepcionForm.get('motivo')?.invalid) invalidFields.push('Motivo');
+      this.mensajeError = 'Por favor complete todos los campos obligatorios: ' + invalidFields.join(', ') + '.';
       return;
     }
     const value = this.excepcionForm.getRawValue();
     this.guardandoExcepcion = true;
-    this.limpiarMensajes();
     this.disponibilidadService.crearExcepcion(this.doctorId, {
       fecha: value.fecha || '',
       horaInicio: value.horaInicio || '08:00',
@@ -163,12 +228,11 @@ export class GestionDisponibilidadComponent implements OnInit {
       motivo: value.motivo || ''
     }).pipe(finalize(() => (this.guardandoExcepcion = false))).subscribe({
       next: () => {
-        this.excepcionForm.reset({ fecha: '', horaInicio: '08:00', horaFin: '09:00', motivo: '' });
         this.mensajeExito = 'Excepcion registrada correctamente.';
         this.mostrarModalExcepcion = false;
         this.cargarDisponibilidad();
       },
-      error: () => (this.mensajeError = 'No se pudo registrar la excepcion.')
+      error: (err) => (this.mensajeError = err.error?.mensaje || 'No se pudo registrar la excepcion.')
     });
   }
 

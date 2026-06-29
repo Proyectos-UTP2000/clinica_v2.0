@@ -57,6 +57,18 @@ public class DisponibilidadServiceImpl implements IDisponibilidadService {
                 .stream()
                 .findFirst()
                 .orElseGet(DisponibilidadBase::new);
+
+        // Validar solapamiento con cualquier disponibilidad base del mismo día para este doctor
+        List<DisponibilidadBase> existentes = disponibilidadBaseRepository.findByDoctorIdOrderByDiaSemanaAscHoraInicioAsc(doctor.getId());
+        for (DisponibilidadBase db : existentes) {
+            if (db.getDiaSemana() == solicitud.getDiaSemana() && (disponibilidad.getId() == null || !db.getId().equals(disponibilidad.getId()))) {
+                if (solicitud.getHoraInicio().isBefore(db.getHoraFin()) && solicitud.getHoraFin().isAfter(db.getHoraInicio())) {
+                    throw new BadRequestException("El horario se solapa con un horario base existente (" 
+                            + db.getHoraInicio() + " - " + db.getHoraFin() + " en " + db.getSede().getNombre() + ")");
+                }
+            }
+        }
+
         disponibilidad.setDoctor(doctor);
         disponibilidad.setSede(sede);
         disponibilidad.setDiaSemana(solicitud.getDiaSemana());

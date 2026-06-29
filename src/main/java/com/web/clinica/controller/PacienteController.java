@@ -38,7 +38,7 @@ public class PacienteController {
 
     /** Obtiene un paciente por id. */
     @GetMapping("/{id}")
-    @RequierePermiso({"pacientes.ver", "usuarios.ver"})
+    @RequierePermiso({"pacientes.ver", "usuarios.ver", "citas.ver_propias", "historial.ver_propios", "historial.crear"})
     public PacienteResponse obtenerPorId(@PathVariable Long id) {
         return pacienteService.obtenerPorId(id);
     }

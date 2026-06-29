@@ -30,7 +30,6 @@ public class SedeController {
 
     /** Lista sedes activas. */
     @GetMapping
-    @RequierePermiso("sedes.ver")
     public Page<SedeResponse> listarActivos(Pageable pageable) {
         return sedeService.listarActivos(pageable);
     }

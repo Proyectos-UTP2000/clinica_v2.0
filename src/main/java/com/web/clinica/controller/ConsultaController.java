@@ -44,7 +44,7 @@ public class ConsultaController {
 
     /** Lista consultas de un paciente. */
     @GetMapping("/paciente/{pacienteId}")
-    @RequierePermiso({"historial.ver_todos", "historial.ver_basico"})
+    @RequierePermiso({"historial.ver_todos", "historial.ver_basico", "historial.ver_propios"})
     public Page<ConsultaResponse> listarPorPaciente(@PathVariable Long pacienteId, Pageable pageable) {
         return historialService.listarPorPaciente(pacienteId, pageable);
     }

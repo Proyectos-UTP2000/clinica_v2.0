@@ -31,14 +31,12 @@ public class EspecialidadController {
 
     /** Lista especialidades con paginacion. */
     @GetMapping
-    @RequierePermiso("especialidades.ver")
     public Page<EspecialidadResponse> listar(Pageable pageable) {
         return especialidadService.listar(pageable);
     }
 
     /** Lista todas las especialidades para combos. */
     @GetMapping("/todas")
-    @RequierePermiso("especialidades.ver")
     public List<EspecialidadResponse> listarTodas() {
         return especialidadService.listarTodas();
     }

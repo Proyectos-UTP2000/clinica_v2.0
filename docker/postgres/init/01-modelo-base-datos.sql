@@ -549,6 +549,11 @@ FROM doctor d
 JOIN usuario u ON u.id = d.usuario_id
 WHERE u.dni = '11111111';
 
+INSERT INTO consultorio (sede_id, nombre, piso, area, activo)
+SELECT s.id, 'Consultorio 101', '1', 'Medicina General', TRUE
+FROM sede s
+WHERE s.nombre = 'Sede Central';
+
 INSERT INTO cita (
     paciente_id,
     doctor_id,
@@ -558,18 +563,22 @@ INSERT INTO cita (
     estado,
     estado_pago,
     origen,
-    creado_por_usuario_id
+    creado_por_usuario_id,
+    consultorio_id
 )
-SELECT p.id, d.id, s.id, TIMESTAMP '2026-06-01 09:00:00', TIMESTAMP '2026-06-01 09:30:00', 'programada', 'pendiente', 'interno', u_admin.id
+SELECT p.id, d.id, s.id, TIMESTAMP '2026-06-01 09:00:00', TIMESTAMP '2026-06-01 09:30:00', 'programada', 'pendiente', 'interno', u_admin.id, c.id
 FROM paciente p
 CROSS JOIN doctor d
 JOIN usuario u_doctor ON u_doctor.id = d.usuario_id
 CROSS JOIN sede s
 CROSS JOIN usuario u_admin
+CROSS JOIN consultorio c
 WHERE p.dni = '44444444'
   AND u_doctor.dni = '11111111'
   AND s.nombre = 'Sede Central'
-  AND u_admin.dni = '00000000';
+  AND u_admin.dni = '00000000'
+  AND c.nombre = 'Consultorio 101';
+
 
 INSERT INTO pago (cita_id, monto, metodo, fecha_pago, registrado_por_usuario_id)
 SELECT c.id, 80.00, 'efectivo', TIMESTAMP '2026-06-01 09:35:00', u.id

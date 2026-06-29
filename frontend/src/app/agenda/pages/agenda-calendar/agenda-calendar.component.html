@@ -18,30 +18,54 @@
       <label class="form-label">
         Sede
         <select class="form-select" [(ngModel)]="sedeId" (ngModelChange)="cargarMedicos(); cargarAgenda()">
-          <option [ngValue]="null">Todas</option>
+          @if (authService.hasRole('Administrador')) {
+            <option [ngValue]="null">Todas</option>
+          }
           @for (sede of sedes; track sede) {
             <option [ngValue]="sede.id">{{ sede.nombre }}</option>
           }
         </select>
       </label>
-      <label class="form-label">
-        Especialidad
-        <select class="form-select" [(ngModel)]="especialidadId" (ngModelChange)="cargarMedicos()">
-          <option [ngValue]="null">Todas</option>
-          @for (especialidad of especialidades; track especialidad) {
-            <option [ngValue]="especialidad.id">{{ especialidad.nombre }}</option>
-          }
-        </select>
-      </label>
-      <label class="form-label">
-        Medico
-        <select class="form-select" [(ngModel)]="doctorId" (ngModelChange)="cargarAgenda()">
-          <option [ngValue]="null">Todos</option>
-          @for (medico of medicos; track medico) {
-            <option [ngValue]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
-          }
-        </select>
-      </label>
+      @if (authService.hasPermission('citas.ver_todas')) {
+        <label class="form-label">
+          Especialidad
+          <select class="form-select" [(ngModel)]="especialidadId" (ngModelChange)="cargarMedicos()">
+            <option [ngValue]="null">Todas</option>
+            @for (especialidad of especialidades; track especialidad) {
+              <option [ngValue]="especialidad.id">{{ especialidad.nombre }}</option>
+            }
+          </select>
+        </label>
+      }
+      @if (authService.hasPermission('citas.ver_todas')) {
+        <label class="form-label" style="position: relative;">
+          Medico
+          <div class="custom-combobox">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Buscar médico..."
+              [value]="busquedaMedico || textoMedicoSeleccionado"
+              [(ngModel)]="busquedaMedico"
+              (focus)="onFocusMedico()"
+              (blur)="onBlurMedico()"
+            />
+            @if (mostrarDropdownMedico) {
+              <ul class="combobox-dropdown">
+                <li (mousedown)="seleccionarMedico(null)">Todos</li>
+                @for (medico of medicosFiltradosBusqueda(); track medico.id) {
+                  <li (mousedown)="seleccionarMedico(medico)">
+                    {{ medico.nombres }} {{ medico.apellidos }}
+                  </li>
+                }
+                @if (medicosFiltradosBusqueda().length === 0) {
+                  <li class="no-results">No se encontraron médicos</li>
+                }
+              </ul>
+            }
+          </div>
+        </label>
+      }
       <label class="form-label">
         Fecha
         <input class="form-control" type="date" [(ngModel)]="fechaActual" (change)="cargarAgenda()" />

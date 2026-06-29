@@ -29,6 +29,8 @@ export class AgendaCalendarComponent implements OnInit {
   cargando = false;
   mensajeError = '';
   citaSeleccionada?: CitaResponse;
+  busquedaMedico = '';
+  mostrarDropdownMedico = false;
 
   horas = Array.from({ length: 25 }, (_, index) => {
     const totalMinutos = 8 * 60 + index * 30;
@@ -44,6 +46,9 @@ export class AgendaCalendarComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.sesionContextService.sedes$.subscribe((sedes) => {
+      this.sedes = sedes;
+    });
     this.cargarCatalogos();
     this.sesionContextService.selectedSedeId$.subscribe((sedeId) => {
       this.sedeId = sedeId;
@@ -54,15 +59,26 @@ export class AgendaCalendarComponent implements OnInit {
 
   cargarCatalogos(): void {
     this.cargando = true;
-    forkJoin({
-      sedes: this.agendaService.listarSedes(),
-      especialidades: this.agendaService.listarEspecialidades(),
-      medicos: this.agendaService.listarMedicos()
-    }).pipe(finalize(() => (this.cargando = false))).subscribe({
-      next: ({ sedes, especialidades, medicos }) => {
-        this.sedes = sedes;
-        this.especialidades = especialidades;
-        this.medicos = medicos;
+    const calls: any = {};
+    if (this.authService.hasPermission('citas.ver_todas')) {
+      calls.especialidades = this.agendaService.listarEspecialidades();
+      calls.medicos = this.agendaService.listarMedicos();
+    }
+
+    if (Object.keys(calls).length === 0) {
+      this.cargando = false;
+      this.cargarAgenda();
+      return;
+    }
+
+    forkJoin(calls).pipe(finalize(() => (this.cargando = false))).subscribe({
+      next: (res: any) => {
+        if (res.especialidades) {
+          this.especialidades = res.especialidades;
+        }
+        if (res.medicos) {
+          this.medicos = res.medicos;
+        }
         this.cargarAgenda();
       },
       error: () => (this.mensajeError = 'No se pudieron cargar los catalogos de agenda.')
@@ -70,6 +86,9 @@ export class AgendaCalendarComponent implements OnInit {
   }
 
   cargarMedicos(): void {
+    if (!this.authService.hasPermission('citas.ver_todas')) {
+      return;
+    }
     this.doctorId = null;
     this.agendaService.listarMedicos({
       sedeId: this.sedeId || undefined,
@@ -174,7 +193,45 @@ export class AgendaCalendarComponent implements OnInit {
       ...(this.sedeId ? { sedeId: this.sedeId } : {})
     };
   }
+  get textoMedicoSeleccionado(): string {
+    if (!this.doctorId) return 'Todos';
+    const medico = this.medicos.find(m => m.id === this.doctorId);
+    return medico ? `${medico.nombres} ${medico.apellidos}` : 'Todos';
+  }
 
+  medicosFiltradosBusqueda(): MedicoResponse[] {
+    const query = this.busquedaMedico.toLowerCase().trim();
+    if (!query) {
+      return this.medicos;
+    }
+    return this.medicos.filter(m => 
+      `${m.nombres} ${m.apellidos}`.toLowerCase().includes(query)
+    );
+  }
+
+  seleccionarMedico(medico: MedicoResponse | null): void {
+    if (medico) {
+      this.doctorId = medico.id;
+      this.busquedaMedico = `${medico.nombres} ${medico.apellidos}`;
+    } else {
+      this.doctorId = null;
+      this.busquedaMedico = '';
+    }
+    this.mostrarDropdownMedico = false;
+    this.cargarAgenda();
+  }
+
+  onFocusMedico(): void {
+    this.mostrarDropdownMedico = true;
+    this.busquedaMedico = '';
+  }
+
+  onBlurMedico(): void {
+    setTimeout(() => {
+      this.mostrarDropdownMedico = false;
+      this.busquedaMedico = this.textoMedicoSeleccionado;
+    }, 200);
+  }
   private rangoVisible(): { inicio: string; fin: string } {
     const dias = this.diasVisibles();
     return { inicio: dias[0], fin: dias[dias.length - 1] };

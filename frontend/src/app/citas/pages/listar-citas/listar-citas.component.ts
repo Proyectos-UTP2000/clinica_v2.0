@@ -54,15 +54,17 @@ export class ListarCitasComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    forkJoin({
-      pacientes: this.citaService.listarPacientes(),
-      medicos: this.citaService.listarMedicos()
-    }).subscribe({
-      next: ({ pacientes, medicos }) => {
-        this.pacientes = pacientes;
-        this.medicos = medicos;
-      }
-    });
+    if (!this.usaAgendaPropia) {
+      forkJoin({
+        pacientes: this.citaService.listarPacientes(),
+        medicos: this.citaService.listarMedicos()
+      }).subscribe({
+        next: ({ pacientes, medicos }) => {
+          this.pacientes = pacientes;
+          this.medicos = medicos;
+        }
+      });
+    }
 
     this.sesionContextService.selectedSedeId$.subscribe(() => {
       this.cargarCitas(0);

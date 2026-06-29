@@ -144,13 +144,15 @@
           </div>
         }
         <form [formGroup]="reprogramarForm" (ngSubmit)="reprogramarCita()">
-          <label for="doctorReprogramarId" class="form-label">Cambiar médico (Opcional)</label>
-          <select id="doctorReprogramarId" class="form-select" formControlName="doctorId">
-            <option value="">Mantener médico actual</option>
-            @for (medico of medicosFiltrados(); track medico.id) {
-              <option [value]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
-            }
-          </select>
+          @if (authService.hasPermission('citas.editar_asignados')) {
+            <label for="doctorReprogramarId" class="form-label">Cambiar médico (Opcional)</label>
+            <select id="doctorReprogramarId" class="form-select" formControlName="doctorId">
+              <option value="">Mantener médico actual</option>
+              @for (medico of medicosFiltrados(); track medico.id) {
+                <option [value]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
+              }
+            </select>
+          }
 
           <label for="fechaReprogramar" class="form-label mt-3">Fecha</label>
           <input id="fechaReprogramar" type="date" class="form-control" formControlName="fecha" [min]="today" />

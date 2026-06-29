@@ -28,6 +28,32 @@
           <label for="soloPrincipales" class="form-check-label fw-semibold">Mostrar solo especialidades principales</label>
         </div>
       }
+
+      <!-- Combobox+textbox de busqueda/filtro -->
+      <div class="custom-combobox flex-grow-1" style="max-width: 350px;">
+        <div class="input-group">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Buscar especialidad..."
+            [(ngModel)]="busqueda"
+            (focus)="mostrarDropdown = true"
+            (blur)="ocultarDropdownConRetraso()"
+          />
+          @if (busqueda) {
+            <button class="btn btn-outline-secondary" type="button" (click)="limpiarBusqueda()">✕</button>
+          }
+        </div>
+        @if (mostrarDropdown && filteredOptions.length > 0) {
+          <ul class="combobox-dropdown">
+            @for (opt of filteredOptions; track opt.id) {
+              <li (click)="seleccionarCoincidencia(opt)">
+                {{ opt.nombre }} @if (opt.especialidadPadreNombre) { <small class="text-muted">(Subespecialidad de {{ opt.especialidadPadreNombre }})</small> }
+              </li>
+            }
+          </ul>
+        }
+      </div>
     </div>
   </div>
 
@@ -52,16 +78,23 @@
           <tbody>
             @if (vistaJerarquica) {
               @for (parent of especialidadesJerarquicas; track parent.id) {
-                <tr class="table-light fw-bold" style="background-color: #f8fafc;">
+                <tr class="tree-row-parent fw-bold" 
+                    [class.highlighted]="highlightedId === parent.id" 
+                    [class.glow-animation]="highlightedId === parent.id" 
+                    [id]="'esp-row-' + parent.id"
+                    (click)="toggleExpand(parent.id)">
                   <td>
+                    <span class="expand-icon" [class.is-open]="isExpanded(parent.id)">▶</span>
                     {{ parent.nombre }}
-                    <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">
-                      {{ parent.subespecialidades.length }} subespecialidades
-                    </span>
+                    @if (parent.subespecialidades.length > 0) {
+                      <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">
+                        {{ parent.subespecialidades.length }} subespecialidades
+                      </span>
+                    }
                   </td>
                   <td>{{ parent.descripcion || 'Sin descripcion' }}</td>
                   <td>Principal</td>
-                  <td class="text-end">
+                  <td class="text-end" (click)="$event.stopPropagation()">
                     @if (authService.hasPermission('especialidades.editar')) {
                       <a class="btn btn-sm btn-outline-secondary me-2" [routerLink]="['/especialidades/editar', parent.id]">Editar</a>
                     }
@@ -70,9 +103,12 @@
                     }
                   </td>
                 </tr>
-                @if (!soloPrincipales) {
+                @if (isExpanded(parent.id) && !soloPrincipales) {
                   @for (sub of parent.subespecialidades; track sub.id) {
-                    <tr>
+                    <tr class="sub-row" 
+                        [class.highlighted]="highlightedId === sub.id" 
+                        [class.glow-animation]="highlightedId === sub.id" 
+                        [id]="'esp-row-' + sub.id">
                       <td class="ps-5 text-muted">
                         ↳ 📄 {{ sub.nombre }}
                       </td>
@@ -92,7 +128,9 @@
               }
             } @else {
               @for (especialidad of especialidades; track especialidad.id) {
-                <tr>
+                <tr [class.highlighted]="highlightedId === especialidad.id" 
+                    [class.glow-animation]="highlightedId === especialidad.id" 
+                    [id]="'esp-row-' + especialidad.id">
                   <td class="fw-semibold">{{ especialidad.nombre }}</td>
                   <td>{{ especialidad.descripcion || 'Sin descripcion' }}</td>
                   <td>{{ especialidad.especialidadPadreNombre || 'Principal' }}</td>

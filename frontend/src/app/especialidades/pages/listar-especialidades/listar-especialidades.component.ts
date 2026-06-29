@@ -8,6 +8,7 @@ import { EspecialidadService } from '../../services/especialidad.service';
 @Component({
     selector: 'app-listar-especialidades',
     templateUrl: './listar-especialidades.component.html',
+    styleUrl: './listar-especialidades.component.css',
     standalone: false
 })
 export class ListarEspecialidadesComponent implements OnInit {
@@ -15,6 +16,11 @@ export class ListarEspecialidadesComponent implements OnInit {
   todasEspecialidades: EspecialidadResponse[] = [];
   vistaJerarquica = true;
   soloPrincipales = false;
+
+  busqueda = '';
+  mostrarDropdown = false;
+  expandedParents = new Set<number>();
+  highlightedId: number | null = null;
 
   page = 0;
   size = 10;
@@ -69,6 +75,61 @@ export class ListarEspecialidadesComponent implements OnInit {
       ...p,
       subespecialidades: this.todasEspecialidades.filter(e => e.especialidadPadreId === p.id)
     }));
+  }
+
+  toggleExpand(parentId: number): void {
+    if (this.expandedParents.has(parentId)) {
+      this.expandedParents.delete(parentId);
+    } else {
+      this.expandedParents.add(parentId);
+    }
+  }
+
+  isExpanded(parentId: number): boolean {
+    return this.expandedParents.has(parentId);
+  }
+
+  get filteredOptions(): EspecialidadResponse[] {
+    if (!this.busqueda) {
+      return [];
+    }
+    const q = this.busqueda.toLowerCase();
+    return this.todasEspecialidades.filter(e => e.nombre.toLowerCase().includes(q));
+  }
+
+  seleccionarCoincidencia(esp: EspecialidadResponse): void {
+    this.busqueda = esp.nombre;
+    this.mostrarDropdown = false;
+    this.highlightedId = esp.id;
+
+    if (esp.especialidadPadreId) {
+      this.expandedParents.add(esp.especialidadPadreId);
+    } else {
+      this.expandedParents.add(esp.id);
+    }
+
+    setTimeout(() => {
+      const el = document.getElementById('esp-row-' + esp.id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 150);
+
+    setTimeout(() => {
+      this.highlightedId = null;
+    }, 4000);
+  }
+
+  limpiarBusqueda(): void {
+    this.busqueda = '';
+    this.highlightedId = null;
+    this.mostrarDropdown = false;
+  }
+
+  ocultarDropdownConRetraso(): void {
+    setTimeout(() => {
+      this.mostrarDropdown = false;
+    }, 200);
   }
 
   private aplicarPagina(response: Page<EspecialidadResponse>): void {

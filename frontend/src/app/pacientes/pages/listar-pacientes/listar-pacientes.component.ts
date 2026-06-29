@@ -22,6 +22,7 @@ export class ListarPacientesComponent implements OnInit {
   mensajeError = '';
   mensajeExito = '';
   pacienteSeleccionado: PacienteResponse | null = null;
+  busqueda = '';
 
   constructor(
     public readonly authService: AuthService,
@@ -35,7 +36,7 @@ export class ListarPacientesComponent implements OnInit {
   cargarPacientes(page = this.page): void {
     this.cargando = true;
     this.mensajeError = '';
-    this.pacienteService.listar(page, this.size)
+    this.pacienteService.listar(page, this.size, this.busqueda || undefined)
       .pipe(finalize(() => (this.cargando = false)))
       .subscribe({
         next: (response) => this.aplicarPagina(response),
@@ -43,6 +44,11 @@ export class ListarPacientesComponent implements OnInit {
           this.mensajeError = 'No se pudo cargar la lista de pacientes.';
         }
       });
+  }
+
+  buscar(): void {
+    this.page = 0;
+    this.cargarPacientes();
   }
 
   abrirConfirmacion(paciente: PacienteResponse): void {

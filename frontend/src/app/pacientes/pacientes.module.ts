@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from '../shared/shared.module';
 import { PacientesRoutingModule } from './pacientes-routing.module';
 import { CrearPacienteComponent } from './pages/crear-paciente/crear-paciente.component';
@@ -16,6 +16,7 @@ import { PacienteService } from './services/paciente.service';
   ],
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     SharedModule,
     PacientesRoutingModule

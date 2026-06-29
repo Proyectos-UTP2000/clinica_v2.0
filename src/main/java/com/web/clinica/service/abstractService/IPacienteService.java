@@ -23,8 +23,8 @@ public interface IPacienteService {
     /** Consulta datos civiles externos para prellenar formularios. */
     PacienteResponse consultarDni(String dni);
 
-    /** Lista pacientes activos con paginacion. */
-    Page<PacienteResponse> listarActivos(Pageable pageable);
+    /** Lista pacientes activos con paginacion y filtro opcional de busqueda. */
+    Page<PacienteResponse> listarActivos(String buscar, Pageable pageable);
 
     /** Desactiva un paciente sin borrar su historial. */
     void desactivar(Long id);

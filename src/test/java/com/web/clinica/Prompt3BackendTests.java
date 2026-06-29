@@ -87,7 +87,7 @@ class Prompt3BackendTests {
         }
 
         @Override
-        public Page<PacienteResponse> listarActivos(Pageable pageable) {
+        public Page<PacienteResponse> listarActivos(String buscar, Pageable pageable) {
             return new PageImpl<>(List.of(pacienteExistente()), PageRequest.of(0, 20), 1);
         }
 

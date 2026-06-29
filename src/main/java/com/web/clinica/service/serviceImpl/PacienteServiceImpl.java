@@ -92,10 +92,13 @@ public class PacienteServiceImpl implements IPacienteService {
                 .build();
     }
 
-    /** Lista solo pacientes activos. */
+    /** Lista solo pacientes activos con filtro de busqueda. */
     @Override
     @Transactional(readOnly = true)
-    public Page<PacienteResponse> listarActivos(Pageable pageable) {
+    public Page<PacienteResponse> listarActivos(String buscar, Pageable pageable) {
+        if (StringUtils.hasText(buscar)) {
+            return pacienteRepository.searchActivos(buscar, pageable).map(this::convertirRespuesta);
+        }
         return pacienteRepository.findByActivoTrue(pageable).map(this::convertirRespuesta);
     }
 

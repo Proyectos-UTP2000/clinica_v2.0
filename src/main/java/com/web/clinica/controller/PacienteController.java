@@ -29,11 +29,13 @@ public class PacienteController {
 
     private final IPacienteService pacienteService;
 
-    /** Lista pacientes activos con paginacion. */
+    /** Lista pacientes activos con paginacion y filtro opcional de busqueda. */
     @GetMapping
     @RequierePermiso({"pacientes.ver", "usuarios.ver"})
-    public Page<PacienteResponse> listarActivos(Pageable pageable) {
-        return pacienteService.listarActivos(pageable);
+    public Page<PacienteResponse> listarActivos(
+            @RequestParam(required = false) String buscar,
+            Pageable pageable) {
+        return pacienteService.listarActivos(buscar, pageable);
     }
 
     /** Obtiene un paciente por id. */

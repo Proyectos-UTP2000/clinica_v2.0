@@ -11,6 +11,28 @@
     }
   </app-page-header>
 
+  <div class="feature-panel mb-4">
+    <div class="feature-panel-body d-flex gap-2 align-items-end">
+      <div class="flex-grow-1">
+        <label for="buscarPaciente" class="form-label">Buscar Paciente</label>
+        <input
+          id="buscarPaciente"
+          type="text"
+          class="form-control"
+          [(ngModel)]="busqueda"
+          placeholder="Buscar por DNI, nombres o apellidos..."
+          (keyup.enter)="buscar()"
+          />
+      </div>
+      <button type="button" class="btn btn-primary" (click)="buscar()">
+        Buscar
+      </button>
+      <button type="button" class="btn btn-outline-secondary" (click)="busqueda = ''; buscar()">
+        Limpiar
+      </button>
+    </div>
+  </div>
+
   @if (mensajeError) {
     <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
   }

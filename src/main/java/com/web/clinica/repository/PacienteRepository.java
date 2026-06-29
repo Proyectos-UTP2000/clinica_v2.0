@@ -19,6 +19,13 @@ public interface PacienteRepository extends JpaRepository<Paciente, Long> {
     /** Lista pacientes activos con paginacion. */
     Page<Paciente> findByActivoTrue(Pageable pageable);
 
+    /** Busca pacientes activos filtrando por DNI, nombres o apellidos. */
+    @Query("SELECT p FROM Paciente p WHERE p.activo = true AND " +
+           "(LOWER(p.dni) LIKE LOWER(CONCAT('%', :buscar, '%')) OR " +
+           "LOWER(p.nombres) LIKE LOWER(CONCAT('%', :buscar, '%')) OR " +
+           "LOWER(p.apellidos) LIKE LOWER(CONCAT('%', :buscar, '%')))")
+    Page<Paciente> searchActivos(String buscar, Pageable pageable);
+
     /** Cuenta pacientes activos para dashboard. */
     @Query("SELECT COUNT(p) FROM Paciente p WHERE p.activo = true")
     long countByActivoTrue();

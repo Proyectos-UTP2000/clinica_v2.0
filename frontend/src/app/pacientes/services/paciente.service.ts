@@ -12,10 +12,13 @@ const API_URL = 'http://localhost:8080/api';
 export class PacienteService {
   constructor(private readonly http: HttpClient) {}
 
-  listar(page = 0, size = 10): Observable<Page<PacienteResponse>> {
-    const params = new HttpParams()
+  listar(page = 0, size = 10, buscar?: string): Observable<Page<PacienteResponse>> {
+    let params = new HttpParams()
       .set('page', page)
       .set('size', size);
+    if (buscar) {
+      params = params.set('buscar', buscar);
+    }
     return this.http.get<Page<PacienteResponse>>(`${API_URL}/pacientes`, { params });
   }
 

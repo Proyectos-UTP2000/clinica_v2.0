@@ -34,6 +34,11 @@ export class ListarCitasComponent implements OnInit {
   cargandoSlotsReprogramar = false;
   diasAtencionReprogramar = '';
 
+  busquedaPaciente = '';
+  mostrarDropdownPaciente = false;
+  busquedaMedico = '';
+  mostrarDropdownMedico = false;
+
   filtrosForm = this.fb.group({
     pacienteId: [''],
     doctorId: [''],
@@ -45,6 +50,60 @@ export class ListarCitasComponent implements OnInit {
     nuevaFechaHora: [''],
     doctorId: ['']
   });
+
+  get pacientesFiltrados(): PacienteResponse[] {
+    const q = this.busquedaPaciente.toLowerCase().trim();
+    if (!q) {
+      return this.pacientes;
+    }
+    return this.pacientes.filter(
+      p => p.nombres.toLowerCase().includes(q) || p.apellidos.toLowerCase().includes(q) || p.dni.includes(q)
+    );
+  }
+
+  get medicosFiltradosList(): MedicoResponse[] {
+    const q = this.busquedaMedico.toLowerCase().trim();
+    if (!q) {
+      return this.medicos;
+    }
+    return this.medicos.filter(
+      m => m.nombres.toLowerCase().includes(q) || m.apellidos.toLowerCase().includes(q) || m.especialidadNombre.toLowerCase().includes(q)
+    );
+  }
+
+  seleccionarPaciente(paciente: PacienteResponse | null): void {
+    if (paciente) {
+      this.filtrosForm.patchValue({ pacienteId: String(paciente.id) });
+      this.busquedaPaciente = `${paciente.apellidos}, ${paciente.nombres} (${paciente.dni})`;
+    } else {
+      this.filtrosForm.patchValue({ pacienteId: '' });
+      this.busquedaPaciente = '';
+    }
+    this.mostrarDropdownPaciente = false;
+  }
+
+  seleccionarMedico(medico: MedicoResponse | null): void {
+    if (medico) {
+      this.filtrosForm.patchValue({ doctorId: String(medico.id) });
+      this.busquedaMedico = `${medico.apellidos}, ${medico.nombres} (${medico.especialidadNombre})`;
+    } else {
+      this.filtrosForm.patchValue({ doctorId: '' });
+      this.busquedaMedico = '';
+    }
+    this.mostrarDropdownMedico = false;
+  }
+
+  ocultarDropdownPacienteConRetraso(): void {
+    setTimeout(() => {
+      this.mostrarDropdownPaciente = false;
+    }, 200);
+  }
+
+  ocultarDropdownMedicoConRetraso(): void {
+    setTimeout(() => {
+      this.mostrarDropdownMedico = false;
+    }, 200);
+  }
 
   constructor(
     public readonly authService: AuthService,
@@ -110,6 +169,8 @@ export class ListarCitasComponent implements OnInit {
   }
 
   limpiarFiltros(): void {
+    this.busquedaPaciente = '';
+    this.busquedaMedico = '';
     this.filtrosForm.reset({ pacienteId: '', doctorId: '', fecha: '' });
     this.cargarCitas(0);
   }

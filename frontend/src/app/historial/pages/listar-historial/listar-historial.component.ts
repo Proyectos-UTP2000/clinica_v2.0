@@ -14,6 +14,7 @@ import { HistorialService } from '../../services/historial.service';
 @Component({
     selector: 'app-listar-historial',
     templateUrl: './listar-historial.component.html',
+    styleUrl: './listar-historial.component.css',
     standalone: false
 })
 export class ListarHistorialComponent implements OnInit {
@@ -30,6 +31,36 @@ export class ListarHistorialComponent implements OnInit {
   mensajeError = '';
   mensajeExito = '';
   dniBusqueda = '';
+
+  busquedaPaciente = '';
+  mostrarDropdownPaciente = false;
+
+  get pacientesFiltrados(): PacienteResponse[] {
+    const q = this.busquedaPaciente.toLowerCase().trim();
+    if (!q) {
+      return this.pacientes;
+    }
+    return this.pacientes.filter(
+      p => p.nombres.toLowerCase().includes(q) || p.apellidos.toLowerCase().includes(q) || p.dni.includes(q)
+    );
+  }
+
+  seleccionarPaciente(paciente: PacienteResponse | null): void {
+    if (paciente) {
+      this.filtroForm.patchValue({ pacienteId: paciente.id });
+      this.busquedaPaciente = `${paciente.apellidos}, ${paciente.nombres} (${paciente.dni})`;
+    } else {
+      this.filtroForm.patchValue({ pacienteId: null });
+      this.busquedaPaciente = '';
+    }
+    this.mostrarDropdownPaciente = false;
+  }
+
+  ocultarDropdownPacienteConRetraso(): void {
+    setTimeout(() => {
+      this.mostrarDropdownPaciente = false;
+    }, 200);
+  }
 
   filtroForm = this.fb.group({
     pacienteId: [null as number | null, Validators.required]

@@ -12,25 +12,67 @@
   <form class="feature-panel" [formGroup]="filtrosForm" (ngSubmit)="buscar()">
     <div class="feature-panel-body filters-grid">
       @if (!usaAgendaPropia) {
-        <div>
-          <label for="pacienteId" class="form-label">Paciente</label>
-          <select id="pacienteId" class="form-select" formControlName="pacienteId">
-            <option value="">Todos</option>
-            @for (paciente of pacientes; track paciente) {
-              <option [value]="paciente.id">{{ paciente.dni }} - {{ paciente.nombres }} {{ paciente.apellidos }}</option>
+        <div class="custom-combobox">
+          <label class="form-label">Paciente</label>
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Buscar paciente..."
+              [(ngModel)]="busquedaPaciente"
+              [ngModelOptions]="{standalone: true}"
+              (focus)="mostrarDropdownPaciente = true"
+              (blur)="ocultarDropdownPacienteConRetraso()"
+            />
+            @if (busquedaPaciente) {
+              <button class="btn btn-outline-secondary" type="button" (click)="seleccionarPaciente(null)">✕</button>
             }
-          </select>
+          </div>
+          @if (mostrarDropdownPaciente) {
+            <ul class="combobox-dropdown">
+              <li (click)="seleccionarPaciente(null)">Todos los pacientes</li>
+              @for (paciente of pacientesFiltrados; track paciente.id) {
+                <li (click)="seleccionarPaciente(paciente)">
+                  {{ paciente.apellidos }}, {{ paciente.nombres }} <small class="text-muted">({{ paciente.dni }})</small>
+                </li>
+              }
+              @if (pacientesFiltrados.length === 0) {
+                <li class="no-results">No se encontraron resultados</li>
+              }
+            </ul>
+          }
         </div>
       }
       @if (!usaAgendaPropia) {
-        <div>
-          <label for="doctorId" class="form-label">Medico</label>
-          <select id="doctorId" class="form-select" formControlName="doctorId">
-            <option value="">Todos</option>
-            @for (medico of medicos; track medico) {
-              <option [value]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
+        <div class="custom-combobox">
+          <label class="form-label">Medico</label>
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Buscar médico..."
+              [(ngModel)]="busquedaMedico"
+              [ngModelOptions]="{standalone: true}"
+              (focus)="mostrarDropdownMedico = true"
+              (blur)="ocultarDropdownMedicoConRetraso()"
+            />
+            @if (busquedaMedico) {
+              <button class="btn btn-outline-secondary" type="button" (click)="seleccionarMedico(null)">✕</button>
             }
-          </select>
+          </div>
+          @if (mostrarDropdownMedico) {
+            <ul class="combobox-dropdown">
+              <li (click)="seleccionarMedico(null)">Todos los médicos</li>
+              @for (medico of medicosFiltradosList; track medico.id) {
+                <li (click)="seleccionarMedico(medico)">
+                  {{ medico.apellidos }}, {{ medico.nombres }} <small class="text-muted">({{ medico.especialidadNombre }})</small>
+                </li>
+              }
+              @if (medicosFiltradosList.length === 0) {
+                <li class="no-results">No se encontraron resultados</li>
+              }
+            </ul>
+          }
         </div>
       }
       <div>

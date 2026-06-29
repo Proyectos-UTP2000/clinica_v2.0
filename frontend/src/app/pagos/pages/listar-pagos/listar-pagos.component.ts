@@ -10,6 +10,7 @@ import { PagoService } from '../../services/pago.service';
 @Component({
     selector: 'app-listar-pagos',
     templateUrl: './listar-pagos.component.html',
+    styleUrl: './listar-pagos.component.css',
     standalone: false
 })
 export class ListarPagosComponent implements OnInit {
@@ -20,6 +21,36 @@ export class ListarPagosComponent implements OnInit {
   guardando = false;
   mensajeError = '';
   mensajeExito = '';
+
+  busquedaPaciente = '';
+  mostrarDropdownPaciente = false;
+
+  get pacientesFiltrados(): PacienteResponse[] {
+    const q = this.busquedaPaciente.toLowerCase().trim();
+    if (!q) {
+      return this.pacientes;
+    }
+    return this.pacientes.filter(
+      p => p.nombres.toLowerCase().includes(q) || p.apellidos.toLowerCase().includes(q) || p.dni.includes(q)
+    );
+  }
+
+  seleccionarPaciente(paciente: PacienteResponse | null): void {
+    if (paciente) {
+      this.filtroForm.patchValue({ pacienteId: paciente.id });
+      this.busquedaPaciente = `${paciente.apellidos}, ${paciente.nombres} (${paciente.dni})`;
+    } else {
+      this.filtroForm.patchValue({ pacienteId: null });
+      this.busquedaPaciente = '';
+    }
+    this.mostrarDropdownPaciente = false;
+  }
+
+  ocultarDropdownPacienteConRetraso(): void {
+    setTimeout(() => {
+      this.mostrarDropdownPaciente = false;
+    }, 200);
+  }
 
   filtroForm = this.fb.group({
     pacienteId: [null as number | null, Validators.required]
@@ -56,6 +87,8 @@ export class ListarPagosComponent implements OnInit {
           const primerPaciente = pacientes[0]?.id ?? null;
           this.filtroForm.patchValue({ pacienteId: primerPaciente });
           if (primerPaciente) {
+            const firstPac = pacientes[0];
+            this.busquedaPaciente = `${firstPac.apellidos}, ${firstPac.nombres} (${firstPac.dni})`;
             this.cargarPagos();
           }
         },

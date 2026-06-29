@@ -20,15 +20,36 @@
     <div class="feature-panel-body">
       @if (authService.hasPermission('pacientes.ver')) {
         <form class="form-grid" [formGroup]="filtroForm" (ngSubmit)="cargarHistorial(0)">
-          <label class="form-label">
-            Paciente
-            <select class="form-select" formControlName="pacienteId">
-              <option [ngValue]="null">Seleccione paciente</option>
-              @for (paciente of pacientes; track paciente) {
-                <option [ngValue]="paciente.id">{{ paciente.nombres }} {{ paciente.apellidos }}</option>
+          <div class="custom-combobox">
+            <label class="form-label">Paciente</label>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Buscar paciente..."
+                [(ngModel)]="busquedaPaciente"
+                [ngModelOptions]="{standalone: true}"
+                (focus)="mostrarDropdownPaciente = true"
+                (blur)="ocultarDropdownPacienteConRetraso()"
+              />
+              @if (busquedaPaciente) {
+                <button class="btn btn-outline-secondary" type="button" (click)="seleccionarPaciente(null)">✕</button>
               }
-            </select>
-          </label>
+            </div>
+            @if (mostrarDropdownPaciente) {
+              <ul class="combobox-dropdown">
+                <li (click)="seleccionarPaciente(null)">Seleccione paciente</li>
+                @for (paciente of pacientesFiltrados; track paciente.id) {
+                  <li (click)="seleccionarPaciente(paciente)">
+                    {{ paciente.apellidos }}, {{ paciente.nombres }} <small class="text-muted">({{ paciente.dni }})</small>
+                  </li>
+                }
+                @if (pacientesFiltrados.length === 0) {
+                  <li class="no-results">No se encontraron resultados</li>
+                }
+              </ul>
+            }
+          </div>
           <div class="form-actions">
             <button class="btn btn-outline-primary" type="submit">Buscar historial</button>
           </div>

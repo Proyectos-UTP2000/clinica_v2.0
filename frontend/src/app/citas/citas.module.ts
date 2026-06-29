@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from '../shared/shared.module';
 import { CitasRoutingModule } from './citas-routing.module';
 import { CrearCitaComponent } from './pages/crear-cita/crear-cita.component';
@@ -14,6 +14,7 @@ import { CitaService } from './services/cita.service';
   ],
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     SharedModule,
     CitasRoutingModule

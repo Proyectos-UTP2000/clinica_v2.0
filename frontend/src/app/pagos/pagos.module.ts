@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from '../shared/shared.module';
 import { HistorialPagosComponent } from './pages/historial-pagos/historial-pagos.component';
 import { ListarPagosComponent } from './pages/listar-pagos/listar-pagos.component';
@@ -10,7 +10,7 @@ import { PagoService } from './services/pago.service';
 
 @NgModule({
   declarations: [ListarPagosComponent, RegistroPagoComponent, HistorialPagosComponent],
-  imports: [CommonModule, ReactiveFormsModule, SharedModule, PagosRoutingModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, SharedModule, PagosRoutingModule],
   providers: [PagoService]
 })
 export class PagosModule {}

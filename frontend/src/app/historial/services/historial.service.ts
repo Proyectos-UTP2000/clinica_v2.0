@@ -59,4 +59,22 @@ export class HistorialService {
   descargarAdjunto(adjuntoId: number): Observable<Blob> {
     return this.http.get(`${API_URL}/adjuntos/${adjuntoId}`, { responseType: 'blob' });
   }
+
+  buscarPacientePorDni(dni: string): Observable<PacienteResponse> {
+    const params = new HttpParams().set('dni', dni);
+    return this.http.get<PacienteResponse>(`${API_URL}/pacientes/buscar`, { params });
+  }
+
+  obtenerMedicoAutenticado(): Observable<MedicoResponse> {
+    return this.http.get<MedicoResponse>(`${API_URL}/medicos/me`);
+  }
+
+  obtenerPacientePorId(id: number): Observable<PacienteResponse> {
+    return this.http.get<PacienteResponse>(`${API_URL}/pacientes/${id}`);
+  }
+
+  listarCitasDoctor(): Observable<any> {
+    const params = new HttpParams().set('page', 0).set('size', 100);
+    return this.http.get<any>(`${API_URL}/citas/doctor`, { params });
+  }
 }

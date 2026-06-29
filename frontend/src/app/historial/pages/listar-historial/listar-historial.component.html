@@ -18,20 +18,43 @@
 
   <div class="feature-panel">
     <div class="feature-panel-body">
-      <form class="form-grid" [formGroup]="filtroForm" (ngSubmit)="cargarHistorial(0)">
-        <label class="form-label">
-          Paciente
-          <select class="form-select" formControlName="pacienteId">
-            <option [ngValue]="null">Seleccione paciente</option>
-            @for (paciente of pacientes; track paciente) {
-              <option [ngValue]="paciente.id">{{ paciente.nombres }} {{ paciente.apellidos }}</option>
-            }
-          </select>
-        </label>
-        <div class="form-actions">
-          <button class="btn btn-outline-primary" type="submit">Buscar historial</button>
+      @if (authService.hasPermission('pacientes.ver')) {
+        <form class="form-grid" [formGroup]="filtroForm" (ngSubmit)="cargarHistorial(0)">
+          <label class="form-label">
+            Paciente
+            <select class="form-select" formControlName="pacienteId">
+              <option [ngValue]="null">Seleccione paciente</option>
+              @for (paciente of pacientes; track paciente) {
+                <option [ngValue]="paciente.id">{{ paciente.nombres }} {{ paciente.apellidos }}</option>
+              }
+            </select>
+          </label>
+          <div class="form-actions">
+            <button class="btn btn-outline-primary" type="submit">Buscar historial</button>
+          </div>
+        </form>
+      } @else {
+        <div class="form-grid">
+          <label class="form-label">
+            Buscar Paciente por DNI
+            <div class="d-flex gap-2">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Ingrese DNI del paciente..."
+                [(ngModel)]="dniBusqueda"
+                (keyup.enter)="buscarPaciente()"
+              />
+              <button type="button" class="btn btn-primary" (click)="buscarPaciente()">Buscar</button>
+            </div>
+          </label>
+          @if (pacientes.length > 0) {
+            <div class="text-success small mt-1 fw-semibold">
+              Paciente seleccionado: {{ pacientes[0].nombres }} {{ pacientes[0].apellidos }}
+            </div>
+          }
         </div>
-      </form>
+      }
     </div>
   </div>
 
@@ -47,15 +70,17 @@
             }
           </select>
         </label>
-        <label class="form-label">
-          Medico
-          <select class="form-select" formControlName="doctorId">
-            <option [ngValue]="null">Seleccione medico</option>
-            @for (medico of medicos; track medico) {
-              <option [ngValue]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
-            }
-          </select>
-        </label>
+        @if (authService.hasPermission('medicos.ver')) {
+          <label class="form-label">
+            Medico
+            <select class="form-select" formControlName="doctorId">
+              <option [ngValue]="null">Seleccione medico</option>
+              @for (medico of medicos; track medico) {
+                <option [ngValue]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
+              }
+            </select>
+          </label>
+        }
         <label class="form-label">
           Sede
           <select class="form-select" formControlName="sedeId">

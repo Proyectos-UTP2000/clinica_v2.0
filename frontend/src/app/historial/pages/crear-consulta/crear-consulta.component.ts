@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize, forkJoin, of, switchMap } from 'rxjs';
+import { AuthService } from '../../../core/services/auth.service';
+import { SesionContextService } from '../../../core/services/sesion-context.service';
 import { EstudioRequest, IndicacionRequest, RecetaRequest } from '../../../shared/models/consulta.model';
 import { MedicoResponse } from '../../../shared/models/medico.model';
 import { PacienteResponse } from '../../../shared/models/paciente.model';
@@ -40,7 +42,9 @@ export class CrearConsultaComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly fb: FormBuilder,
-    private readonly historialService: HistorialService
+    private readonly historialService: HistorialService,
+    private readonly authService: AuthService,
+    private readonly sesionContextService: SesionContextService
   ) {}
 
   get recetas(): FormArray {
@@ -143,17 +147,68 @@ export class CrearConsultaComponent implements OnInit {
 
   private cargarCatalogos(): void {
     this.cargando = true;
-    forkJoin({
-      pacientes: this.historialService.listarPacientes(),
-      medicos: this.historialService.listarMedicos(),
-      sedes: this.historialService.listarSedes()
-    }).pipe(finalize(() => (this.cargando = false))).subscribe({
-      next: ({ pacientes, medicos, sedes }) => {
-        this.pacientes = pacientes;
-        this.medicos = medicos;
-        this.sedes = sedes;
-      },
-      error: () => (this.mensajeError = 'No se pudieron cargar los catalogos.')
+    this.mensajeError = '';
+
+    const tienePacientesVer = this.authService.hasPermission('pacientes.ver');
+    const tieneMedicosVer = this.authService.hasPermission('medicos.ver');
+
+    this.sesionContextService.sedes$.subscribe((sedes) => {
+      this.sedes = sedes;
     });
+
+    const calls: any = {};
+
+    if (tienePacientesVer) {
+      calls.pacientes = this.historialService.listarPacientes();
+    } else {
+      const routePacienteId = this.route.snapshot.queryParamMap.get('pacienteId');
+      if (routePacienteId) {
+        calls.pacienteDetalle = this.historialService.obtenerPacientePorId(Number(routePacienteId));
+      } else {
+        calls.pacientes = of([]);
+      }
+    }
+
+    if (tieneMedicosVer) {
+      calls.medicos = this.historialService.listarMedicos();
+    } else if (this.authService.hasRole('Doctor')) {
+      calls.medicoAutenticado = this.historialService.obtenerMedicoAutenticado();
+    }
+
+    if (tieneMedicosVer) {
+      calls.sedesList = this.historialService.listarSedes();
+    } else {
+      calls.sedesList = of(this.sedes);
+    }
+
+    forkJoin(calls)
+      .pipe(finalize(() => (this.cargando = false)))
+      .subscribe({
+        next: (res: any) => {
+          if (res.pacientes) {
+            this.pacientes = res.pacientes;
+          } else if (res.pacienteDetalle) {
+            this.pacientes = [res.pacienteDetalle];
+          }
+
+          if (res.medicos) {
+            this.medicos = res.medicos;
+          } else if (res.medicoAutenticado) {
+            this.medicos = [res.medicoAutenticado];
+          }
+
+          if (res.sedesList && res.sedesList.length > 0) {
+            this.sedes = res.sedesList;
+          }
+
+          const currentFormValue = this.consultaForm.value;
+          this.consultaForm.patchValue({
+            pacienteId: currentFormValue.pacienteId || (this.pacientes.length === 1 ? this.pacientes[0].id : null),
+            doctorId: currentFormValue.doctorId || (this.medicos.length === 1 ? this.medicos[0].id : null),
+            sedeId: currentFormValue.sedeId || (this.sedes.length === 1 ? this.sedes[0].id : null)
+          });
+        },
+        error: () => (this.mensajeError = 'No se pudieron cargar los catálogos de consulta.')
+      });
   }
 }

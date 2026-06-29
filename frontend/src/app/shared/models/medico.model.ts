@@ -10,6 +10,7 @@ export interface MedicoResponse {
   especialidadNombre: string;
   subespecialidadNombre?: string;
   sedes: string[];
+  sedesIds?: number[];
   consultorioIds?: number[];
   activo: boolean;
 }

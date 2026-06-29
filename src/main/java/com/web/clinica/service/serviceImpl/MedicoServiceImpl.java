@@ -16,9 +16,13 @@ import com.web.clinica.repository.DoctorRepository;
 import com.web.clinica.repository.EspecialidadRepository;
 import com.web.clinica.repository.RolRepository;
 import com.web.clinica.repository.SedeRepository;
+import com.web.clinica.repository.SecretariaRepository;
 import com.web.clinica.repository.UsuarioRepository;
 import com.web.clinica.service.abstractService.IMedicoService;
 import com.web.clinica.util.DniApiClient;
+import java.util.Collections;
+import java.util.stream.Collectors;
+import org.springframework.security.core.Authentication;
 import com.web.clinica.util.DniInfo;
 import com.web.clinica.util.EmailService;
 import java.security.SecureRandom;
@@ -54,6 +58,7 @@ public class MedicoServiceImpl implements IMedicoService {
     private final PasswordEncoder passwordEncoder;
     private final SecureRandom generadorSeguro;
     private final DniApiClient dniApiClient;
+    private final SecretariaRepository secretariaRepository;
 
     /** Crea usuario interno, asigna rol medico y crea perfil doctor. */
     @Override
@@ -128,15 +133,39 @@ public class MedicoServiceImpl implements IMedicoService {
         throw new ResourceNotFoundException("Medico autenticado no encontrado");
     }
 
-    /** Lista doctores activos con filtros opcionales. */
     @Override
     @Transactional(readOnly = true)
     public Page<MedicoResponse> listarActivos(String texto, Long especialidadId, Long sedeId, Pageable pageable) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        final Set<Long> doctorIdsAsignados;
+        if (auth != null && auth.getPrincipal() instanceof Usuario usuario) {
+            boolean esSecretaria = usuario.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_Secretaria"));
+            if (esSecretaria) {
+                doctorIdsAsignados = secretariaRepository.findByUsuarioId(usuario.getId())
+                        .map(sec -> sec.getDoctores().stream().map(Doctor::getId).collect(Collectors.toSet()))
+                        .orElse(Collections.emptySet());
+            } else {
+                doctorIdsAsignados = null;
+            }
+        } else {
+            doctorIdsAsignados = null;
+        }
+
         if (!StringUtils.hasText(texto) && especialidadId == null && sedeId == null) {
+            if (doctorIdsAsignados != null) {
+                List<MedicoResponse> filtrados = doctorRepository.listarActivosConRelaciones().stream()
+                        .filter(doc -> doctorIdsAsignados.contains(doc.getId()))
+                        .map(this::convertirRespuesta)
+                        .sorted(Comparator.comparing(MedicoResponse::getApellidos).thenComparing(MedicoResponse::getNombres))
+                        .toList();
+                return paginar(filtrados, pageable);
+            }
             return doctorRepository.listarActivos(pageable).map(this::convertirRespuesta);
         }
 
         List<MedicoResponse> medicos = doctorRepository.listarActivosConRelaciones().stream()
+                .filter(doctor -> doctorIdsAsignados == null || doctorIdsAsignados.contains(doctor.getId()))
                 .filter(doctor -> coincideTexto(doctor, texto))
                 .filter(doctor -> especialidadId == null || doctor.getEspecialidad().getId().equals(especialidadId))
                 .filter(doctor -> sedeId == null || doctor.getSedes().stream().anyMatch(sede -> sede.getId().equals(sedeId)))
@@ -258,6 +287,7 @@ public class MedicoServiceImpl implements IMedicoService {
                 .especialidadNombre(doctor.getEspecialidad().getNombre())
                 .subespecialidadNombre(doctor.getSubespecialidad() == null ? null : doctor.getSubespecialidad().getNombre())
                 .sedes(doctor.getSedes().stream().map(Sede::getNombre).sorted().toList())
+                .sedesIds(doctor.getSedes().stream().map(Sede::getId).sorted().toList())
                 .consultorioIds(doctor.getConsultorios().stream().map(Consultorio::getId).toList())
                 .activo(usuario.getActivo())
                 .build();

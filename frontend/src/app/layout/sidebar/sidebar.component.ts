@@ -27,12 +27,12 @@ export class SidebarComponent {
     { label: 'Estudios', route: '/historial/estudios', permiso: 'historial.ver_todos', code: 'ET', group: 'Operacion' },
 
     { label: 'Disponibilidad', route: '/disponibilidad', permiso: 'disponibilidad.ver_propia', code: 'DP', group: 'Operacion' },
-    { label: 'Pagos', route: '/pagos', permiso: 'pagos.ver', code: 'PG', group: 'Administracion' },
+    { label: 'Pagos', route: '/pagos', permiso: 'pagos.ver', code: 'PG', group: 'Administracion', exact: true },
     { label: 'Caja Diaria', route: '/pagos/caja', permiso: 'caja.ver', code: 'CJ', group: 'Administracion' },
-    { label: 'Sedes', route: '/sedes', permiso: 'sedes.ver', code: 'SD', group: 'Administracion' },
+    { label: 'Sedes', route: '/sedes', permiso: 'sedes.ver', code: 'SD', group: 'Administracion', exact: true },
     { label: 'Configuración', route: '/sedes/configuracion-global', permiso: 'config.ver', code: 'CG', group: 'Administracion' },
     { label: 'Roles', route: '/roles', permiso: 'roles.ver', code: 'RL', group: 'Administracion' },
-    { label: 'Usuarios', route: '/usuarios', permiso: 'usuarios.ver', code: 'US', group: 'Administracion' },
+    { label: 'Usuarios', route: '/usuarios', permiso: 'usuarios.ver', code: 'US', group: 'Administracion', exact: true },
     { label: 'Bitácora', route: '/usuarios/bitacora', permiso: 'audit.ver', code: 'AU', group: 'Administracion' },
     { label: 'Especialidades', route: '/especialidades', permiso: 'especialidades.ver', code: 'ES', group: 'Administracion' },
     { label: 'Consultorios', route: '/consultorios', permiso: 'consultorios.ver', code: 'CS', group: 'Administracion' }

@@ -1,6 +1,7 @@
 package com.web.clinica.exception;
 
 import com.web.clinica.dto.response.ApiResponse;
+import com.web.clinica.dto.response.ConflictoDisponibilidadResponse;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    /** Responde 409 para conflictos de disponibilidad con el detalle de las citas conflictivas. */
+    @ExceptionHandler(ConflictoDisponibilidadException.class)
+    public ResponseEntity<ConflictoDisponibilidadResponse> manejarConflictoDisponibilidad(ConflictoDisponibilidadException excepcion) {
+        ConflictoDisponibilidadResponse respuesta = new ConflictoDisponibilidadResponse(
+                excepcion.getMessage(),
+                excepcion.getCitasConflictivas()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(respuesta);
+    }
 
     /** Responde 400 para reglas de negocio invalidas. */
     @ExceptionHandler(BadRequestException.class)

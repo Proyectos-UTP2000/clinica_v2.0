@@ -2,22 +2,27 @@ package com.web.clinica.service.serviceImpl;
 
 import com.web.clinica.dto.request.DisponibilidadBaseCreateRequest;
 import com.web.clinica.dto.request.ExcepcionDisponibilidadCreateRequest;
+import com.web.clinica.dto.response.CitaConflictivaResponse;
 import com.web.clinica.dto.response.DisponibilidadBaseResponse;
 import com.web.clinica.dto.response.ExcepcionDisponibilidadResponse;
 import com.web.clinica.exception.AccesoDenegadoException;
 import com.web.clinica.exception.BadRequestException;
+import com.web.clinica.exception.ConflictoDisponibilidadException;
 import com.web.clinica.exception.ResourceNotFoundException;
+import com.web.clinica.model.Cita;
 import com.web.clinica.model.DisponibilidadBase;
 import com.web.clinica.model.Doctor;
 import com.web.clinica.model.ExcepcionDisponibilidad;
 import com.web.clinica.model.Sede;
 import com.web.clinica.model.Usuario;
+import com.web.clinica.repository.CitaRepository;
 import com.web.clinica.repository.DisponibilidadBaseRepository;
 import com.web.clinica.repository.DoctorRepository;
 import com.web.clinica.repository.ExcepcionDisponibilidadRepository;
 import com.web.clinica.repository.SedeRepository;
 import com.web.clinica.service.abstractService.IDisponibilidadService;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -34,6 +39,7 @@ public class DisponibilidadServiceImpl implements IDisponibilidadService {
     private final ExcepcionDisponibilidadRepository excepcionDisponibilidadRepository;
     private final DoctorRepository doctorRepository;
     private final SedeRepository sedeRepository;
+    private final CitaRepository citaRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -106,6 +112,37 @@ public class DisponibilidadServiceImpl implements IDisponibilidadService {
     public ExcepcionDisponibilidadResponse crearExcepcion(Long doctorId, ExcepcionDisponibilidadCreateRequest solicitud) {
         Doctor doctor = obtenerDoctorConAlcance(doctorId);
         validarRangoHorario(solicitud.getHoraInicio(), solicitud.getHoraFin());
+
+        LocalDateTime excepcionInicio = solicitud.getFecha().atTime(solicitud.getHoraInicio());
+        LocalDateTime excepcionFin = solicitud.getFecha().atTime(solicitud.getHoraFin());
+
+        // Buscar citas que coincidan con el rango de la excepción
+        List<Cita> citasConflicto = citaRepository.findByDoctorAndFechaHoraInicioBetween(
+                doctor,
+                solicitud.getFecha().atStartOfDay(),
+                solicitud.getFecha().plusDays(1).atStartOfDay()
+        ).stream()
+                .filter(cita -> !"cancelada".equalsIgnoreCase(cita.getEstado()))
+                .filter(cita -> {
+                    return cita.getFechaHoraInicio().isBefore(excepcionFin) && cita.getFechaHoraFin().isAfter(excepcionInicio);
+                })
+                .toList();
+
+        if (!citasConflicto.isEmpty()) {
+            List<CitaConflictivaResponse> conflictoResponses = citasConflicto.stream()
+                    .map(cita -> CitaConflictivaResponse.builder()
+                            .id(cita.getId())
+                            .pacienteDni(cita.getPaciente().getDni())
+                            .pacienteNombre(cita.getPaciente().getNombres() + " " + cita.getPaciente().getApellidos())
+                            .fechaHoraInicio(cita.getFechaHoraInicio())
+                            .fechaHoraFin(cita.getFechaHoraFin())
+                            .build())
+                    .toList();
+            throw new ConflictoDisponibilidadException(
+                    "Existen citas programadas en el rango de la excepción. Debe reprogramarlas o reasignarlas.",
+                    conflictoResponses
+            );
+        }
 
         ExcepcionDisponibilidad excepcion = new ExcepcionDisponibilidad();
         excepcion.setDoctor(doctor);

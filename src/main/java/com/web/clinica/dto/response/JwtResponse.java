@@ -14,6 +14,8 @@ public class JwtResponse {
     private String dni;
     private String nombres;
     private String apellidos;
+    private String email;
+    private String telefono;
     private boolean cambioPasswordObligatorio;
     private List<String> roles;
     private List<String> permisos;

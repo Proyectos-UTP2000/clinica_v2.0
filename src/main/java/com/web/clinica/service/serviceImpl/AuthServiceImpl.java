@@ -3,21 +3,27 @@ package com.web.clinica.service.serviceImpl;
 import com.web.clinica.config.JwtProvider;
 import com.web.clinica.dto.request.CambioPasswordRequest;
 import com.web.clinica.dto.request.LoginRequest;
+import com.web.clinica.dto.request.MiPerfilRequest;
 import com.web.clinica.dto.request.RecuperarPasswordRequest;
 import com.web.clinica.dto.request.ValidarCodigoRequest;
 import com.web.clinica.dto.request.VerificarCodigoRecuperacionRequest;
 import com.web.clinica.dto.response.JwtResponse;
+import com.web.clinica.dto.response.RolResponse;
+import com.web.clinica.dto.response.UsuarioResponse;
 import com.web.clinica.exception.BadRequestException;
 import com.web.clinica.exception.ResourceNotFoundException;
 import com.web.clinica.exception.UnauthorizedException;
 import com.web.clinica.model.CodigoVerificacion;
+import com.web.clinica.model.Doctor;
 import com.web.clinica.model.Permiso;
 import com.web.clinica.model.Rol;
 import com.web.clinica.model.Usuario;
 import com.web.clinica.repository.CodigoVerificacionRepository;
+import com.web.clinica.repository.SecretariaRepository;
 import com.web.clinica.repository.UsuarioRepository;
 import com.web.clinica.service.abstractService.IAuthService;
 import com.web.clinica.util.EmailService;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -31,7 +37,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 public class AuthServiceImpl implements IAuthService, UserDetailsService {
 
     private static final String TIPO_RECUPERACION = "recuperacion";
@@ -39,10 +44,44 @@ public class AuthServiceImpl implements IAuthService, UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
     private final CodigoVerificacionRepository codigoVerificacionRepository;
+    private final SecretariaRepository secretariaRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final EmailService emailService;
     private final SecureRandom generadorSeguro;
+
+    @Autowired
+    public AuthServiceImpl(UsuarioRepository usuarioRepository,
+                           CodigoVerificacionRepository codigoVerificacionRepository,
+                           SecretariaRepository secretariaRepository,
+                           PasswordEncoder passwordEncoder,
+                           JwtProvider jwtProvider,
+                           EmailService emailService,
+                           SecureRandom generadorSeguro) {
+        this.usuarioRepository = usuarioRepository;
+        this.codigoVerificacionRepository = codigoVerificacionRepository;
+        this.secretariaRepository = secretariaRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtProvider = jwtProvider;
+        this.emailService = emailService;
+        this.generadorSeguro = generadorSeguro;
+    }
+
+    // Constructor para retrocompatibilidad con tests (6 argumentos)
+    public AuthServiceImpl(UsuarioRepository usuarioRepository,
+                           CodigoVerificacionRepository codigoVerificacionRepository,
+                           PasswordEncoder passwordEncoder,
+                           JwtProvider jwtProvider,
+                           EmailService emailService,
+                           SecureRandom generadorSeguro) {
+        this.usuarioRepository = usuarioRepository;
+        this.codigoVerificacionRepository = codigoVerificacionRepository;
+        this.secretariaRepository = null;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtProvider = jwtProvider;
+        this.emailService = emailService;
+        this.generadorSeguro = generadorSeguro;
+    }
 
     /** Autentica con DNI y password, luego construye la respuesta JWT. */
     @Override
@@ -183,6 +222,8 @@ public class AuthServiceImpl implements IAuthService, UserDetailsService {
                 .dni(usuario.getDni())
                 .nombres(usuario.getNombres())
                 .apellidos(usuario.getApellidos())
+                .email(usuario.getEmail())
+                .telefono(usuario.getTelefono())
                 .cambioPasswordObligatorio(Boolean.TRUE.equals(usuario.getCambioPasswordObligatorio()))
                 .roles(roles)
                 .permisos(permisos)
@@ -192,5 +233,62 @@ public class AuthServiceImpl implements IAuthService, UserDetailsService {
     /** Genera un codigo numerico de seis digitos. */
     private String generarCodigoNumerico() {
         return String.format("%06d", generadorSeguro.nextInt(1_000_000));
+    }
+
+    @Override
+    @Transactional
+    public UsuarioResponse actualizarMiPerfil(Long usuarioId, MiPerfilRequest solicitud) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+        usuario.setEmail(solicitud.getEmail());
+        usuario.setTelefono(solicitud.getTelefono());
+
+        if (solicitud.getNuevaPassword() != null && !solicitud.getNuevaPassword().isBlank()) {
+            if (solicitud.getPasswordAnterior() == null || solicitud.getPasswordAnterior().isBlank()) {
+                throw new BadRequestException("Debe ingresar la contraseña anterior para poder cambiarla");
+            }
+            if (!passwordEncoder.matches(solicitud.getPasswordAnterior(), usuario.getPasswordHash())) {
+                throw new BadRequestException("La contraseña anterior es incorrecta");
+            }
+            validarPassword(solicitud.getNuevaPassword(), solicitud.getRepetirPassword());
+            usuario.setPasswordHash(passwordEncoder.encode(solicitud.getNuevaPassword()));
+            usuario.setCambioPasswordObligatorio(false);
+        }
+
+        Usuario usuarioGuardado = usuarioRepository.save(usuario);
+        return convertirUsuarioRespuesta(usuarioGuardado);
+    }
+
+    private UsuarioResponse convertirUsuarioRespuesta(Usuario usuario) {
+        List<Long> doctorIds = List.of();
+        boolean esSecretaria = usuario.getRoles().stream().anyMatch(r -> r.getNombre().equalsIgnoreCase("Secretaria"));
+        if (esSecretaria) {
+            doctorIds = secretariaRepository.findByUsuarioId(usuario.getId())
+                    .map(s -> s.getDoctores().stream().map(Doctor::getId).sorted().toList())
+                    .orElse(List.of());
+        }
+
+        return UsuarioResponse.builder()
+                .id(usuario.getId())
+                .dni(usuario.getDni())
+                .nombres(usuario.getNombres())
+                .apellidos(usuario.getApellidos())
+                .email(usuario.getEmail())
+                .telefono(usuario.getTelefono())
+                .fechaNacimiento(usuario.getFechaNacimiento())
+                .activo(usuario.getActivo())
+                .roles(usuario.getRoles().stream().map(this::convertirRol).toList())
+                .doctorIds(doctorIds)
+                .build();
+    }
+
+    private RolResponse convertirRol(Rol rol) {
+        return RolResponse.builder()
+                .id(rol.getId())
+                .nombre(rol.getNombre())
+                .descripcion(rol.getDescripcion())
+                .activo(rol.getActivo())
+                .build();
     }
 }

@@ -2,11 +2,13 @@ package com.web.clinica.controller;
 
 import com.web.clinica.dto.request.CambioPasswordRequest;
 import com.web.clinica.dto.request.LoginRequest;
+import com.web.clinica.dto.request.MiPerfilRequest;
 import com.web.clinica.dto.request.RecuperarPasswordRequest;
 import com.web.clinica.dto.request.ValidarCodigoRequest;
 import com.web.clinica.dto.request.VerificarCodigoRecuperacionRequest;
 import com.web.clinica.dto.response.ApiResponse;
 import com.web.clinica.dto.response.JwtResponse;
+import com.web.clinica.dto.response.UsuarioResponse;
 import com.web.clinica.model.Usuario;
 import com.web.clinica.service.abstractService.IAuthService;
 import jakarta.validation.Valid;
@@ -15,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -72,5 +75,15 @@ public class AuthController {
     ) {
         authService.restablecerPasswordConCodigo(solicitud);
         return ResponseEntity.ok(new ApiResponse("Password restablecido correctamente", true));
+    }
+
+    /** Actualiza el perfil (email, telefono, password) del usuario autenticado. */
+    @PutMapping("/mi-perfil")
+    public ResponseEntity<UsuarioResponse> actualizarMiPerfil(
+            Authentication autenticacion,
+            @Valid @RequestBody MiPerfilRequest solicitud
+    ) {
+        Usuario usuario = (Usuario) autenticacion.getPrincipal();
+        return ResponseEntity.ok(authService.actualizarMiPerfil(usuario.getId(), solicitud));
     }
 }

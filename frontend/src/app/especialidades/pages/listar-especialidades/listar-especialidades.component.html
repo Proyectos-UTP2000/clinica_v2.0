@@ -82,9 +82,10 @@
                     [class.highlighted]="highlightedId === parent.id"
                     [class.glow-animation]="highlightedId === parent.id"
                     [id]="'esp-row-' + parent.id"
-                    (click)="toggleExpand(parent.id)">
+                    (click)="parent.subespecialidades.length > 0 ? toggleExpand(parent.id) : null"
+                    [style.cursor]="parent.subespecialidades.length > 0 ? 'pointer' : 'default'">
                   <td>
-                    <span class="expand-icon" [class.is-open]="isExpanded(parent.id)">▶</span>
+                    <span class="expand-icon" [class.is-open]="isExpanded(parent.id)" [style.visibility]="parent.subespecialidades.length > 0 ? 'visible' : 'hidden'">▶</span>
                     {{ parent.nombre }}
                     @if (parent.subespecialidades.length > 0) {
                       <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">

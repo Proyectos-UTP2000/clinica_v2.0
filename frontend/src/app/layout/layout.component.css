@@ -22,11 +22,22 @@
 }
 
 @media (max-width: 991.98px) {
-  .app-shell {
-    flex-direction: column;
-  }
-
   .content-area {
     padding: 1rem;
   }
 }
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 1080;
+  animation: fade-in-backdrop 0.2s ease-out;
+}
+
+@keyframes fade-in-backdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+

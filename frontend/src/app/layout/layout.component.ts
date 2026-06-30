@@ -6,4 +6,14 @@ import { Component } from '@angular/core';
     styleUrl: './layout.component.css',
     standalone: false
 })
-export class LayoutComponent {}
+export class LayoutComponent {
+  sidebarOpen = false;
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen = false;
+  }
+}

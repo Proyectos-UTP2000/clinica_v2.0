@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 
 interface MenuItem {
@@ -17,6 +17,7 @@ interface MenuItem {
     standalone: false
 })
 export class SidebarComponent {
+  @Output() closeSidebar = new EventEmitter<void>();
   menuItems: MenuItem[] = [
     { label: 'Dashboard', route: '/dashboard', permiso: 'dashboard.ver', code: 'DB', group: 'Operacion', exact: true },
     { label: 'Pacientes', route: '/pacientes', permiso: 'pacientes.ver', code: 'PX', group: 'Operacion' },
@@ -68,5 +69,9 @@ export class SidebarComponent {
 
   visiblesPorGrupo(group: MenuItem['group']): MenuItem[] {
     return this.menuItems.filter((item) => item.group === group && this.puedeVer(item));
+  }
+
+  onLinkClick(): void {
+    this.closeSidebar.emit();
   }
 }

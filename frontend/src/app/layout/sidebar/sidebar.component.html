@@ -1,10 +1,11 @@
 <aside class="sidebar" aria-label="Navegación principal">
   <div class="sidebar-brand">
     <span class="brand-mark" aria-hidden="true">CL</span>
-    <div>
+    <div class="flex-grow-1">
       <strong>Clinica interna</strong>
       <small>Operación multisede</small>
     </div>
+    <button type="button" class="btn-close-sidebar" (click)="onLinkClick()" aria-label="Cerrar menú de navegación">✕</button>
   </div>
 
   <nav class="sidebar-nav">
@@ -17,7 +18,7 @@
             [routerLink]="item.route"
             routerLinkActive="active"
             [routerLinkActiveOptions]="{ exact: item.exact || false }"
-
+            (click)="onLinkClick()"
             >
             <span class="nav-code" aria-hidden="true">{{ item.code }}</span>
             <span>{{ item.label }}</span>

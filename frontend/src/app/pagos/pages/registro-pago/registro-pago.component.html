@@ -6,7 +6,12 @@
   ></app-page-header>
 
   @if (mensajeError) {
-    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+    <div class="alert alert-danger d-flex align-items-center justify-content-between gap-3" role="alert">
+      <span>{{ mensajeError }}</span>
+      @if (cajaCerrada) {
+        <a class="btn btn-warning btn-sm text-dark fw-semibold" routerLink="/pagos/caja">Ir a Caja Diaria</a>
+      }
+    </div>
   }
   @if (cargando) {
     <div class="loading-state">Cargando cita...</div>

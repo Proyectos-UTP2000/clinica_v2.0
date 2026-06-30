@@ -16,6 +16,7 @@ export class RegistroPagoComponent implements OnInit {
   cargando = false;
   guardando = false;
   mensajeError = '';
+  cajaCerrada = false;
 
   pagoForm = this.fb.group({
     monto: [80, [Validators.required, Validators.min(0.01)]],
@@ -47,7 +48,16 @@ export class RegistroPagoComponent implements OnInit {
       metodo: this.pagoForm.value.metodo || 'efectivo'
     }).pipe(finalize(() => (this.guardando = false))).subscribe({
       next: () => this.router.navigate(['/pagos']),
-      error: (err: any) => (this.mensajeError = err.error?.message || 'No se pudo registrar el pago.')
+      error: (err: any) => {
+        const msg = err.error?.mensaje || err.error?.message || '';
+        if (msg.toLowerCase().includes('caja')) {
+          this.cajaCerrada = true;
+          this.mensajeError = 'Se debe de abrir la caja primero.';
+        } else {
+          this.cajaCerrada = false;
+          this.mensajeError = msg || 'No se pudo registrar el pago.';
+        }
+      }
     });
   }
 

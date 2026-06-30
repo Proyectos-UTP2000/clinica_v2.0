@@ -197,18 +197,31 @@ public class CajaDiariaServiceImpl implements ICajaDiariaService {
     @Override
     @Transactional
     public CajaDiariaResponse reabrirCaja() {
-        LocalDate hoy = LocalDate.now();
-        CajaDiaria caja = cajaDiariaRepository.findByFechaAndEstado(hoy, "cerrada")
-                .orElseThrow(() -> new BadRequestException("No hay ninguna caja cerrada hoy para reabrir."));
+        try {
+            LocalDate hoy = LocalDate.now();
+            CajaDiaria caja = cajaDiariaRepository.findByFechaAndEstado(hoy, "cerrada")
+                    .orElseThrow(() -> new BadRequestException("No hay ninguna caja cerrada hoy para reabrir."));
 
-        caja.setEstado("abierta");
-        caja.setFechaCierre(null);
-        caja.setCerradoPorUsuario(null);
-        caja.setMontoCierre(null);
-        caja.setDiferencia(null);
-        caja.setBalanceReal(null);
+            caja.setEstado("abierta");
+            caja.setFechaCierre(null);
+            caja.setCerradoPorUsuario(null);
+            caja.setMontoCierre(null);
+            caja.setDiferencia(null);
+            caja.setBalanceReal(null);
 
-        return convertirRespuesta(cajaDiariaRepository.save(caja));
+            return convertirRespuesta(cajaDiariaRepository.save(caja));
+        } catch (Exception e) {
+            try {
+                java.io.StringWriter sw = new java.io.StringWriter();
+                java.io.PrintWriter pw = new java.io.PrintWriter(sw);
+                e.printStackTrace(pw);
+                java.nio.file.Files.writeString(
+                    java.nio.file.Paths.get("backend-error.txt"),
+                    sw.toString()
+                );
+            } catch (Exception ex) {}
+            throw e;
+        }
     }
 
     private CajaDiariaResponse convertirRespuesta(CajaDiaria caja) {

@@ -16,6 +16,15 @@
   }
 
   @if (consulta) {
+    <div class="d-flex justify-content-end mb-3">
+      <button class="btn btn-primary" type="button" [disabled]="descargandoPdf" (click)="descargarPdf()">
+        @if (descargandoPdf) {
+          <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+        }
+        Descargar Ficha en PDF
+      </button>
+    </div>
+
     <div class="feature-panel">
       <div class="feature-panel-body detail-grid">
         <div><span>Paciente</span><strong>{{ consulta.pacienteNombre }}</strong></div>
@@ -42,7 +51,7 @@
     </div>
     <div class="table-shell">
       <table class="table align-middle">
-        <thead><tr><th>Medicamento</th><th>Dosis</th><th>Frecuencia</th><th>Duracion</th></tr></thead>
+        <thead><tr><th>Medicamento</th><th>Dosis</th><th>Frecuencia</th><th>Duración</th></tr></thead>
         <tbody>
           @for (receta of consulta.recetas; track receta) {
             <tr>
@@ -94,7 +103,7 @@
     <form class="feature-panel" [formGroup]="notaForm" (ngSubmit)="agregarNota()">
       <div class="feature-panel-body">
         <div class="section-heading">
-          <h3>Notas de evolucion</h3>
+          <h3>Notas de evolución</h3>
         </div>
         <div class="timeline">
           @for (nota of consulta.notasEvolucion; track nota) {
@@ -105,7 +114,7 @@
             </div>
           }
           @if (consulta.notasEvolucion.length === 0) {
-            <p class="text-muted">Sin notas de evolucion.</p>
+            <p class="text-muted">Sin notas de evolución.</p>
           }
         </div>
         <label class="form-label w-100">

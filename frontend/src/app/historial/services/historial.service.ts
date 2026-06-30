@@ -60,6 +60,10 @@ export class HistorialService {
     return this.http.get(`${API_URL}/adjuntos/${adjuntoId}`, { responseType: 'blob' });
   }
 
+  descargarPdf(consultaId: number): Observable<Blob> {
+    return this.http.get(`${API_URL}/consultas/${consultaId}/pdf`, { responseType: 'blob' });
+  }
+
   buscarPacientePorDni(dni: string): Observable<PacienteResponse> {
     const params = new HttpParams().set('dni', dni);
     return this.http.get<PacienteResponse>(`${API_URL}/pacientes/buscar`, { params });

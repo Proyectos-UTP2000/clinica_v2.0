@@ -71,4 +71,18 @@ public class ConsultaController {
                                                           @RequestPart("archivo") MultipartFile archivo) {
         return ResponseEntity.status(HttpStatus.CREATED).body(historialService.agregarAdjunto(id, archivo));
     }
+
+    /** Descarga el PDF de la consulta clinica. */
+    @GetMapping("/{id}/pdf")
+    @RequierePermiso({"historial.ver_todos", "historial.ver_propios", "historial.ver_basico"})
+    public ResponseEntity<byte[]> descargarPdf(@PathVariable Long id) {
+        byte[] pdfBytes = historialService.generarPdfConsulta(id);
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
+        String nombreArchivo = "consulta_" + id + '.' + "pdf";
+        headers.setContentDisposition(org.springframework.http.ContentDisposition.builder("attachment")
+                .filename(nombreArchivo)
+                .build());
+        return new ResponseEntity<>(pdfBytes, headers, org.springframework.http.HttpStatus.OK);
+    }
 }

@@ -289,6 +289,11 @@ class Prompt4ControllerSmokeTests {
                     new ByteArrayResource("PDF".getBytes()));
         }
 
+        @Override
+        public byte[] generarPdfConsulta(Long consultaId) {
+            return "PDF".getBytes();
+        }
+
         private ConsultaResponse respuesta() {
             return ConsultaResponse.builder().id(1L).tipo("consulta").estado("activa").build();
         }

@@ -24,4 +24,6 @@ public interface IHistorialService {
     AdjuntoResponse agregarAdjunto(Long consultaId, MultipartFile archivo);
 
     AdjuntoDownloadResponse descargarAdjunto(Long adjuntoId);
+
+    byte[] generarPdfConsulta(Long consultaId);
 }

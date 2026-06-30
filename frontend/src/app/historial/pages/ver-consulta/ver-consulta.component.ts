@@ -52,6 +52,8 @@ export class VerConsultaComponent implements OnInit {
       });
   }
 
+  descargandoPdf = false;
+
   descargarAdjunto(adjunto: AdjuntoResponse): void {
     this.descargandoAdjuntoId = adjunto.id;
     this.mensajeError = '';
@@ -67,6 +69,27 @@ export class VerConsultaComponent implements OnInit {
           URL.revokeObjectURL(url);
         },
         error: () => (this.mensajeError = 'No se pudo descargar el adjunto.')
+      });
+  }
+
+  descargarPdf(): void {
+    if (!this.consulta) {
+      return;
+    }
+    this.descargandoPdf = true;
+    this.mensajeError = '';
+    this.historialService.descargarPdf(this.consulta.id)
+      .pipe(finalize(() => (this.descargandoPdf = false)))
+      .subscribe({
+        next: (blob) => {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `consulta_${this.consulta?.id}.pdf`;
+          link.click();
+          URL.revokeObjectURL(url);
+        },
+        error: () => (this.mensajeError = 'No se pudo descargar el PDF de la consulta.')
       });
   }
 

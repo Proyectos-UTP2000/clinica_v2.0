@@ -58,6 +58,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.pdf.PdfWriter;
+import java.io.ByteArrayOutputStream;
 
 @Service
 public class HistorialServiceImpl implements IHistorialService {
@@ -500,5 +508,90 @@ public class HistorialServiceImpl implements IHistorialService {
                         .autorNombre(nota.getAutor().getNombres() + " " + nota.getAutor().getApellidos())
                         .build())
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public byte[] generarPdfConsulta(Long consultaId) {
+        ConsultaResponse consulta = obtenerConsulta(consultaId);
+        
+        Document document = new Document(PageSize.A4);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            PdfWriter.getInstance(document, out);
+            document.open();
+            
+            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
+            Font subtitleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12);
+            Font normalFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
+            Font boldFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10);
+            
+            Paragraph title = new Paragraph("CLINICA - HISTORIAL CLINICO Y RECETA", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            document.add(title);
+            
+            document.add(new Paragraph(" "));
+            
+            document.add(new Paragraph("Sede: " + consulta.getSedeNombre(), boldFont));
+            document.add(new Paragraph("Fecha y Hora: " + consulta.getFechaHora().toString(), normalFont));
+            document.add(new Paragraph("Paciente: " + consulta.getPacienteNombre(), normalFont));
+            document.add(new Paragraph("Medico: " + consulta.getDoctorNombre(), normalFont));
+            document.add(new Paragraph("Tipo de consulta: " + consulta.getTipo(), normalFont));
+            
+            document.add(new Paragraph(" "));
+            document.add(new Paragraph("MOTIVO DE CONSULTA:", subtitleFont));
+            document.add(new Paragraph(consulta.getMotivoConsulta() != null ? consulta.getMotivoConsulta() : "Sin motivo registrado", normalFont));
+            
+            document.add(new Paragraph(" "));
+            document.add(new Paragraph("DIAGNOSTICO:", subtitleFont));
+            document.add(new Paragraph(consulta.getDiagnostico() != null ? consulta.getDiagnostico() : "Sin diagnostico registrado", normalFont));
+            
+            if (consulta.getObservaciones() != null && !consulta.getObservaciones().isEmpty()) {
+                document.add(new Paragraph(" "));
+                document.add(new Paragraph("OBSERVACIONES:", subtitleFont));
+                document.add(new Paragraph(consulta.getObservaciones(), normalFont));
+            }
+            
+            if (consulta.getRecetas() != null && !consulta.getRecetas().isEmpty()) {
+                document.add(new Paragraph(" "));
+                document.add(new Paragraph("RECETAS MEDICAS:", subtitleFont));
+                for (var receta : consulta.getRecetas()) {
+                    Paragraph p = new Paragraph("- " + receta.getMedicamento() + " | Dosis: " + receta.getDosis() + " | Frecuencia: " + receta.getFrecuencia() + " | Duracion: " + receta.getDuracion(), normalFont);
+                    if (receta.getIndicaciones() != null && !receta.getIndicaciones().isEmpty()) {
+                        p.add(new Paragraph("  Indicaciones: " + receta.getIndicaciones(), normalFont));
+                    }
+                    document.add(p);
+                }
+            }
+            
+            if (consulta.getIndicaciones() != null && !consulta.getIndicaciones().isEmpty()) {
+                document.add(new Paragraph(" "));
+                document.add(new Paragraph("INDICACIONES:", subtitleFont));
+                for (var ind : consulta.getIndicaciones()) {
+                    document.add(new Paragraph("- " + ind.getTipo() + ": " + ind.getDescripcion(), normalFont));
+                }
+            }
+            
+            if (consulta.getEstudios() != null && !consulta.getEstudios().isEmpty()) {
+                document.add(new Paragraph(" "));
+                document.add(new Paragraph("ESTUDIOS COMPLEMENTARIOS:", subtitleFont));
+                for (var est : consulta.getEstudios()) {
+                    document.add(new Paragraph("- " + est.getTipoEstudio() + ": " + est.getDetalle(), normalFont));
+                }
+            }
+            
+            if (consulta.getNotasEvolucion() != null && !consulta.getNotasEvolucion().isEmpty()) {
+                document.add(new Paragraph(" "));
+                document.add(new Paragraph("NOTAS DE EVOLUCION:", subtitleFont));
+                for (var nota : consulta.getNotasEvolucion()) {
+                    document.add(new Paragraph("[" + nota.getFecha().toString() + " - Autor: " + nota.getAutorNombre() + "] " + nota.getNota(), normalFont));
+                }
+            }
+            
+            document.close();
+        } catch (com.lowagie.text.DocumentException e) {
+            throw new RuntimeException("Error al generar PDF", e);
+        }
+        return out.toByteArray();
     }
 }

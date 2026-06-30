@@ -1,0 +1,95 @@
+<section class="feature-page" aria-labelledby="bitacora-title">
+  <app-page-header
+    kicker="Auditoría"
+    title="Bitácora de Accesos"
+    description="Bitácora de seguridad con registro de accesos y modificaciones a historias clínicas y consultas médicas."
+  >
+    <button class="btn btn-outline-primary" type="button" (click)="cargarLogs(0)">Refrescar</button>
+  </app-page-header>
+
+  <div class="feature-panel mb-4">
+    <div class="feature-panel-body d-flex gap-2 align-items-center">
+      <div class="input-group">
+        <span class="input-group-text bg-light border-end-0">
+          <!-- Usamos una lupa simple o texto -->
+          🔍
+        </span>
+        <input
+          type="text"
+          class="form-control border-start-0 ps-0"
+          placeholder="Buscar por usuario, acción, IP, detalles..."
+          [(ngModel)]="filtroTexto"
+        />
+        @if (filtroTexto) {
+          <button class="btn btn-outline-secondary" type="button" (click)="limpiarFiltro()">✕</button>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+
+  <div class="table-shell">
+    @if (cargando) {
+      <div class="loading-state" aria-live="polite">
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        Cargando bitácora de auditoría...
+      </div>
+    }
+    @if (!cargando && logsFiltrados.length === 0) {
+      <div class="empty-state">No se encontraron registros de auditoría que coincidan con la búsqueda.</div>
+    }
+    @if (!cargando && logsFiltrados.length > 0) {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Fecha y Hora</th>
+              <th>Usuario</th>
+              <th>Acción Realizada</th>
+              <th>IP Origen</th>
+              <th>Estado</th>
+              <th>Detalles / Parámetros</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (log of logsFiltrados; track log.id) {
+              <tr>
+                <td class="text-nowrap small fw-semibold">{{ log.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                <td>
+                  <span class="badge bg-light text-dark border">{{ log.usuarioUsername }}</span>
+                </td>
+                <td class="fw-semibold text-primary-dark">{{ log.accion }}</td>
+                <td class="text-nowrap small text-muted">{{ log.ipAddress }}</td>
+                <td>
+                  @if (log.estado === 'EXITOSO') {
+                    <span class="badge bg-success-light text-success fw-bold d-inline-flex align-items-center gap-1">
+                      ✔ Éxito
+                    </span>
+                  } @else {
+                    <span class="badge bg-danger-light text-danger fw-bold d-inline-flex align-items-center gap-1" [title]="log.detalles">
+                      ❌ Fallo
+                    </span>
+                  }
+                </td>
+                <td class="small text-muted text-wrap" style="max-width: 300px; word-break: break-all;">
+                  {{ log.detalles || 'Sin detalles adicionales' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <app-paginator
+    [page]="page"
+    [totalPages]="totalPages"
+    [totalElements]="totalElements"
+    [size]="size"
+    (pageChange)="cargarLogs($event)"
+  ></app-paginator>
+</section>

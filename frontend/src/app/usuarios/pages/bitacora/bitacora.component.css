@@ -1,0 +1,28 @@
+.bg-success-light {
+  background-color: #d1fae5;
+}
+
+.bg-danger-light {
+  background-color: #fee2e2;
+}
+
+.text-primary-dark {
+  color: #1e3a8a;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2.5rem;
+  color: #94a3b8;
+  font-style: italic;
+}

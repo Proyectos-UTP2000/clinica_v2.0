@@ -53,4 +53,9 @@ export class UsuarioService {
       map((response) => response.content)
     );
   }
+
+  listarAuditoria(page = 0, size = 20): Observable<Page<any>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<Page<any>>(`${API_URL}/audit-logs`, { params });
+  }
 }

@@ -48,11 +48,11 @@ export class CambiarPasswordComponent {
       .subscribe({
         next: () => {
           this.authService.marcarPasswordActualizado();
-          this.mensajeExito = 'Contrasena actualizada correctamente.';
+          this.mensajeExito = 'Contraseña actualizada correctamente.';
           this.router.navigateByUrl('/dashboard');
         },
         error: () => {
-          this.mensajeError = 'No se pudo actualizar la contrasena. Revise los datos e intente nuevamente.';
+          this.mensajeError = 'No se pudo actualizar la contraseña. Revise los datos e intente nuevamente.';
         }
       });
   }

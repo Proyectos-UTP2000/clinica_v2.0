@@ -20,7 +20,7 @@
           <input class="form-control" formControlName="nombre" />
         </label>
         <label class="form-label">
-          Descripcion
+          Descripción
           <input class="form-control" formControlName="descripcion" />
         </label>
         @if (rolId) {
@@ -54,7 +54,7 @@
           </label>
 
           @if (gruposPermisos.length === 0) {
-            <div class="empty-state">No hay permisos que coincidan con la busqueda.</div>
+            <div class="empty-state">No hay permisos que coincidan con la búsqueda.</div>
           }
 
           <div class="permissions-grid">
@@ -83,7 +83,7 @@
                       />
                       <span>
                         <strong>{{ permiso.codigo }}</strong>
-                        <small>{{ permiso.descripcion || 'Sin descripcion' }}</small>
+                        <small>{{ permiso.descripcion || 'Sin descripción' }}</small>
                       </span>
                     </label>
                   }

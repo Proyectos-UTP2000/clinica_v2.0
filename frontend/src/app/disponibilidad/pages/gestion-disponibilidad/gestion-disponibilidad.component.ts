@@ -28,7 +28,7 @@ export class GestionDisponibilidadComponent implements OnInit {
   guardandoExcepcion = false;
   mensajeError = '';
   mensajeExito = '';
-  
+
   // Variables para la organización de la vista
   pestanaActiva = 'base';
   mostrarModalBase = false;
@@ -37,10 +37,10 @@ export class GestionDisponibilidadComponent implements OnInit {
   dias = [
     { id: 1, nombre: 'Lunes' },
     { id: 2, nombre: 'Martes' },
-    { id: 3, nombre: 'Miercoles' },
+    { id: 3, nombre: 'Miércoles' },
     { id: 4, nombre: 'Jueves' },
     { id: 5, nombre: 'Viernes' },
-    { id: 6, nombre: 'Sabado' },
+    { id: 6, nombre: 'Sábado' },
     { id: 7, nombre: 'Domingo' }
   ];
 
@@ -228,11 +228,11 @@ export class GestionDisponibilidadComponent implements OnInit {
       motivo: value.motivo || ''
     }).pipe(finalize(() => (this.guardandoExcepcion = false))).subscribe({
       next: () => {
-        this.mensajeExito = 'Excepcion registrada correctamente.';
+        this.mensajeExito = 'Excepción registrada correctamente.';
         this.mostrarModalExcepcion = false;
         this.cargarDisponibilidad();
       },
-      error: (err) => (this.mensajeError = err.error?.mensaje || 'No se pudo registrar la excepcion.')
+      error: (err) => (this.mensajeError = err.error?.mensaje || 'No se pudo registrar la excepción.')
     });
   }
 
@@ -252,7 +252,7 @@ export class GestionDisponibilidadComponent implements OnInit {
     }
     this.disponibilidadService.eliminarExcepcion(this.doctorId, excepcion.id).subscribe({
       next: () => this.cargarDisponibilidad(),
-      error: () => (this.mensajeError = 'No se pudo eliminar la excepcion.')
+      error: () => (this.mensajeError = 'No se pudo eliminar la excepción.')
     });
   }
 

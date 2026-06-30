@@ -191,7 +191,7 @@ export class ListarHistorialComponent implements OnInit {
             completeLoading();
           }
         },
-        error: () => (this.mensajeError = 'No se pudo cargar la informacion de historial.')
+        error: () => (this.mensajeError = 'No se pudo cargar la información de historial.')
       });
   }
 

@@ -35,7 +35,7 @@ describe('MedicoService', () => {
         nombres: 'Maria',
         apellidos: 'Lopez',
         email: 'maria@example.com',
-        especialidadNombre: 'Pediatria',
+        especialidadNombre: 'Pediatría',
         sedes: ['Central'],
         activo: true
       }],

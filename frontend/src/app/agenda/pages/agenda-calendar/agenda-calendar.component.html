@@ -2,7 +2,7 @@
   <app-page-header
     kicker="Agenda"
     title="Calendario de citas"
-    description="Revise la agenda diaria o semanal por sede, especialidad y medico."
+    description="Revise la agenda diaria o semanal por sede, especialidad y médico."
     >
     @if (authService.hasPermission('citas.crear')) {
       <a class="btn btn-primary" routerLink="/citas/crear">Nueva cita</a>
@@ -39,7 +39,7 @@
       }
       @if (authService.hasPermission('citas.ver_todas')) {
         <label class="form-label" style="position: relative;">
-          Medico
+          Médico
           <div class="custom-combobox">
             <input
               type="text"

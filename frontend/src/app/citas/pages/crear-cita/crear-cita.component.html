@@ -2,7 +2,7 @@
   <app-page-header
     kicker="Citas"
     title="Nueva cita"
-    description="Seleccione paciente, medico, sede y un slot disponible antes de confirmar la agenda."
+    description="Seleccione paciente, médico, sede y un slot disponible antes de confirmar la agenda."
     >
     <a class="btn btn-outline-secondary" routerLink="/citas">Volver</a>
   </app-page-header>
@@ -40,14 +40,14 @@
               <div class="invalid-feedback">Seleccione una sede.</div>
             </div>
             <div>
-              <label for="doctorId" class="form-label">Medico</label>
+              <label for="doctorId" class="form-label">Médico</label>
               <select id="doctorId" class="form-select" formControlName="doctorId" [class.is-invalid]="campoInvalido('doctorId')">
                 <option value="">Seleccione</option>
                 @for (medico of medicos; track medico) {
                   <option [value]="medico.id">{{ medico.nombres }} {{ medico.apellidos }} · {{ medico.especialidadNombre }}</option>
                 }
               </select>
-              <div class="invalid-feedback">Seleccione un medico.</div>
+              <div class="invalid-feedback">Seleccione un médico.</div>
             </div>
             <div>
               <label for="consultorioId" class="form-label">Consultorio</label>
@@ -111,14 +111,14 @@
       </div>
       <aside class="summary-card">
         <p class="summary-kicker">Resumen</p>
-        <h3>Confirmacion de cita</h3>
+        <h3>Confirmación de cita</h3>
         <dl>
           <div>
             <dt>Paciente</dt>
             <dd>{{ pacienteSeleccionado ? pacienteSeleccionado.nombres + ' ' + pacienteSeleccionado.apellidos : 'Sin seleccionar' }}</dd>
           </div>
           <div>
-            <dt>Medico</dt>
+            <dt>Médico</dt>
             <dd>{{ medicoSeleccionado ? medicoSeleccionado.nombres + ' ' + medicoSeleccionado.apellidos : 'Sin seleccionar' }}</dd>
           </div>
           <div>

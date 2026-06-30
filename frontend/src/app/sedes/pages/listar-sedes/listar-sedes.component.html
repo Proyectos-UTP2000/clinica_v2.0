@@ -29,7 +29,7 @@
           <thead>
             <tr>
               <th>Nombre</th>
-              <th>Direccion</th>
+              <th>Dirección</th>
               <th>Estado</th>
               <th class="text-end">Acciones</th>
             </tr>
@@ -38,7 +38,7 @@
             @for (sede of sedes; track sede) {
               <tr>
                 <td class="fw-semibold">{{ sede.nombre }}</td>
-                <td>{{ sede.direccion || 'Sin direccion' }}</td>
+                <td>{{ sede.direccion || 'Sin dirección' }}</td>
                 <td><span class="status-pill" [class.is-active]="sede.activo">{{ sede.activo ? 'Activa' : 'Inactiva' }}</span></td>
                 <td class="text-end">
                   @if (authService.hasPermission('sedes.editar')) {

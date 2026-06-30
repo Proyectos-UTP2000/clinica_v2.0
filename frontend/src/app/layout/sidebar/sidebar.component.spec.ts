@@ -27,7 +27,7 @@ describe('SidebarComponent roles link', () => {
     component = fixture.componentInstance;
   });
 
-  it('muestra Roles bajo Administracion solo con roles.ver', () => {
+  it('muestra Roles bajo Administración solo con roles.ver', () => {
     expect(component.visiblesPorGrupo('Administracion').some((item) => item.route === '/roles')).toBeFalse();
 
     auth.permissions.add('roles.ver');

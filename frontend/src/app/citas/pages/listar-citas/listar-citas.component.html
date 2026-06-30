@@ -45,7 +45,7 @@
       }
       @if (!usaAgendaPropia) {
         <div class="custom-combobox">
-          <label class="form-label">Medico</label>
+          <label class="form-label">Médico</label>
           <div class="input-group">
             <input
               type="text"
@@ -207,13 +207,13 @@
             @if (cargandoSlotsReprogramar) {
               <span class="text-muted small ms-2">Consultando...</span>
             }
-            
+
             @if (!cargandoSlotsReprogramar && slotsReprogramar.length === 0) {
               <div class="text-muted small p-2 border rounded bg-light">
                 Seleccione una fecha para consultar disponibilidad.
               </div>
             }
-            
+
             @if (slotsReprogramar.length > 0) {
               <div class="d-flex flex-wrap gap-2 border rounded p-2 bg-light" style="max-height: 140px; overflow-y: auto;">
                 @for (slot of slotsReprogramar; track slot) {

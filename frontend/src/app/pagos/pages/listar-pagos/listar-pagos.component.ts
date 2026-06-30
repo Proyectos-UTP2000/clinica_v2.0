@@ -92,7 +92,7 @@ export class ListarPagosComponent implements OnInit {
             this.cargarPagos();
           }
         },
-        error: () => (this.mensajeError = 'No se pudo cargar la informacion de pagos.')
+        error: () => (this.mensajeError = 'No se pudo cargar la información de pagos.')
       });
   }
 

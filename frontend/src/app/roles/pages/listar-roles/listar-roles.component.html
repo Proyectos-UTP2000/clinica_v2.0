@@ -29,7 +29,7 @@
           <thead>
             <tr>
               <th>Nombre</th>
-              <th>Descripcion</th>
+              <th>Descripción</th>
               <th>Estado</th>
               <th>Permisos asignados</th>
               <th class="text-end">Acciones</th>
@@ -39,7 +39,7 @@
             @for (rol of roles; track rol.id) {
               <tr>
                 <td class="fw-semibold">{{ rol.nombre }}</td>
-                <td>{{ rol.descripcion || 'Sin descripcion' }}</td>
+                <td>{{ rol.descripcion || 'Sin descripción' }}</td>
                 <td><span class="status-pill" [class.is-active]="rol.activo">{{ rol.activo ? 'Activo' : 'Inactivo' }}</span></td>
                 <td>{{ permisosResumen(rol) }}</td>
                 <td class="text-end">

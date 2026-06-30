@@ -213,7 +213,7 @@ export class CrearCitaComponent implements OnInit {
           this.aplicarPrefillAgenda();
         },
         error: () => {
-          this.mensajeError = 'No se pudieron cargar pacientes, medicos o sedes.';
+          this.mensajeError = 'No se pudieron cargar pacientes, médicos o sedes.';
         }
       });
   }

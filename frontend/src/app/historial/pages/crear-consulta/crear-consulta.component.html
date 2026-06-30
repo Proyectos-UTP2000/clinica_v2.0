@@ -9,7 +9,7 @@
     <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
   }
   @if (cargando) {
-    <div class="loading-state">Cargando catalogos...</div>
+    <div class="loading-state">Cargando catálogos...</div>
   }
 
   @if (!cargando) {
@@ -87,16 +87,16 @@
         <div class="grid-span-2 detail-section" formArrayName="indicaciones">
           <div class="section-heading">
             <h3>Indicaciones</h3>
-            <button class="btn btn-sm btn-outline-primary" type="button" (click)="agregarIndicacion()">Agregar indicacion</button>
+            <button class="btn btn-sm btn-outline-primary" type="button" (click)="agregarIndicacion()">Agregar indicación</button>
           </div>
           @for (indicacion of indicaciones.controls; track indicacion; let i = $index) {
             <div class="nested-row" [formGroupName]="i">
               <select class="form-select" formControlName="tipo">
                 <option value="reposo">Reposo</option>
-                <option value="derivacion">Derivacion</option>
+                <option value="derivacion">Derivación</option>
                 <option value="estudios">Estudios</option>
               </select>
-              <input class="form-control" placeholder="Descripcion" formControlName="descripcion" />
+              <input class="form-control" placeholder="Descripción" formControlName="descripcion" />
               <button class="btn btn-outline-danger" type="button" (click)="eliminarItem(indicaciones, i)">Quitar</button>
             </div>
           }
@@ -117,7 +117,7 @@
         <label class="form-label grid-span-2">
           Adjuntos
           <input class="form-control" type="file" multiple (change)="seleccionarAdjuntos($event)" />
-          <span class="form-text">Los archivos se subiran despues de crear la consulta.</span>
+          <span class="form-text">Los archivos se subirán después de crear la consulta.</span>
         </label>
         @if (adjuntos.length > 0) {
           <div class="grid-span-2 detail-section">

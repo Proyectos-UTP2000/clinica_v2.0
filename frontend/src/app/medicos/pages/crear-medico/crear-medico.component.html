@@ -14,7 +14,7 @@
     <div class="alert alert-info" role="status">{{ mensajeInfo }}</div>
   }
   @if (cargandoCatalogos) {
-    <div class="feature-panel feature-panel-body text-muted fw-semibold">Cargando catalogos...</div>
+    <div class="feature-panel feature-panel-body text-muted fw-semibold">Cargando catálogos...</div>
   }
 
   @if (!cargandoCatalogos) {
@@ -33,7 +33,7 @@
                 Consultar
               </button>
             </div>
-            <div class="invalid-feedback">Ingrese un DNI valido de 8 digitos.</div>
+            <div class="invalid-feedback">Ingrese un DNI valido de 8 dígitos.</div>
           </div>
           <div>
             <label for="email" class="form-label">Email</label>
@@ -51,9 +51,9 @@
             <div class="invalid-feedback">Los apellidos son obligatorios.</div>
           </div>
           <div>
-            <label for="telefono" class="form-label">Telefono</label>
+            <label for="telefono" class="form-label">Teléfono</label>
             <input id="telefono" class="form-control" inputmode="tel" formControlName="telefono" [class.is-invalid]="campoInvalido('telefono')" />
-            <div class="invalid-feedback">Ingrese un telefono numerico valido.</div>
+            <div class="invalid-feedback">Ingrese un teléfono numérico valido.</div>
           </div>
           <div>
             <label for="fechaNacimiento" class="form-label">Fecha nacimiento</label>

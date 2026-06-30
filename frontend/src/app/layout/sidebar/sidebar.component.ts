@@ -19,7 +19,7 @@ export class SidebarComponent {
   menuItems: MenuItem[] = [
     { label: 'Dashboard', route: '/dashboard', permiso: 'dashboard.ver', code: 'DB', group: 'Operacion' },
     { label: 'Pacientes', route: '/pacientes', permiso: 'pacientes.ver', code: 'PX', group: 'Operacion' },
-    { label: 'Medicos', route: '/medicos', permiso: 'medicos.ver', code: 'MD', group: 'Operacion' },
+    { label: 'Médicos', route: '/medicos', permiso: 'medicos.ver', code: 'MD', group: 'Operacion' },
     { label: 'Citas', route: '/citas', permiso: 'citas.ver_todas', code: 'CT', group: 'Operacion' },
     { label: 'Agenda', route: '/agenda', permiso: 'citas.ver_todas', code: 'AG', group: 'Operacion' },
     { label: 'Historial', route: '/historial', permiso: 'historial.ver_todos', code: 'HC', group: 'Operacion' },

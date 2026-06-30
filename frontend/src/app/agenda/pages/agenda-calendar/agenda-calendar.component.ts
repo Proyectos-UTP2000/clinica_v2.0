@@ -81,7 +81,7 @@ export class AgendaCalendarComponent implements OnInit {
         }
         this.cargarAgenda();
       },
-      error: () => (this.mensajeError = 'No se pudieron cargar los catalogos de agenda.')
+      error: () => (this.mensajeError = 'No se pudieron cargar los catálogos de agenda.')
     });
   }
 
@@ -95,7 +95,7 @@ export class AgendaCalendarComponent implements OnInit {
       especialidadId: this.especialidadId || undefined
     }).subscribe({
       next: (medicos) => (this.medicos = medicos),
-      error: () => (this.mensajeError = 'No se pudieron cargar los medicos.')
+      error: () => (this.mensajeError = 'No se pudieron cargar los médicos.')
     });
   }
 
@@ -204,7 +204,7 @@ export class AgendaCalendarComponent implements OnInit {
     if (!query) {
       return this.medicos;
     }
-    return this.medicos.filter(m => 
+    return this.medicos.filter(m =>
       `${m.nombres} ${m.apellidos}`.toLowerCase().includes(query)
     );
   }

@@ -15,19 +15,19 @@ interface GrupoPermisos {
 
 const GRUPOS: Record<string, { titulo: string; descripcion: string }> = {
   dashboard: { titulo: 'Dashboard', descripcion: 'Acceso al panel general del sistema.' },
-  roles: { titulo: 'Roles y permisos', descripcion: 'Administracion de perfiles y permisos.' },
+  roles: { titulo: 'Roles y permisos', descripcion: 'Administración de perfiles y permisos.' },
   usuarios: { titulo: 'Usuarios / empleados', descripcion: 'Gestion de cuentas internas no medicas.' },
   pacientes: { titulo: 'Pacientes', descripcion: 'CRUD y consulta de pacientes.' },
   medicos: { titulo: 'Medicos', descripcion: 'Gestion de medicos y datos asociados.' },
-  sedes: { titulo: 'Sedes', descripcion: 'Administracion de sedes de atencion.' },
+  sedes: { titulo: 'Sedes', descripcion: 'Administración de sedes de atención.' },
   especialidades: { titulo: 'Especialidades', descripcion: 'Catalogo de especialidades y subespecialidades.' },
   consultorios: { titulo: 'Consultorios', descripcion: 'Gestion futura de consultorios por sede.' },
-  citas: { titulo: 'Citas y agenda', descripcion: 'Agendamiento, visualizacion y reprogramacion.' },
+  citas: { titulo: 'Citas y agenda', descripcion: 'Agendamiento, visualización y reprogramación.' },
   pagos: { titulo: 'Pagos', descripcion: 'Consulta y registro manual de pagos.' },
-  historial: { titulo: 'Historial clinico', descripcion: 'Consultas, evolucion y lectura clinica.' },
+  historial: { titulo: 'Historial clínico', descripcion: 'Consultas, evolución y lectura clinica.' },
   disponibilidad: { titulo: 'Disponibilidad', descripcion: 'Horarios base y excepciones medicas.' },
   justificaciones: { titulo: 'Justificaciones', descripcion: 'Gestion de justificaciones medicas.' },
-  reportes: { titulo: 'Reportes', descripcion: 'Analiticas y reportes administrativos.' }
+  reportes: { titulo: 'Reportes', descripcion: 'Analíticas y reportes administrativos.' }
 };
 
 @Component({

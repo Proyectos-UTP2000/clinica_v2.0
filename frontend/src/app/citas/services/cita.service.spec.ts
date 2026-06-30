@@ -40,7 +40,7 @@ describe('CitaService', () => {
     });
   });
 
-  it('mantiene el medico actual cuando no recibe doctorId', () => {
+  it('mantiene el médico actual cuando no recibe doctorId', () => {
     service.reprogramar(6, '2026-07-11T10:00').subscribe((cita) => {
       expect(cita.id).toBe(6);
     });

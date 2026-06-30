@@ -1,0 +1,103 @@
+<section class="feature-page" aria-labelledby="config-title">
+  <app-page-header
+    kicker="Configuración del Sistema"
+    title="Configuración de Sede y Clínica"
+    description="Actualice los datos generales del Centro Médico. Esta información se inyecta dinámicamente en las cabeceras de reportes y PDFs (Fichas clínicas y Recetas)."
+  ></app-page-header>
+
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (mensajeExito) {
+    <div class="alert alert-success" role="status">{{ mensajeExito }}</div>
+  }
+
+  @if (cargando) {
+    <div class="loading-state" aria-live="polite">
+      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      Cargando variables de configuración global...
+    </div>
+  }
+
+  @if (!cargando) {
+    <div class="row g-4 justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6">
+        <form class="feature-panel" (ngSubmit)="guardar()">
+          <div class="feature-panel-body">
+            <h4 class="mb-3 text-primary-dark">Datos de Cabecera para Documentos</h4>
+            <p class="text-muted small">
+              Los siguientes valores aparecerán en la parte superior de las recetas médicas y fichas que generen los doctores.
+            </p>
+            <hr />
+            
+            <div class="row g-3">
+              <div class="col-12">
+                <label for="clinicaNombre" class="form-label fw-semibold">Nombre Comercial</label>
+                <input
+                  id="clinicaNombre"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="valores['clinica.nombre']"
+                  name="clinicaNombre"
+                  placeholder="Ej. Clínica Santa Lucía"
+                  required
+                />
+              </div>
+
+              <div class="col-12">
+                <label for="clinicaRazonSocial" class="form-label fw-semibold">Razón Social</label>
+                <input
+                  id="clinicaRazonSocial"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="valores['clinica.razon_social']"
+                  name="clinicaRazonSocial"
+                  placeholder="Ej. Centro Médico Santa Lucía S.A.C."
+                  required
+                />
+              </div>
+
+              <div class="col-12">
+                <label for="clinicaDireccion" class="form-label fw-semibold">Dirección Sede Central</label>
+                <input
+                  id="clinicaDireccion"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="valores['clinica.direccion']"
+                  name="clinicaDireccion"
+                  placeholder="Ej. Av. Los Libertadores 456, San Isidro"
+                  required
+                />
+              </div>
+
+              <div class="col-12">
+                <label for="clinicaTelefono" class="form-label fw-semibold">Teléfono de Contacto</label>
+                <input
+                  id="clinicaTelefono"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="valores['clinica.telefono']"
+                  name="clinicaTelefono"
+                  placeholder="Ej. (01) 456-7890 / +51 987654321"
+                  required
+                />
+              </div>
+            </div>
+
+            @if (authService.hasPermission('config.editar')) {
+              <div class="form-actions mt-4 border-top pt-3 d-flex justify-content-end gap-2">
+                <a class="btn btn-outline-secondary" routerLink="/dashboard">Cancelar</a>
+                <button type="submit" class="btn btn-primary px-4 fw-semibold" [disabled]="guardando">
+                  @if (guardando) {
+                    <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                  }
+                  Guardar Configuración
+                </button>
+              </div>
+            }
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</section>

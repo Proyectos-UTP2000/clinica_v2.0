@@ -107,6 +107,12 @@ export class AuthService {
     this.usuarioActual = response;
   }
 
+  actualizarPerfil(request: { email: string; telefono: string; passwordActual?: string; nuevaPassword?: string }): Observable<any> {
+    return this.http.put<any>(`${API_URL}/auth/mi-perfil`, request).pipe(
+      tap(() => this.refrescarSesion().subscribe())
+    );
+  }
+
   private leerUsuarioGuardado(): JwtResponse | null {
     const rawUser = localStorage.getItem(USER_KEY);
     if (!rawUser) {

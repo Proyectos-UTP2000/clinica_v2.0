@@ -7,6 +7,7 @@ interface MenuItem {
   permiso?: string;
   code: string;
   group: 'Operacion' | 'Administracion';
+  exact?: boolean;
 }
 
 @Component({
@@ -17,17 +18,22 @@ interface MenuItem {
 })
 export class SidebarComponent {
   menuItems: MenuItem[] = [
-    { label: 'Dashboard', route: '/dashboard', permiso: 'dashboard.ver', code: 'DB', group: 'Operacion' },
+    { label: 'Dashboard', route: '/dashboard', permiso: 'dashboard.ver', code: 'DB', group: 'Operacion', exact: true },
     { label: 'Pacientes', route: '/pacientes', permiso: 'pacientes.ver', code: 'PX', group: 'Operacion' },
     { label: 'Médicos', route: '/medicos', permiso: 'medicos.ver', code: 'MD', group: 'Operacion' },
     { label: 'Citas', route: '/citas', permiso: 'citas.ver_todas', code: 'CT', group: 'Operacion' },
     { label: 'Agenda', route: '/agenda', permiso: 'citas.ver_todas', code: 'AG', group: 'Operacion' },
-    { label: 'Historial', route: '/historial', permiso: 'historial.ver_todos', code: 'HC', group: 'Operacion' },
+    { label: 'Historial', route: '/historial', permiso: 'historial.ver_todos', code: 'HC', group: 'Operacion', exact: true },
+    { label: 'Estudios', route: '/historial/estudios', permiso: 'historial.ver_todos', code: 'ET', group: 'Operacion' },
+
     { label: 'Disponibilidad', route: '/disponibilidad', permiso: 'disponibilidad.ver_propia', code: 'DP', group: 'Operacion' },
     { label: 'Pagos', route: '/pagos', permiso: 'pagos.ver', code: 'PG', group: 'Administracion' },
+    { label: 'Caja Diaria', route: '/pagos/caja', permiso: 'caja.ver', code: 'CJ', group: 'Administracion' },
     { label: 'Sedes', route: '/sedes', permiso: 'sedes.ver', code: 'SD', group: 'Administracion' },
+    { label: 'Configuración', route: '/sedes/configuracion-global', permiso: 'config.ver', code: 'CG', group: 'Administracion' },
     { label: 'Roles', route: '/roles', permiso: 'roles.ver', code: 'RL', group: 'Administracion' },
     { label: 'Usuarios', route: '/usuarios', permiso: 'usuarios.ver', code: 'US', group: 'Administracion' },
+    { label: 'Bitácora', route: '/usuarios/bitacora', permiso: 'audit.ver', code: 'AU', group: 'Administracion' },
     { label: 'Especialidades', route: '/especialidades', permiso: 'especialidades.ver', code: 'ES', group: 'Administracion' },
     { label: 'Consultorios', route: '/consultorios', permiso: 'consultorios.ver', code: 'CS', group: 'Administracion' }
   ];
@@ -45,7 +51,7 @@ export class SidebarComponent {
       return this.authService.hasPermission('citas.ver_todas') || this.authService.hasPermission('citas.ver_propias');
     }
 
-    if (item.route === '/historial') {
+    if (item.route === '/historial' || item.route === '/historial/estudios') {
       return this.authService.hasPermission('historial.ver_todos')
         || this.authService.hasPermission('historial.ver_propios')
         || this.authService.hasPermission('historial.ver_basico');
@@ -57,6 +63,7 @@ export class SidebarComponent {
     }
 
     return this.authService.hasPermission(item.permiso);
+
   }
 
   visiblesPorGrupo(group: MenuItem['group']): MenuItem[] {

@@ -40,4 +40,12 @@ export class SedeService {
   desactivar(id: number): Observable<ApiResponse> {
     return this.http.delete<ApiResponse>(`${API_URL}/sedes/${id}`);
   }
+
+  obtenerConfiguracionGlobal(): Observable<any[]> {
+    return this.http.get<any[]>(`${API_URL}/config`);
+  }
+
+  actualizarConfiguracionGlobal(clave: string, valor: string): Observable<any> {
+    return this.http.put<any>(`${API_URL}/config/${clave}`, { valor });
+  }
 }

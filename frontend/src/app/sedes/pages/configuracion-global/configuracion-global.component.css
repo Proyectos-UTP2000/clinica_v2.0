@@ -1,0 +1,18 @@
+.text-primary-dark {
+  color: #1e3a8a;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #475569;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem;
+  color: #64748b;
+  font-weight: 500;
+}

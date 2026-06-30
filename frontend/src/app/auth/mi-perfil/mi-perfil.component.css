@@ -1,0 +1,18 @@
+.text-primary-dark {
+  color: #1e3a8a;
+}
+
+.text-warning-dark {
+  color: #b45309;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #475569;
+}
+
+.form-control[readonly] {
+  background-color: #f8fafc !important;
+  color: #64748b;
+  border-color: #e2e8f0;
+}

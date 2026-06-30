@@ -6,4 +6,6 @@ export interface JwtResponse {
   cambioPasswordObligatorio: boolean;
   roles: string[];
   permisos: string[];
+  email?: string;
+  telefono?: string;
 }

@@ -40,8 +40,12 @@ export class AuthService {
     return this.http.post<ApiResponse>(`${API_URL}/auth/recuperar-password`, request);
   }
 
-  restablecerPassword(email: string, codigo: string, nuevaPassword: string): Observable<ApiResponse> {
-    const request: VerificarCodigoRequest = { email, codigo, nuevaPassword };
+  validarCodigo(email: string, codigo: string): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${API_URL}/auth/validar-codigo`, { email, codigo });
+  }
+
+  restablecerPassword(email: string, codigo: string, nuevaPassword: string, repetirPassword: string): Observable<ApiResponse> {
+    const request: VerificarCodigoRequest = { email, codigo, nuevaPassword, repetirPassword };
     return this.http.post<ApiResponse>(`${API_URL}/auth/verificar-codigo-recuperacion`, request);
   }
 

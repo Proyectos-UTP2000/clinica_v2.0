@@ -3,6 +3,7 @@ package com.web.clinica.service.abstractService;
 import com.web.clinica.dto.request.CambioPasswordRequest;
 import com.web.clinica.dto.request.LoginRequest;
 import com.web.clinica.dto.request.RecuperarPasswordRequest;
+import com.web.clinica.dto.request.ValidarCodigoRequest;
 import com.web.clinica.dto.request.VerificarCodigoRecuperacionRequest;
 import com.web.clinica.dto.response.JwtResponse;
 
@@ -19,6 +20,9 @@ public interface IAuthService {
 
     /** Genera un codigo temporal para recuperar password. */
     void generarCodigoRecuperacion(RecuperarPasswordRequest solicitud);
+
+    /** Valida que un codigo de recuperacion sea vigente y no usado. */
+    void validarCodigoRecuperacion(ValidarCodigoRequest solicitud);
 
     /** Restablece el password usando un codigo vigente. */
     void restablecerPasswordConCodigo(VerificarCodigoRecuperacionRequest solicitud);

@@ -3,6 +3,7 @@ package com.web.clinica.controller;
 import com.web.clinica.dto.request.CambioPasswordRequest;
 import com.web.clinica.dto.request.LoginRequest;
 import com.web.clinica.dto.request.RecuperarPasswordRequest;
+import com.web.clinica.dto.request.ValidarCodigoRequest;
 import com.web.clinica.dto.request.VerificarCodigoRecuperacionRequest;
 import com.web.clinica.dto.response.ApiResponse;
 import com.web.clinica.dto.response.JwtResponse;
@@ -55,6 +56,13 @@ public class AuthController {
     public ResponseEntity<ApiResponse> recuperarPassword(@Valid @RequestBody RecuperarPasswordRequest solicitud) {
         authService.generarCodigoRecuperacion(solicitud);
         return ResponseEntity.ok(new ApiResponse("Codigo de recuperacion generado", true));
+    }
+
+    /** Valida el codigo de recuperacion sin cambiar password. */
+    @PostMapping("/validar-codigo")
+    public ResponseEntity<ApiResponse> validarCodigo(@Valid @RequestBody ValidarCodigoRequest solicitud) {
+        authService.validarCodigoRecuperacion(solicitud);
+        return ResponseEntity.ok(new ApiResponse("Codigo de recuperacion valido", true));
     }
 
     /** Verifica el codigo y restablece el password. */

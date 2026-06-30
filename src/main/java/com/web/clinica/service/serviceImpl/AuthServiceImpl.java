@@ -4,6 +4,7 @@ import com.web.clinica.config.JwtProvider;
 import com.web.clinica.dto.request.CambioPasswordRequest;
 import com.web.clinica.dto.request.LoginRequest;
 import com.web.clinica.dto.request.RecuperarPasswordRequest;
+import com.web.clinica.dto.request.ValidarCodigoRequest;
 import com.web.clinica.dto.request.VerificarCodigoRecuperacionRequest;
 import com.web.clinica.dto.response.JwtResponse;
 import com.web.clinica.exception.BadRequestException;
@@ -107,6 +108,19 @@ public class AuthServiceImpl implements IAuthService, UserDetailsService {
                 "Codigo de recuperacion",
                 "Su codigo de recuperacion es: " + codigoVerificacion.getCodigo()
         );
+    }
+
+    /** Valida que un codigo de recuperacion sea vigente y no usado. */
+    @Override
+    @Transactional(readOnly = true)
+    public void validarCodigoRecuperacion(ValidarCodigoRequest solicitud) {
+        codigoVerificacionRepository
+                .findByEmailAndCodigoAndUsadoFalseAndFechaExpiracionAfter(
+                        solicitud.getEmail(),
+                        solicitud.getCodigo(),
+                        LocalDateTime.now()
+                )
+                .orElseThrow(() -> new BadRequestException("Codigo invalido o expirado"));
     }
 
     /** Valida un codigo de recuperacion y reemplaza el password. */

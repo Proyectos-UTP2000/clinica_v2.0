@@ -134,7 +134,12 @@
           <div class="modal-footer">
             <button class="btn btn-outline-secondary" (click)="cerrarUpload()">Cancelar</button>
             <button class="btn btn-primary" [disabled]="archivosSeleccionados.length === 0 || cargando" (click)="subirResultado()">
-              Guardar Resultado
+              @if (cargando) {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Subiendo...
+              } @else {
+                Guardar Resultado
+              }
             </button>
           </div>
         </div>

@@ -15,4 +15,6 @@ public class DisponibilidadBaseResponse {
     private Integer diaSemana;
     private LocalTime horaInicio;
     private LocalTime horaFin;
+    private Long consultorioId;
+    private String consultorioNombre;
 }

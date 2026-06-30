@@ -24,6 +24,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(respuesta);
     }
 
+    @ExceptionHandler(ConflictoHorarioConsultorioException.class)
+    public ResponseEntity<ApiResponse> manejarConflictoHorarioConsultorio(ConflictoHorarioConsultorioException excepcion) {
+        return responder(HttpStatus.CONFLICT, excepcion.getMessage());
+    }
+
     /** Responde 400 para reglas de negocio invalidas. */
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ApiResponse> manejarBadRequest(BadRequestException excepcion) {

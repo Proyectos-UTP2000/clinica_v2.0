@@ -9,13 +9,16 @@ import com.web.clinica.exception.AccesoDenegadoException;
 import com.web.clinica.exception.BadRequestException;
 import com.web.clinica.exception.ConflictoDisponibilidadException;
 import com.web.clinica.exception.ResourceNotFoundException;
+import com.web.clinica.exception.ConflictoHorarioConsultorioException;
 import com.web.clinica.model.Cita;
+import com.web.clinica.model.Consultorio;
 import com.web.clinica.model.DisponibilidadBase;
 import com.web.clinica.model.Doctor;
 import com.web.clinica.model.ExcepcionDisponibilidad;
 import com.web.clinica.model.Sede;
 import com.web.clinica.model.Usuario;
 import com.web.clinica.repository.CitaRepository;
+import com.web.clinica.repository.ConsultorioRepository;
 import com.web.clinica.repository.DisponibilidadBaseRepository;
 import com.web.clinica.repository.DoctorRepository;
 import com.web.clinica.repository.ExcepcionDisponibilidadRepository;
@@ -40,6 +43,7 @@ public class DisponibilidadServiceImpl implements IDisponibilidadService {
     private final DoctorRepository doctorRepository;
     private final SedeRepository sedeRepository;
     private final CitaRepository citaRepository;
+    private final ConsultorioRepository consultorioRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -52,11 +56,25 @@ public class DisponibilidadServiceImpl implements IDisponibilidadService {
 
     @Override
     @Transactional
-    public DisponibilidadBaseResponse guardarBase(Long doctorId, DisponibilidadBaseCreateRequest solicitud) {
+    public DisponibilidadBaseResponse guardarBase(Long doctorId, DisponibilidadBaseCreateRequest solicitud, boolean forzar) {
         Doctor doctor = obtenerDoctorConAlcance(doctorId);
         Sede sede = obtenerSede(solicitud.getSedeId());
         validarRangoHorario(solicitud.getHoraInicio(), solicitud.getHoraFin());
         validarDoctorAtiendeEnSede(doctor, sede);
+
+        Consultorio consultorio = null;
+        if (solicitud.getConsultorioId() != null) {
+            consultorio = consultorioRepository.findById(solicitud.getConsultorioId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Consultorio no encontrado"));
+            if (!consultorio.getSede().getId().equals(sede.getId())) {
+                throw new BadRequestException("El consultorio no pertenece a la sede seleccionada");
+            }
+            boolean tieneAsignado = doctor.getConsultorios().stream()
+                    .anyMatch(c -> c.getId().equals(solicitud.getConsultorioId()));
+            if (!tieneAsignado) {
+                throw new BadRequestException("El médico no tiene asignado este consultorio");
+            }
+        }
 
         DisponibilidadBase disponibilidad = disponibilidadBaseRepository
                 .findByDoctorAndSedeAndDiaSemana(doctor, sede, solicitud.getDiaSemana())
@@ -75,8 +93,30 @@ public class DisponibilidadServiceImpl implements IDisponibilidadService {
             }
         }
 
+        // VALIDACIÓN DE CONSULTORIO (Cruce entre diferentes médicos)
+        if (consultorio != null && !forzar) {
+            List<DisponibilidadBase> ocupantes = disponibilidadBaseRepository.findAll().stream()
+                    .filter(db -> db.getSede().getId().equals(sede.getId())
+                            && db.getDiaSemana().equals(solicitud.getDiaSemana())
+                            && db.getConsultorio() != null
+                            && db.getConsultorio().getId().equals(solicitud.getConsultorioId()))
+                    .filter(db -> disponibilidad.getId() == null || !db.getId().equals(disponibilidad.getId()))
+                    .toList();
+
+            for (DisponibilidadBase db : ocupantes) {
+                if (solicitud.getHoraInicio().isBefore(db.getHoraFin()) && solicitud.getHoraFin().isAfter(db.getHoraInicio())) {
+                    String medicoNombre = db.getDoctor().getUsuario().getNombres() + " " + db.getDoctor().getUsuario().getApellidos();
+                    throw new ConflictoHorarioConsultorioException(
+                            String.format("El %s ya está asignado al Dr. %s el día %s de %s a %s en esta sede.",
+                                    consultorio.getNombre(), medicoNombre, obtenerNombreDia(solicitud.getDiaSemana()), db.getHoraInicio(), db.getHoraFin())
+                    );
+                }
+            }
+        }
+
         disponibilidad.setDoctor(doctor);
         disponibilidad.setSede(sede);
+        disponibilidad.setConsultorio(consultorio);
         disponibilidad.setDiaSemana(solicitud.getDiaSemana());
         disponibilidad.setHoraInicio(solicitud.getHoraInicio());
         disponibilidad.setHoraFin(solicitud.getHoraFin());
@@ -208,6 +248,19 @@ public class DisponibilidadServiceImpl implements IDisponibilidadService {
                 .anyMatch(permiso::equals);
     }
 
+    private String obtenerNombreDia(int diaSemana) {
+        return switch (diaSemana) {
+            case 1 -> "Lunes";
+            case 2 -> "Martes";
+            case 3 -> "Miércoles";
+            case 4 -> "Jueves";
+            case 5 -> "Viernes";
+            case 6 -> "Sábado";
+            case 7 -> "Domingo";
+            default -> "Día Desconocido";
+        };
+    }
+
     private DisponibilidadBaseResponse convertirBase(DisponibilidadBase disponibilidad) {
         return DisponibilidadBaseResponse.builder()
                 .id(disponibilidad.getId())
@@ -217,6 +270,8 @@ public class DisponibilidadServiceImpl implements IDisponibilidadService {
                 .diaSemana(disponibilidad.getDiaSemana())
                 .horaInicio(disponibilidad.getHoraInicio())
                 .horaFin(disponibilidad.getHoraFin())
+                .consultorioId(disponibilidad.getConsultorio() != null ? disponibilidad.getConsultorio().getId() : null)
+                .consultorioNombre(disponibilidad.getConsultorio() != null ? disponibilidad.getConsultorio().getNombre() : null)
                 .build();
     }
 

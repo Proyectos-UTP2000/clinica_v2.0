@@ -22,4 +22,6 @@ public class DisponibilidadBaseCreateRequest {
 
     @NotNull
     private LocalTime horaFin;
+
+    private Long consultorioId;
 }

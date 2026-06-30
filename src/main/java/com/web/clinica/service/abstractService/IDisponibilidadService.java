@@ -11,7 +11,7 @@ public interface IDisponibilidadService {
 
     List<DisponibilidadBaseResponse> listarBases(Long doctorId);
 
-    DisponibilidadBaseResponse guardarBase(Long doctorId, DisponibilidadBaseCreateRequest solicitud);
+    DisponibilidadBaseResponse guardarBase(Long doctorId, DisponibilidadBaseCreateRequest solicitud, boolean forzar);
 
     void eliminarBase(Long doctorId, Long disponibilidadId);
 

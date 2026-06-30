@@ -195,12 +195,19 @@ public class DataLoader implements CommandLineRunner {
                     d.setUsuario(doctorUsuario);
                     d.setEspecialidad(espGeneral);
                     d.setSedes(new HashSet<>(Collections.singletonList(sedeCentral)));
+                    d.setConsultorios(new HashSet<>(Collections.singletonList(consultorio1)));
                     return doctorRepository.save(d);
                 });
 
         // Asegurar que atiende en Sede Central
         if (doctor.getSedes() == null || doctor.getSedes().isEmpty()) {
             doctor.setSedes(new HashSet<>(Collections.singletonList(sedeCentral)));
+            doctorRepository.save(doctor);
+        }
+
+        // Asegurar que tiene asignado el consultorio
+        if (doctor.getConsultorios() == null || doctor.getConsultorios().isEmpty()) {
+            doctor.setConsultorios(new HashSet<>(Collections.singletonList(consultorio1)));
             doctorRepository.save(doctor);
         }
 
@@ -213,6 +220,7 @@ public class DataLoader implements CommandLineRunner {
                 db.setDiaSemana(i);
                 db.setHoraInicio(LocalTime.of(8, 0));
                 db.setHoraFin(LocalTime.of(13, 0));
+                db.setConsultorio(consultorio1);
                 disponibilidadBaseRepository.save(db);
             }
         }

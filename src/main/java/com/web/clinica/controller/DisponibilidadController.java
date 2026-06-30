@@ -39,8 +39,9 @@ public class DisponibilidadController {
     @PostMapping("/doctor/{doctorId}/base")
     @RequierePermiso({"disponibilidad.editar_propia", "disponibilidad.editar_todas"})
     public ResponseEntity<DisponibilidadBaseResponse> guardarBase(@PathVariable Long doctorId,
-                                                                  @Valid @RequestBody DisponibilidadBaseCreateRequest solicitud) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(disponibilidadService.guardarBase(doctorId, solicitud));
+                                                                  @Valid @RequestBody DisponibilidadBaseCreateRequest solicitud,
+                                                                  @RequestParam(required = false, defaultValue = "false") boolean forzar) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(disponibilidadService.guardarBase(doctorId, solicitud, forzar));
     }
 
     @DeleteMapping("/doctor/{doctorId}/base/{id}")

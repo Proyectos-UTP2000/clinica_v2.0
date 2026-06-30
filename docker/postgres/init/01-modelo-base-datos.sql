@@ -207,6 +207,7 @@ CREATE TABLE disponibilidad_base (
     id BIGSERIAL PRIMARY KEY,
     doctor_id BIGINT NOT NULL REFERENCES doctor(id) ON DELETE CASCADE,
     sede_id BIGINT NOT NULL REFERENCES sede(id) ON DELETE CASCADE,
+    consultorio_id BIGINT REFERENCES consultorio(id) ON DELETE SET NULL,
     dia_semana INT NOT NULL CHECK (dia_semana BETWEEN 1 AND 7),
     hora_inicio TIME NOT NULL,
     hora_fin TIME NOT NULL,

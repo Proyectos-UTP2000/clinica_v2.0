@@ -39,4 +39,8 @@ public class DisponibilidadBase {
 
     @Column(name = "hora_fin", nullable = false)
     private LocalTime horaFin;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "consultorio_id")
+    private Consultorio consultorio;
 }

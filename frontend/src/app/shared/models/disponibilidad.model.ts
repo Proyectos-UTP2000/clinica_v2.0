@@ -6,6 +6,8 @@ export interface DisponibilidadBaseResponse {
   diaSemana: number;
   horaInicio: string;
   horaFin: string;
+  consultorioId?: number;
+  consultorioNombre?: string;
 }
 
 export interface ExcepcionDisponibilidadResponse {
@@ -22,6 +24,7 @@ export interface DisponibilidadBaseCreateRequest {
   diaSemana: number;
   horaInicio: string;
   horaFin: string;
+  consultorioId?: number;
 }
 
 export interface ExcepcionDisponibilidadCreateRequest {

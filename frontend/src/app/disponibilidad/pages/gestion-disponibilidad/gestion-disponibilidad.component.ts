@@ -11,6 +11,9 @@ import { MedicoResponse } from '../../../shared/models/medico.model';
 import { SedeResponse } from '../../../shared/models/sede.model';
 import { DisponibilidadService } from '../../services/disponibilidad.service';
 
+import { ConsultorioResponse } from '../../../shared/models/consultorio.model';
+import { ConsultorioService } from '../../../consultorios/services/consultorio.service';
+
 @Component({
     selector: 'app-gestion-disponibilidad',
     templateUrl: './gestion-disponibilidad.component.html',
@@ -22,6 +25,7 @@ export class GestionDisponibilidadComponent implements OnInit {
   sedes: SedeResponse[] = [];
   horariosBase: DisponibilidadBaseResponse[] = [];
   excepciones: ExcepcionDisponibilidadResponse[] = [];
+  consultoriosFiltrados: ConsultorioResponse[] = [];
   doctorId: number | null = null;
   cargando = false;
   guardandoBase = false;
@@ -33,6 +37,9 @@ export class GestionDisponibilidadComponent implements OnInit {
   pestanaActiva = 'base';
   mostrarModalBase = false;
   mostrarModalExcepcion = false;
+  mostrarModalConfirmacion = false;
+  mensajeConfirmacion = '';
+  confirmarCallback: (() => void) | null = null;
 
   dias = [
     { id: 1, nombre: 'Lunes' },
@@ -48,7 +55,8 @@ export class GestionDisponibilidadComponent implements OnInit {
     sedeId: [null as number | null, Validators.required],
     diaSemana: [1, Validators.required],
     horaInicio: ['08:00', Validators.required],
-    horaFin: ['13:00', Validators.required]
+    horaFin: ['13:00', Validators.required],
+    consultorioId: [null as number | null, Validators.required]
   });
 
   excepcionForm = this.fb.group({
@@ -67,8 +75,17 @@ export class GestionDisponibilidadComponent implements OnInit {
     public readonly authService: AuthService,
     private readonly fb: FormBuilder,
     private readonly disponibilidadService: DisponibilidadService,
+    private readonly consultorioService: ConsultorioService,
     private readonly sesionContextService: SesionContextService
-  ) {}
+  ) {
+    this.baseForm.get('sedeId')?.valueChanges.subscribe(sedeId => {
+      if (sedeId) {
+        this.cargarConsultoriosDeSede(Number(sedeId));
+      } else {
+        this.consultoriosFiltrados = [];
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.sesionContextService.sedes$.subscribe((sedes) => {
@@ -138,9 +155,26 @@ export class GestionDisponibilidadComponent implements OnInit {
     }));
   }
 
+  cargarConsultoriosDeSede(sedeId: number): void {
+    if (!this.doctorId) return;
+    const medico = this.medicos.find(m => m.id === this.doctorId);
+    if (!medico) return;
+
+    this.consultorioService.listarPorSede(sedeId).subscribe({
+      next: (res) => {
+        const asignadosIds = medico.consultorioIds || [];
+        this.consultoriosFiltrados = res.filter(c => asignadosIds.includes(c.id));
+      },
+      error: () => {
+        this.mensajeError = 'No se pudieron cargar los consultorios de la sede.';
+      }
+    });
+  }
+
   abrirModalBase(): void {
     this.limpiarMensajes();
     this.mostrarModalBase = true;
+    this.consultoriosFiltrados = [];
     setTimeout(() => {
       const list = this.sedesDelMedicoSeleccionado;
       const defaultSede = this.sesionContextService.selectedSedeId || (list.length > 0 ? list[0].id : null);
@@ -148,10 +182,14 @@ export class GestionDisponibilidadComponent implements OnInit {
         sedeId: defaultSede,
         diaSemana: 1,
         horaInicio: '08:00',
-        horaFin: '13:00'
+        horaFin: '13:00',
+        consultorioId: null
       });
       this.baseForm.markAsPristine();
       this.baseForm.markAsUntouched();
+      if (defaultSede) {
+        this.cargarConsultoriosDeSede(Number(defaultSede));
+      }
     }, 0);
   }
 
@@ -170,7 +208,7 @@ export class GestionDisponibilidadComponent implements OnInit {
     }, 0);
   }
 
-  guardarBase(): void {
+  guardarBase(forzar = false): void {
     this.limpiarMensajes();
     if (!this.doctorId) {
       this.mensajeError = 'No se ha seleccionado ningún médico.';
@@ -183,6 +221,7 @@ export class GestionDisponibilidadComponent implements OnInit {
       if (this.baseForm.get('diaSemana')?.invalid) invalidFields.push('Día');
       if (this.baseForm.get('horaInicio')?.invalid) invalidFields.push('Hora Inicio');
       if (this.baseForm.get('horaFin')?.invalid) invalidFields.push('Hora Fin');
+      if (this.baseForm.get('consultorioId')?.invalid) invalidFields.push('Consultorio');
       this.mensajeError = 'Por favor complete todos los campos obligatorios: ' + invalidFields.join(', ') + '.';
       return;
     }
@@ -192,15 +231,45 @@ export class GestionDisponibilidadComponent implements OnInit {
       sedeId: Number(value.sedeId),
       diaSemana: Number(value.diaSemana),
       horaInicio: value.horaInicio || '08:00',
-      horaFin: value.horaFin || '13:00'
-    }).pipe(finalize(() => (this.guardandoBase = false))).subscribe({
+      horaFin: value.horaFin || '13:00',
+      consultorioId: value.consultorioId ? Number(value.consultorioId) : undefined
+    }, forzar).pipe(finalize(() => (this.guardandoBase = false))).subscribe({
       next: () => {
         this.mensajeExito = 'Horario base guardado correctamente.';
         this.mostrarModalBase = false;
         this.cargarDisponibilidad();
       },
-      error: (err) => (this.mensajeError = err.error?.mensaje || 'No se pudo guardar el horario base.')
+      error: (err) => {
+        if (err.status === 409) {
+          const mensajeConflictivo = err.error?.mensaje || 'El consultorio seleccionado ya está ocupado en ese horario por otro médico.';
+          this.abrirConfirmacion(
+            `${mensajeConflictivo} ¿Desea registrar este horario de todos modos?`,
+            () => this.guardarBase(true)
+          );
+        } else {
+          this.mensajeError = err.error?.mensaje || 'No se pudo guardar el horario base.';
+        }
+      }
     });
+  }
+
+  abrirConfirmacion(mensaje: string, callback: () => void): void {
+    this.mensajeConfirmacion = mensaje;
+    this.confirmarCallback = callback;
+    this.mostrarModalConfirmacion = true;
+  }
+
+  aceptarConfirmacion(): void {
+    this.mostrarModalConfirmacion = false;
+    if (this.confirmarCallback) {
+      this.confirmarCallback();
+    }
+    this.confirmarCallback = null;
+  }
+
+  cancelarConfirmacion(): void {
+    this.mostrarModalConfirmacion = false;
+    this.confirmarCallback = null;
   }
 
   guardarExcepcion(): void {

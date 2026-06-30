@@ -144,3 +144,20 @@
     transform: scale(1);
   }
 }
+
+.clinic-dialog.confirm-dialog {
+  width: min(100%, 460px);
+  text-align: center;
+}
+
+.confirm-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background-color: #fff3cd;
+  color: #ffc107;
+  border-radius: 50%;
+  margin-inline: auto;
+}

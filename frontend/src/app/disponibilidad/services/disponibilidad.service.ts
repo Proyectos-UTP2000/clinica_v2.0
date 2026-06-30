@@ -39,8 +39,9 @@ export class DisponibilidadService {
     return this.http.get<DisponibilidadBaseResponse[]>(`${API_URL}/disponibilidad/doctor/${doctorId}/base`);
   }
 
-  guardarBase(doctorId: number, request: DisponibilidadBaseCreateRequest): Observable<DisponibilidadBaseResponse> {
-    return this.http.post<DisponibilidadBaseResponse>(`${API_URL}/disponibilidad/doctor/${doctorId}/base`, request);
+  guardarBase(doctorId: number, request: DisponibilidadBaseCreateRequest, forzar = false): Observable<DisponibilidadBaseResponse> {
+    const params = new HttpParams().set('forzar', forzar.toString());
+    return this.http.post<DisponibilidadBaseResponse>(`${API_URL}/disponibilidad/doctor/${doctorId}/base`, request, { params });
   }
 
   eliminarBase(doctorId: number, id: number): Observable<ApiResponse> {

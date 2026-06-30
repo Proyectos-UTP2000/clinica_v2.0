@@ -88,8 +88,10 @@ class HistorialAdjuntoServiceTests {
                 mock(DoctorRepository.class),
                 mock(SedeRepository.class),
                 mock(CitaRepository.class),
-                tempDir);
+                tempDir,
+                mock(com.cloudinary.Cloudinary.class));
     }
+
 
     private Consulta consulta() {
         Usuario usuario = new Usuario();

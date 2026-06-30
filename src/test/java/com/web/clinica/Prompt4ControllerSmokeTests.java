@@ -258,7 +258,7 @@ class Prompt4ControllerSmokeTests {
         }
 
         @Override
-        public Page<ConsultaResponse> listarPorPaciente(Long pacienteId, Pageable pageable) {
+        public Page<ConsultaResponse> listarPorPaciente(Long pacienteId, String search, boolean tieneRecetas, boolean tieneEstudios, boolean tieneAdjuntos, java.time.LocalDate fechaInicio, java.time.LocalDate fechaFin, Pageable pageable) {
             return new PageImpl<>(List.of(respuesta()), PageRequest.of(0, 20), 1);
         }
 
@@ -294,10 +294,35 @@ class Prompt4ControllerSmokeTests {
             return "PDF".getBytes();
         }
 
+        @Override
+        public Page<com.web.clinica.dto.response.EstudioResponse> listarEstudios(String estado, String filtro, Pageable pageable) {
+            com.web.clinica.dto.response.EstudioResponse response = new com.web.clinica.dto.response.EstudioResponse();
+            response.setId(1L);
+            response.setTipoEstudio("Estudio de prueba");
+            response.setEstado("pendiente");
+            return new org.springframework.data.domain.PageImpl<>(List.of(response), pageable, 1);
+        }
+
+        @Override
+        public com.web.clinica.dto.response.EstudioResponse registrarResultadoEstudio(Long estudioId, List<org.springframework.web.multipart.MultipartFile> archivos) {
+            com.web.clinica.dto.response.EstudioResponse response = new com.web.clinica.dto.response.EstudioResponse();
+            response.setId(estudioId);
+            response.setTipoEstudio("Estudio de prueba");
+            response.setDetalle("Detalle");
+            response.setEstado("realizado");
+            return response;
+        }
+
+        @Override
+        public AdjuntoDownloadResponse descargarResultadoEstudio(Long estudioId, Integer index) {
+            return new AdjuntoDownloadResponse("archivo.pdf", "application/pdf", new org.springframework.core.io.ByteArrayResource("archivo".getBytes()));
+        }
+
         private ConsultaResponse respuesta() {
             return ConsultaResponse.builder().id(1L).tipo("consulta").estado("activa").build();
         }
     }
+
 
     private static class PagoServiceStub implements IPagoService {
 

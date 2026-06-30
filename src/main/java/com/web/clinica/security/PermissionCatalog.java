@@ -62,7 +62,12 @@ public final class PermissionCatalog {
                 permission("justificaciones.ver_todas", "Ver todas las justificaciones"),
                 permission("justificaciones.ver_propias", "Ver solo justificaciones propias"),
                 permission("reportes.ver", "Acceder a reportes y analiticas"),
-                permission("dashboard.ver", "Ver dashboard general")
+                permission("dashboard.ver", "Ver dashboard general"),
+                permission("caja.gestionar", "Abrir y cerrar caja diaria"),
+                permission("caja.ver", "Ver reportes y balances de caja"),
+                permission("audit.ver", "Ver historial de auditoria"),
+                permission("config.ver", "Ver configuración global"),
+                permission("config.editar", "Editar configuración global")
         ).stream().sorted(Comparator.comparing(PermissionDefinition::codigo)).toList();
     }
 

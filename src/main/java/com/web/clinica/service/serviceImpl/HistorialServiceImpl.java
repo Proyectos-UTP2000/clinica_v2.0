@@ -28,6 +28,7 @@ import com.web.clinica.model.Receta;
 import com.web.clinica.model.Sede;
 import com.web.clinica.model.Usuario;
 import com.web.clinica.repository.AdjuntoRepository;
+import com.web.clinica.repository.ConfiguracionGlobalRepository;
 import com.web.clinica.repository.CitaRepository;
 import com.web.clinica.repository.ConsultaRepository;
 import com.web.clinica.repository.DoctorRepository;
@@ -38,6 +39,7 @@ import com.web.clinica.repository.PacienteRepository;
 import com.web.clinica.repository.RecetaRepository;
 import com.web.clinica.repository.SedeRepository;
 import com.web.clinica.service.abstractService.IHistorialService;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.io.IOException;
@@ -83,7 +85,9 @@ public class HistorialServiceImpl implements IHistorialService {
     private final DoctorRepository doctorRepository;
     private final SedeRepository sedeRepository;
     private final CitaRepository citaRepository;
+    private final ConfiguracionGlobalRepository configuracionGlobalRepository;
     private final Path adjuntosStorageDir;
+    private final com.cloudinary.Cloudinary cloudinary;
 
     @Autowired
     public HistorialServiceImpl(ConsultaRepository consultaRepository,
@@ -96,10 +100,30 @@ public class HistorialServiceImpl implements IHistorialService {
                                 DoctorRepository doctorRepository,
                                 SedeRepository sedeRepository,
                                 CitaRepository citaRepository,
-                                @Value("${app.storage.adjuntos-dir:uploads/adjuntos}") String adjuntosStorageDir) {
+                                ConfiguracionGlobalRepository configuracionGlobalRepository,
+                                @Value("${app.storage.adjuntos-dir:uploads/adjuntos}") String adjuntosStorageDir,
+                                com.cloudinary.Cloudinary cloudinary) {
         this(consultaRepository, recetaRepository, indicacionMedicaRepository, estudioComplementarioRepository,
                 adjuntoRepository, notaEvolucionRepository, pacienteRepository, doctorRepository, sedeRepository,
-                citaRepository, Path.of(adjuntosStorageDir));
+                citaRepository, configuracionGlobalRepository, Path.of(adjuntosStorageDir), cloudinary);
+    }
+
+    // Constructor de 12 argumentos con String para retrocompatibilidad
+    public HistorialServiceImpl(ConsultaRepository consultaRepository,
+                                RecetaRepository recetaRepository,
+                                IndicacionMedicaRepository indicacionMedicaRepository,
+                                EstudioComplementarioRepository estudioComplementarioRepository,
+                                AdjuntoRepository adjuntoRepository,
+                                NotaEvolucionRepository notaEvolucionRepository,
+                                PacienteRepository pacienteRepository,
+                                DoctorRepository doctorRepository,
+                                SedeRepository sedeRepository,
+                                CitaRepository citaRepository,
+                                String adjuntosStorageDir,
+                                com.cloudinary.Cloudinary cloudinary) {
+        this(consultaRepository, recetaRepository, indicacionMedicaRepository, estudioComplementarioRepository,
+                adjuntoRepository, notaEvolucionRepository, pacienteRepository, doctorRepository, sedeRepository,
+                citaRepository, null, Path.of(adjuntosStorageDir), cloudinary);
     }
 
     public HistorialServiceImpl(ConsultaRepository consultaRepository,
@@ -112,7 +136,9 @@ public class HistorialServiceImpl implements IHistorialService {
                                 DoctorRepository doctorRepository,
                                 SedeRepository sedeRepository,
                                 CitaRepository citaRepository,
-                                Path adjuntosStorageDir) {
+                                ConfiguracionGlobalRepository configuracionGlobalRepository,
+                                Path adjuntosStorageDir,
+                                com.cloudinary.Cloudinary cloudinary) {
         this.consultaRepository = consultaRepository;
         this.recetaRepository = recetaRepository;
         this.indicacionMedicaRepository = indicacionMedicaRepository;
@@ -123,8 +149,29 @@ public class HistorialServiceImpl implements IHistorialService {
         this.doctorRepository = doctorRepository;
         this.sedeRepository = sedeRepository;
         this.citaRepository = citaRepository;
+        this.configuracionGlobalRepository = configuracionGlobalRepository;
         this.adjuntosStorageDir = adjuntosStorageDir;
+        this.cloudinary = cloudinary;
     }
+
+    // Constructor de 12 argumentos con Path para retrocompatibilidad con tests
+    public HistorialServiceImpl(ConsultaRepository consultaRepository,
+                                RecetaRepository recetaRepository,
+                                IndicacionMedicaRepository indicacionMedicaRepository,
+                                EstudioComplementarioRepository estudioComplementarioRepository,
+                                AdjuntoRepository adjuntoRepository,
+                                NotaEvolucionRepository notaEvolucionRepository,
+                                PacienteRepository pacienteRepository,
+                                DoctorRepository doctorRepository,
+                                SedeRepository sedeRepository,
+                                CitaRepository citaRepository,
+                                Path adjuntosStorageDir,
+                                com.cloudinary.Cloudinary cloudinary) {
+        this(consultaRepository, recetaRepository, indicacionMedicaRepository, estudioComplementarioRepository,
+                adjuntoRepository, notaEvolucionRepository, pacienteRepository, doctorRepository, sedeRepository,
+                citaRepository, null, adjuntosStorageDir, cloudinary);
+    }
+
 
     /** Crea una consulta clinica y sus detalles en una sola transaccion. */
     @Override
@@ -175,11 +222,13 @@ public class HistorialServiceImpl implements IHistorialService {
         return convertirRespuesta(consulta);
     }
 
-    /** Lista historial de un paciente. */
+    /** Lista historial de un paciente con filtros. */
     @Override
     @Transactional(readOnly = true)
-    public Page<ConsultaResponse> listarPorPaciente(Long pacienteId, Pageable pageable) {
-        return consultaRepository.findByPacienteId(pacienteId, pageable).map(this::convertirRespuesta);
+    public Page<ConsultaResponse> listarPorPaciente(Long pacienteId, String search, boolean tieneRecetas, boolean tieneEstudios, boolean tieneAdjuntos, LocalDate fechaInicio, LocalDate fechaFin, Pageable pageable) {
+        LocalDateTime inicio = fechaInicio != null ? fechaInicio.atStartOfDay() : null;
+        LocalDateTime fin = fechaFin != null ? fechaFin.atTime(23, 59, 59, 999999999) : null;
+        return consultaRepository.findByPacienteIdWithFilters(pacienteId, search, tieneRecetas, tieneEstudios, tieneAdjuntos, inicio, fin, pageable).map(this::convertirRespuesta);
     }
 
     /** Lista historial del medico autenticado. */
@@ -349,7 +398,7 @@ public class HistorialServiceImpl implements IHistorialService {
         }
     }
 
-    /** Verifica que la cita enviada pertenezca a la misma consulta. */
+    /** Verifica que la cita enviada pertenezca a la misma consulta y tenga un estado válido para ser atendida. */
     private void validarCitaCompatible(Cita cita, Paciente paciente, Doctor doctor, Sede sede) {
         if (cita == null) {
             return;
@@ -359,6 +408,9 @@ public class HistorialServiceImpl implements IHistorialService {
                 && cita.getSede().getId().equals(sede.getId());
         if (!compatible) {
             throw new BadRequestException("La cita no corresponde al paciente, doctor y sede enviados");
+        }
+        if (!"programada".equalsIgnoreCase(cita.getEstado()) && !"reprogramada".equalsIgnoreCase(cita.getEstado())) {
+            throw new BadRequestException("Solo se pueden atender citas con estado programada o reprogramada");
         }
     }
 
@@ -466,15 +518,29 @@ public class HistorialServiceImpl implements IHistorialService {
     /** Convierte estudios. */
     private List<EstudioResponse> mapearEstudios(Long consultaId) {
         return estudioComplementarioRepository.findByConsultaId(consultaId).stream()
-                .map(estudio -> EstudioResponse.builder()
-                        .id(estudio.getId())
-                        .tipoEstudio(estudio.getTipoEstudio())
-                        .detalle(estudio.getDetalle())
-                        .estado(estudio.getEstado())
-                        .archivoResultado(estudio.getArchivoResultado())
-                        .build())
+                .map(this::mapearEstudioEntidad)
                 .toList();
     }
+
+    private EstudioResponse mapearEstudioEntidad(EstudioComplementario estudio) {
+        EstudioResponse response = new EstudioResponse();
+        response.setId(estudio.getId());
+        response.setTipoEstudio(estudio.getTipoEstudio());
+        response.setDetalle(estudio.getDetalle());
+        response.setEstado(estudio.getEstado());
+        response.setArchivoResultado(estudio.getArchivoResultado());
+        if (estudio.getConsulta() != null) {
+            response.setConsultaId(estudio.getConsulta().getId());
+            response.setFechaHora(estudio.getConsulta().getFechaHora());
+            if (estudio.getConsulta().getPaciente() != null) {
+                response.setPacienteNombre(estudio.getConsulta().getPaciente().getNombres() + " " + estudio.getConsulta().getPaciente().getApellidos());
+                response.setPacienteDni(estudio.getConsulta().getPaciente().getDni());
+            }
+        }
+        return response;
+    }
+
+
 
     /** Convierte adjuntos. */
     private List<AdjuntoResponse> mapearAdjuntos(Long consultaId) {
@@ -526,9 +592,29 @@ public class HistorialServiceImpl implements IHistorialService {
             Font normalFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
             Font boldFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10);
             
-            Paragraph title = new Paragraph("CLINICA - HISTORIAL CLINICO Y RECETA", titleFont);
+            String clinicaNombre = configuracionGlobalRepository.findById("clinica.nombre").map(c -> c.getValor().toUpperCase()).orElse("CLINICA");
+            String clinicaRazonSocial = configuracionGlobalRepository.findById("clinica.razon_social").map(c -> c.getValor()).orElse("");
+            String clinicaDireccion = configuracionGlobalRepository.findById("clinica.direccion").map(c -> c.getValor()).orElse("");
+            String clinicaTelefono = configuracionGlobalRepository.findById("clinica.telefono").map(c -> c.getValor()).orElse("");
+
+            Paragraph title = new Paragraph(clinicaNombre + " - HISTORIAL CLINICO Y RECETA", titleFont);
             title.setAlignment(Element.ALIGN_CENTER);
             document.add(title);
+            
+            if (!clinicaRazonSocial.isEmpty() || !clinicaDireccion.isEmpty() || !clinicaTelefono.isEmpty()) {
+                StringBuilder cabecera = new StringBuilder();
+                if (!clinicaRazonSocial.isEmpty()) cabecera.append("Razon Social: ").append(clinicaRazonSocial).append(" | ");
+                if (!clinicaDireccion.isEmpty()) cabecera.append("Direccion: ").append(clinicaDireccion).append(" | ");
+                if (!clinicaTelefono.isEmpty()) cabecera.append("Tlf: ").append(clinicaTelefono);
+                
+                String cabeceraTexto = cabecera.toString();
+                if (cabeceraTexto.endsWith(" | ")) {
+                    cabeceraTexto = cabeceraTexto.substring(0, cabeceraTexto.length() - 3);
+                }
+                Paragraph infoCabecera = new Paragraph(cabeceraTexto, FontFactory.getFont(FontFactory.HELVETICA, 8));
+                infoCabecera.setAlignment(Element.ALIGN_CENTER);
+                document.add(infoCabecera);
+            }
             
             document.add(new Paragraph(" "));
             
@@ -594,4 +680,112 @@ public class HistorialServiceImpl implements IHistorialService {
         }
         return out.toByteArray();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<EstudioResponse> listarEstudios(String estado, String filtro, org.springframework.data.domain.Pageable pageable) {
+        String filtroNormalizado = filtro == null ? "" : filtro.trim();
+        String estadoNormalizado = (estado == null || estado.trim().isEmpty()) ? null : estado.trim();
+        return estudioComplementarioRepository.buscarPorEstadoYPaciente(estadoNormalizado, filtroNormalizado, pageable)
+                .map(this::mapearEstudioEntidad);
+    }
+
+    @Override
+    @Transactional
+    public EstudioResponse registrarResultadoEstudio(Long estudioId, java.util.List<MultipartFile> archivos) {
+        if (archivos == null || archivos.isEmpty()) {
+            throw new BadRequestException("Debe enviar al menos un archivo de resultado");
+        }
+        EstudioComplementario estudio = estudioComplementarioRepository.findById(estudioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Estudio complementario no encontrado"));
+
+        java.util.List<String> secureUrls = new java.util.ArrayList<>();
+        for (MultipartFile archivo : archivos) {
+            if (archivo == null || archivo.isEmpty()) continue;
+            try {
+                java.util.Map<?, ?> uploadResult = cloudinary.uploader().upload(
+                        archivo.getBytes(),
+                        com.cloudinary.utils.ObjectUtils.asMap(
+                                "resource_type", "auto",
+                                "folder", "clinica/Sistema-Interno/Estudios"
+                        )
+                );
+                String secureUrl = (String) uploadResult.get("secure_url");
+                secureUrls.add(secureUrl);
+            } catch (Exception excepcion) {
+                excepcion.printStackTrace();
+                throw new BadRequestException("No se pudo subir el archivo de resultado a Cloudinary: " + excepcion.getMessage());
+            }
+        }
+
+        if (secureUrls.isEmpty()) {
+            throw new BadRequestException("Todos los archivos enviados están vacíos");
+        }
+
+        estudio.setArchivoResultado(String.join(",", secureUrls));
+        estudio.setEstado("realizado");
+
+        estudioComplementarioRepository.save(estudio);
+
+        return mapearEstudioEntidad(estudio);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AdjuntoDownloadResponse descargarResultadoEstudio(Long estudioId, Integer index) {
+        EstudioComplementario estudio = estudioComplementarioRepository.findById(estudioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Estudio complementario no encontrado"));
+
+        String archivoResultado = estudio.getArchivoResultado();
+        if (archivoResultado == null || archivoResultado.isEmpty()) {
+            throw new ResourceNotFoundException("No se ha cargado un resultado para este estudio");
+        }
+
+        String[] urls = archivoResultado.split(",");
+        int idx = (index != null && index >= 0 && index < urls.length) ? index : 0;
+        String urlResultado = urls[idx];
+
+        if (urlResultado.startsWith("http://") || urlResultado.startsWith("https://")) {
+            try {
+                Resource resource = new UrlResource(urlResultado);
+                String tipoMime = "application/octet-stream";
+                if (urlResultado.toLowerCase().contains(".pdf") || urlResultado.toLowerCase().endsWith(".pdf")) {
+                    tipoMime = "application/pdf";
+                } else if (urlResultado.toLowerCase().contains(".jpg") || urlResultado.toLowerCase().contains(".jpeg") || urlResultado.toLowerCase().endsWith(".jpg") || urlResultado.toLowerCase().endsWith(".jpeg")) {
+                    tipoMime = "image/jpeg";
+                } else if (urlResultado.toLowerCase().contains(".png") || urlResultado.toLowerCase().endsWith(".png")) {
+                    tipoMime = "image/png";
+                }
+                String ext = extension(urlResultado);
+                if (ext.isEmpty()) {
+                    if ("application/pdf".equals(tipoMime)) ext = ".pdf";
+                    else if ("image/jpeg".equals(tipoMime)) ext = ".jpg";
+                    else if ("image/png".equals(tipoMime)) ext = ".png";
+                }
+                return new AdjuntoDownloadResponse("resultado_" + estudio.getId() + "_" + (idx + 1) + ext, tipoMime, resource);
+            } catch (Exception excepcion) {
+                throw new ResourceNotFoundException("Error al cargar archivo de resultado remoto de Cloudinary");
+            }
+        }
+
+        try {
+            Path ruta = adjuntosStorageDir.resolve(urlResultado).normalize();
+            Resource resource = new UrlResource(ruta.toUri());
+            if (!resource.exists() || !resource.isReadable()) {
+                throw new ResourceNotFoundException("Archivo de resultado no encontrado");
+            }
+            String tipoMime = "application/octet-stream";
+            try {
+                String detectado = Files.probeContentType(ruta);
+                if (detectado != null) {
+                    tipoMime = detectado;
+                }
+            } catch (Exception ignored) {}
+            return new AdjuntoDownloadResponse("resultado_" + estudio.getId() + extension(urlResultado), tipoMime, resource);
+        } catch (IOException excepcion) {
+            throw new ResourceNotFoundException("Archivo de resultado no encontrado");
+        }
+    }
 }
+
+

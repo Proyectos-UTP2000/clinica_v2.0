@@ -15,4 +15,8 @@ public interface PagoRepository extends JpaRepository<Pago, Long> {
     /** Lista pagos de un paciente. */
     @EntityGraph(attributePaths = {"cita", "registradoPorUsuario"})
     List<Pago> findByCitaPacienteId(Long pacienteId);
+
+    /** Lista pagos vinculados a una caja diaria. */
+    @EntityGraph(attributePaths = {"cita", "cita.paciente", "registradoPorUsuario"})
+    List<Pago> findByCajaDiariaId(Long cajaDiariaId);
 }

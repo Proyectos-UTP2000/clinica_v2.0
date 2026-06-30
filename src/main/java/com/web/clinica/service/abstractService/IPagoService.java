@@ -11,4 +11,6 @@ public interface IPagoService {
     PagoResponse obtenerPorCita(Long citaId);
 
     List<PagoResponse> listarPorPaciente(Long pacienteId);
+
+    List<PagoResponse> listarPorCaja(Long cajaId);
 }

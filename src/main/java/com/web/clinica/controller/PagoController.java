@@ -43,4 +43,11 @@ public class PagoController {
     public List<PagoResponse> listarPorPaciente(@PathVariable Long pacienteId) {
         return pagoService.listarPorPaciente(pacienteId);
     }
+
+    /** Lista pagos vinculados a una caja diaria. */
+    @GetMapping("/caja/{cajaId}")
+    @RequierePermiso("caja.ver")
+    public List<PagoResponse> listarPorCaja(@PathVariable Long cajaId) {
+        return pagoService.listarPorCaja(cajaId);
+    }
 }

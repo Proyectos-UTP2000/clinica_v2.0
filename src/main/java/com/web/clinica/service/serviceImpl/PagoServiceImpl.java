@@ -8,9 +8,12 @@ import com.web.clinica.exception.ResourceNotFoundException;
 import com.web.clinica.model.Cita;
 import com.web.clinica.model.Pago;
 import com.web.clinica.model.Usuario;
+import com.web.clinica.model.CajaDiaria;
+import com.web.clinica.repository.CajaDiariaRepository;
 import com.web.clinica.repository.CitaRepository;
 import com.web.clinica.repository.PagoRepository;
 import com.web.clinica.service.abstractService.IPagoService;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PagoServiceImpl implements IPagoService {
 
-    private static final List<String> METODOS_PERMITIDOS = List.of("efectivo", "tarjeta", "transferencia", "web");
+    private static final List<String> METODOS_PERMITIDOS = List.of("efectivo", "tarjeta", "transferencia", "yape", "plin", "web");
 
     private final PagoRepository pagoRepository;
     private final CitaRepository citaRepository;
+    private final CajaDiariaRepository cajaDiariaRepository;
 
     /** Registra un pago unico y marca la cita como pagada. */
     @Override
@@ -38,13 +42,26 @@ public class PagoServiceImpl implements IPagoService {
             throw new BadRequestException("La cita ya tiene un pago registrado");
         }
 
+        CajaDiaria caja = null;
+        if (!"web".equalsIgnoreCase(solicitud.getMetodo())) {
+            caja = cajaDiariaRepository.findByFechaAndEstado(LocalDate.now(), "abierta")
+                    .orElseThrow(() -> new BadRequestException("No se puede registrar un pago presencial si la caja diaria de hoy no está abierta."));
+        }
+
         Pago pago = Pago.builder()
                 .cita(cita)
                 .monto(solicitud.getMonto())
                 .metodo(solicitud.getMetodo())
                 .fechaPago(LocalDateTime.now())
                 .registradoPorUsuario(obtenerUsuarioActual())
+                .cajaDiaria(caja)
                 .build();
+
+        if (caja != null) {
+            caja.setIngresos(caja.getIngresos().add(solicitud.getMonto()));
+            cajaDiariaRepository.save(caja);
+        }
+
         cita.setEstadoPago("pagado");
         citaRepository.save(cita);
         return convertirRespuesta(pagoRepository.save(pago));
@@ -64,6 +81,14 @@ public class PagoServiceImpl implements IPagoService {
     @Transactional(readOnly = true)
     public List<PagoResponse> listarPorPaciente(Long pacienteId) {
         return pagoRepository.findByCitaPacienteId(pacienteId).stream()
+                .map(this::convertirRespuesta)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PagoResponse> listarPorCaja(Long cajaId) {
+        return pagoRepository.findByCajaDiariaId(cajaId).stream()
                 .map(this::convertirRespuesta)
                 .toList();
     }

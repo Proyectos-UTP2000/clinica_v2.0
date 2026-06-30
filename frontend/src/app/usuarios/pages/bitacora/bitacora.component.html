@@ -49,33 +49,48 @@
               <th>Fecha y Hora</th>
               <th>Usuario</th>
               <th>Acción Realizada</th>
-              <th>IP Origen</th>
               <th>Estado</th>
-              <th>Detalles / Parámetros</th>
+              <th>Detalle de la Acción</th>
             </tr>
           </thead>
           <tbody>
             @for (log of logsFiltrados; track log.id) {
               <tr>
-                <td class="text-nowrap small fw-semibold">{{ log.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                <td class="text-nowrap small fw-semibold">{{ log.fecha | date:'dd/MM/yyyy HH:mm:ss' }}</td>
                 <td>
-                  <span class="badge bg-light text-dark border">{{ log.usuarioUsername }}</span>
+                  <div class="d-flex flex-column">
+                    <span class="fw-semibold text-dark">{{ log.usuarioNombre || 'Anonimo' }}</span>
+                    <span class="text-muted small text-nowrap">DNI: {{ log.usuarioDni || 'N/A' }}</span>
+                  </div>
                 </td>
                 <td class="fw-semibold text-primary-dark">{{ log.accion }}</td>
-                <td class="text-nowrap small text-muted">{{ log.ipAddress }}</td>
                 <td>
                   @if (log.estado === 'EXITOSO') {
                     <span class="badge bg-success-light text-success fw-bold d-inline-flex align-items-center gap-1">
                       ✔ Éxito
                     </span>
                   } @else {
-                    <span class="badge bg-danger-light text-danger fw-bold d-inline-flex align-items-center gap-1" [title]="log.detalles">
+                    <span class="badge bg-danger-light text-danger fw-bold d-inline-flex align-items-center gap-1">
                       ❌ Fallo
                     </span>
                   }
                 </td>
-                <td class="small text-muted text-wrap" style="max-width: 300px; word-break: break-all;">
-                  {{ log.detalles || 'Sin detalles adicionales' }}
+                <td>
+                  <div class="d-flex flex-column gap-1" style="max-width: 450px;">
+                    <span class="fw-medium text-dark" style="white-space: pre-wrap;">{{ obtenerDetalleAmigable(log.detalles) }}</span>
+                    
+                    @if (obtenerDetalleTecnico(log.detalles)) {
+                      <button type="button" class="btn btn-link p-0 text-start text-decoration-none small text-muted font-monospace mt-1" (click)="log.verDetallesTecnicos = !log.verDetallesTecnicos" style="font-size: 0.72rem;">
+                        {{ log.verDetallesTecnicos ? '▼ Ocultar información técnica' : '▶ Ver información técnica' }}
+                      </button>
+                      
+                      @if (log.verDetallesTecnicos) {
+                        <div class="bg-light p-2 rounded border small text-muted font-monospace mt-1" style="font-size: 0.7rem; word-break: break-all; white-space: pre-wrap;">
+                          {{ obtenerDetalleTecnico(log.detalles) }}
+                        </div>
+                      }
+                    }
+                  </div>
                 </td>
               </tr>
             }

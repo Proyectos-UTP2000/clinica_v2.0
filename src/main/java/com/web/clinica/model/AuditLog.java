@@ -39,6 +39,9 @@ public class AuditLog {
     @Column(name = "ip_address", length = 45)
     private String ipAddress;
 
+    @Column(nullable = false, length = 20)
+    private String estado; // "EXITOSO", "FALLIDO"
+
     @Builder.Default
     @Column(nullable = false)
     private LocalDateTime fecha = LocalDateTime.now();

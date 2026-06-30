@@ -359,6 +359,7 @@ CREATE TABLE audit_log (
     accion VARCHAR(100) NOT NULL,
     detalles TEXT,
     ip_address VARCHAR(45),
+    estado VARCHAR(20) NOT NULL DEFAULT 'EXITOSO',
     fecha TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_audit_log_usuario_dni ON audit_log(usuario_dni);

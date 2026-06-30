@@ -35,6 +35,10 @@ public class DashboardServiceImpl implements IDashboardService {
                 .totalMedicos(doctorRepository.countDoctoresActivos())
                 .totalCitasProgramadas(citaRepository.countByEstadoIn(ESTADOS_CITAS_PROGRAMADAS))
                 .citasHoy(citaRepository.countCitasProgramadasEntre(inicioDia, finDia))
+                .citasAtendidas(citaRepository.countByEstado("atendida"))
+                .citasCanceladas(citaRepository.countByEstado("cancelada"))
+                .citasNoAsistidas(citaRepository.countByEstado("no_asistida"))
+                .citasReprogramadas(citaRepository.countByEstado("reprogramada"))
                 .build();
     }
 }

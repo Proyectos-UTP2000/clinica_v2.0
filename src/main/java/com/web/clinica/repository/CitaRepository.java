@@ -24,6 +24,9 @@ public interface CitaRepository extends JpaRepository<Cita, Long>, JpaSpecificat
     @Query("SELECT COUNT(c) FROM Cita c WHERE c.estado IN :estados")
     long countByEstadoIn(@Param("estados") List<String> estados);
 
+    /** Cuenta citas por un estado específico. */
+    long countByEstado(String estado);
+
     /** Devuelve ranking de medicos por citas atendidas en un rango. */
     @Query("""
             SELECT c.doctor, COUNT(c) FROM Cita c

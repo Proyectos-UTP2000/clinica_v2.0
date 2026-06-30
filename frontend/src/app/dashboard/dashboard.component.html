@@ -2,8 +2,8 @@
   <div class="page-heading">
     <div>
       <p class="section-kicker">Resumen operativo</p>
-      <h2 id="dashboard-title">Turno clinico</h2>
-      <p class="heading-copy">Vista rapida de pacientes, agenda, personal y flujo administrativo.</p>
+      <h2 id="dashboard-title">Turno clínico</h2>
+      <p class="heading-copy">Vista rápida de pacientes, agenda, personal y flujo administrativo.</p>
     </div>
     <a class="btn btn-primary" routerLink="/citas">Nueva cita</a>
   </div>
@@ -41,12 +41,48 @@
         </div>
       }
     </div>
+
+    <div class="row g-3 mt-1">
+      <div class="col-12 col-lg-6">
+        <section class="chart-card" aria-label="Grafico de citas">
+          <h4>Distribución de Citas</h4>
+          <p class="text-muted small">Estado de todas las citas registradas en el sistema.</p>
+          <div class="chart-container">
+            <canvas #citasChart></canvas>
+          </div>
+        </section>
+      </div>
+      <div class="col-12 col-lg-6">
+        <section class="chart-card info-summary-card" aria-label="Resumen de atenciones">
+          <h4>Resumen de Atenciones</h4>
+          <p class="text-muted small">Detalle cuantitativo de estados clínicos.</p>
+          <div class="summary-list mt-3">
+            <div class="summary-item">
+              <span class="badge bg-success">Atendidas</span>
+              <span class="summary-value">{{ totales?.citasAtendidas ?? 0 }} citas</span>
+            </div>
+            <div class="summary-item">
+              <span class="badge bg-danger">Canceladas</span>
+              <span class="summary-value">{{ totales?.citasCanceladas ?? 0 }} citas</span>
+            </div>
+            <div class="summary-item">
+              <span class="badge bg-warning text-dark">No Asistidas</span>
+              <span class="summary-value">{{ totales?.citasNoAsistidas ?? 0 }} citas</span>
+            </div>
+            <div class="summary-item">
+              <span class="badge bg-info text-dark">Reprogramadas</span>
+              <span class="summary-value">{{ totales?.citasReprogramadas ?? 0 }} citas</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
   }
 
   <section class="quick-section" aria-labelledby="quick-title">
     <div class="section-header">
       <div>
-        <p class="section-kicker">Accesos rapidos</p>
+        <p class="section-kicker">Accesos rápidos</p>
         <h3 id="quick-title">Modulos principales</h3>
       </div>
     </div>

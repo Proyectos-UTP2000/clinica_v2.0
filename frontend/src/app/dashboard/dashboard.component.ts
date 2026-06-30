@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { DashboardService } from '../core/services/dashboard.service';
 import { DashboardTotalesResponse } from '../shared/models/dashboard-totales.model';
+import { Chart, ChartConfiguration } from 'chart.js/auto';
 
 interface MetricCard {
   titulo: string;
@@ -23,11 +24,14 @@ interface QuickLink {
     styleUrl: './dashboard.component.css',
     standalone: false
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   totales: DashboardTotalesResponse | null = null;
   cargando = true;
   mensajeError = '';
   metricas: MetricCard[] = [];
+  
+  @ViewChild('citasChart') citasChartCanvas!: ElementRef<HTMLCanvasElement>;
+  chartInstance: Chart | null = null;
 
   quickLinks: QuickLink[] = [
     { label: 'Pacientes', route: '/pacientes', description: 'Gestionar registro y contacto', code: 'PX' },
@@ -45,12 +49,77 @@ export class DashboardComponent implements OnInit {
         this.totales = response;
         this.actualizarMetricas();
         this.cargando = false;
+        setTimeout(() => this.inicializarGrafico(), 0);
       },
       error: () => {
         this.mensajeError = 'No se pudieron cargar los totales del dashboard.';
         this.cargando = false;
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.chartInstance) {
+      this.chartInstance.destroy();
+    }
+  }
+
+  inicializarGrafico(): void {
+    if (this.chartInstance) {
+      this.chartInstance.destroy();
+      this.chartInstance = null;
+    }
+
+    if (!this.citasChartCanvas || !this.totales) {
+      return;
+    }
+
+    const ctx = this.citasChartCanvas.nativeElement.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+
+    const config: ChartConfiguration = {
+      type: 'doughnut',
+      data: {
+        labels: ['Programadas', 'Atendidas', 'Canceladas', 'No Asistidas', 'Reprogramadas'],
+        datasets: [{
+          data: [
+            this.totales.totalCitasProgramadas,
+            this.totales.citasAtendidas,
+            this.totales.citasCanceladas,
+            this.totales.citasNoAsistidas,
+            this.totales.citasReprogramadas
+          ],
+          backgroundColor: [
+            '#6366f1', // Indigo (Programadas)
+            '#10b981', // Emerald (Atendidas)
+            '#ef4444', // Red (Canceladas)
+            '#f59e0b', // Amber (No Asistidas)
+            '#06b6d4'  // Cyan (Reprogramadas)
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              boxWidth: 12,
+              font: {
+                family: 'Inter, system-ui, sans-serif',
+                size: 12
+              }
+            }
+          }
+        }
+      }
+    };
+
+    this.chartInstance = new Chart(ctx, config);
   }
 
   private actualizarMetricas(): void {

@@ -341,6 +341,11 @@ class Prompt4ControllerSmokeTests {
             return List.of(respuesta());
         }
 
+        @Override
+        public List<PagoResponse> listarPorCaja(Long cajaId) {
+            return List.of(respuesta());
+        }
+
         private PagoResponse respuesta() {
             return PagoResponse.builder().id(1L).citaId(1L).monto(BigDecimal.TEN).metodo("efectivo").build();
         }

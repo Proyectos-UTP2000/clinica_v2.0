@@ -125,4 +125,8 @@ export class CitaService {
   listarDisponibilidadBase(doctorId: number): Observable<any[]> {
     return this.http.get<any[]>(`${API_URL}/disponibilidad/doctor/${doctorId}/base`);
   }
+
+  checkIn(id: number): Observable<CitaResponse> {
+    return this.http.patch<CitaResponse>(`${API_URL}/citas/${id}/check-in`, {});
+  }
 }

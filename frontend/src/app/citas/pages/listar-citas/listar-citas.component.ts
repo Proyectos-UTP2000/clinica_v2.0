@@ -308,12 +308,30 @@ export class ListarCitasComponent implements OnInit {
       });
   }
 
+  marcarLlegada(cita: CitaResponse): void {
+    this.procesando = true;
+    this.citaService.checkIn(cita.id)
+      .pipe(finalize(() => (this.procesando = false)))
+      .subscribe({
+        next: () => {
+          this.mensajeExito = 'Llegada marcada correctamente. El paciente está en sala de espera.';
+          this.cargarCitas();
+        },
+        error: (err) => {
+          this.mensajeError = err.error?.mensaje || 'No se pudo marcar la llegada del paciente.';
+        }
+      });
+  }
+
   estadoClass(estado: string): string {
     if (estado === 'cancelada' || estado === 'no_asistida') {
       return 'is-danger';
     }
     if (estado === 'atendida' || estado === 'confirmada') {
       return 'is-success';
+    }
+    if (estado === 'en_espera') {
+      return 'is-warning';
     }
     return 'is-muted';
   }

@@ -108,15 +108,24 @@
                         <a class="agenda-slot-link" [routerLink]="rutaNuevaCita(dia, hora)" [queryParams]="queryNuevaCita(dia, hora)">+</a>
                       }
                       @for (cita of citasEnFranja(dia, hora); track cita) {
-                        <a
-                          class="appointment-block"
-                          [routerLink]="['/historial/crear']"
-                          [queryParams]="{ pacienteId: cita.pacienteId, citaId: cita.id, doctorId: cita.doctorId, sedeId: cita.sedeId }"
-                          >
-                          <strong>{{ cita.pacienteNombre }}</strong>
-                          <span>{{ cita.doctorNombre }}</span>
-                          <small>{{ cita.estado }} / {{ cita.estadoPago }}</small>
-                        </a>
+                        @if (cita.estado === 'programada' || cita.estado === 'reprogramada' || cita.estado === 'en_espera') {
+                          <a
+                            class="appointment-block"
+                            [class.waiting]="cita.estado === 'en_espera'"
+                            [routerLink]="['/historial/crear']"
+                            [queryParams]="{ pacienteId: cita.pacienteId, citaId: cita.id, doctorId: cita.doctorId, sedeId: cita.sedeId }"
+                            >
+                            <strong>{{ cita.pacienteNombre }}</strong>
+                            <span>{{ cita.doctorNombre }}</span>
+                            <small>{{ cita.estado }} / {{ cita.estadoPago }}</small>
+                          </a>
+                        } @else {
+                          <div class="appointment-block disabled" title="Esta cita ya no puede ser atendida en su estado actual ({{ cita.estado }})">
+                            <strong>{{ cita.pacienteNombre }}</strong>
+                            <span>{{ cita.doctorNombre }}</span>
+                            <small>{{ cita.estado }} / {{ cita.estadoPago }}</small>
+                          </div>
+                        }
                       }
                     </td>
                   }
@@ -166,11 +175,11 @@
         <div><span>Medico</span><strong>{{ citaSeleccionada.doctorNombre }}</strong></div>
         <div><span>Sede</span><strong>{{ citaSeleccionada.sedeNombre }}</strong></div>
         <div><span>Horario</span><strong>{{ citaSeleccionada.fechaHoraInicio | date:'shortTime' }} - {{ citaSeleccionada.fechaHoraFin | date:'shortTime' }}</strong></div>
-        <div class="form-actions grid-span-2">
-          <a class="btn btn-outline-primary" [routerLink]="['/historial/crear']" [queryParams]="{ citaId: citaSeleccionada.id }">Crear consulta</a>
+          @if (citaSeleccionada.estado === 'programada' || citaSeleccionada.estado === 'reprogramada' || citaSeleccionada.estado === 'en_espera') {
+            <a class="btn btn-outline-primary" [routerLink]="['/historial/crear']" [queryParams]="{ citaId: citaSeleccionada.id }">Crear consulta</a>
+          }
           <a class="btn btn-outline-secondary" [routerLink]="['/pagos/cita', citaSeleccionada.id]">Registrar pago</a>
           <button class="btn btn-outline-secondary" type="button" (click)="citaSeleccionada = undefined">Cerrar</button>
-        </div>
       </div>
     </div>
   }

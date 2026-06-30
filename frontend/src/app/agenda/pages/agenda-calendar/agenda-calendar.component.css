@@ -116,3 +116,41 @@
 .combobox-dropdown li.no-results:hover {
   background-color: transparent;
 }
+
+/* Estilos para bloques de citas deshabilitados (atendidas, canceladas o inasistencias) */
+::ng-deep .appointment-block.disabled {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #64748b !important;
+  cursor: default !important;
+}
+
+::ng-deep .appointment-block.disabled span,
+::ng-deep .appointment-block.disabled small {
+  color: #94a3b8 !important;
+}
+
+::ng-deep .appointment-block.waiting {
+  background-color: #fef3c7 !important;
+  border-left: 4px solid #f59e0b !important;
+  color: #92400e !important;
+  animation: pulse-waiting 2s infinite;
+}
+
+::ng-deep .appointment-block.waiting span,
+::ng-deep .appointment-block.waiting small {
+  color: #b45309 !important;
+}
+
+@keyframes pulse-waiting {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}
+

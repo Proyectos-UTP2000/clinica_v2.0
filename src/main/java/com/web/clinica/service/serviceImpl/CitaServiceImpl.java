@@ -447,6 +447,18 @@ public class CitaServiceImpl implements ICitaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cita no encontrada"));
     }
 
+    @Override
+    @Transactional
+    public CitaResponse checkIn(Long citaId) {
+        Cita cita = obtenerEntidad(citaId);
+        verificarPermisoEdicionCita(cita);
+        if (!"programada".equalsIgnoreCase(cita.getEstado()) && !"reprogramada".equalsIgnoreCase(cita.getEstado())) {
+            throw new BadRequestException("Solo se puede marcar la llegada de citas programadas o reprogramadas");
+        }
+        cita.setEstado("en_espera");
+        return convertirRespuesta(citaRepository.save(cita));
+    }
+
     /** Convierte cita a respuesta API. */
     private CitaResponse convertirRespuesta(Cita cita) {
         return CitaResponse.builder()

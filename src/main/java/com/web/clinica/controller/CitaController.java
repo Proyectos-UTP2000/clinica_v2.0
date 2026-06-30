@@ -18,6 +18,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -92,5 +93,12 @@ public class CitaController {
                                                                     @RequestParam Long sedeId,
                                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
         return citaService.obtenerSlotsDisponibles(doctorId, sedeId, fecha);
+    }
+
+    /** Marca la llegada del paciente para la cita (sala de espera). */
+    @PatchMapping("/{id}/check-in")
+    @RequierePermiso({"citas.editar_asignados", "citas.editar_propias"})
+    public CitaResponse checkIn(@PathVariable Long id) {
+        return citaService.checkIn(id);
     }
 }

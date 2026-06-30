@@ -23,8 +23,10 @@ public class CitaScheduler {
     @Transactional
     public void procesarCitasVencidas() {
         LocalDateTime ahora = LocalDateTime.now();
+        // Solo marcar como no asistidas si el dia ya paso por completo (es decir, antes de hoy a las 00:00:00)
+        LocalDateTime limite = ahora.toLocalDate().atStartOfDay();
         List<String> estadosActivos = Arrays.asList("programada", "reprogramada");
-        List<Cita> vencidas = citaRepository.buscarCitasVencidas(ahora, estadosActivos);
+        List<Cita> vencidas = citaRepository.buscarCitasVencidas(limite, estadosActivos);
 
         if (!vencidas.isEmpty()) {
             log.info("Iniciando procesamiento de {} citas vencidas para marcar inasistencia", vencidas.size());

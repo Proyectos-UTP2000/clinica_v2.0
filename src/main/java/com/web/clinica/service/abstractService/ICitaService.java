@@ -47,4 +47,7 @@ public interface ICitaService {
 
     /** Calcula slots libres de 30 minutos. */
     List<DisponibilidadSlotResponse> obtenerSlotsDisponibles(Long doctorId, Long sedeId, LocalDate fecha);
+
+    /** Marca la llegada de un paciente para una cita (estado en_espera). */
+    CitaResponse checkIn(Long citaId);
 }

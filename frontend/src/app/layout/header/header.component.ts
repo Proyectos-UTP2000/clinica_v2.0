@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
@@ -12,6 +12,7 @@ import { SedeResponse } from '../../shared/models/sede.model';
     standalone: false
 })
 export class HeaderComponent implements OnInit {
+  @Output() toggleSidebar = new EventEmitter<void>();
   readonly fechaOperativa = new Intl.DateTimeFormat('es-PE', {
     weekday: 'long',
     day: '2-digit',
@@ -50,6 +51,10 @@ export class HeaderComponent implements OnInit {
     // When binded via ngModel, string empty is received for 'Todas', map to null
     const val = value === null || value === undefined || String(value) === '' ? null : Number(value);
     this.sesionContextService.setSede(val);
+  }
+
+  onToggleSidebar(): void {
+    this.toggleSidebar.emit();
   }
 
   cerrarSesion(): void {

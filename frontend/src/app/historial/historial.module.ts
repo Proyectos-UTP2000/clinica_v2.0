@@ -6,11 +6,13 @@ import { HistorialRoutingModule } from './historial-routing.module';
 import { CrearConsultaComponent } from './pages/crear-consulta/crear-consulta.component';
 import { ListarHistorialComponent } from './pages/listar-historial/listar-historial.component';
 import { VerConsultaComponent } from './pages/ver-consulta/ver-consulta.component';
+import { ListarEstudiosComponent } from './pages/listar-estudios/listar-estudios.component';
 import { HistorialService } from './services/historial.service';
 
 @NgModule({
-  declarations: [ListarHistorialComponent, CrearConsultaComponent, VerConsultaComponent],
+  declarations: [ListarHistorialComponent, CrearConsultaComponent, VerConsultaComponent, ListarEstudiosComponent],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, SharedModule, HistorialRoutingModule],
   providers: [HistorialService]
 })
 export class HistorialModule {}
+

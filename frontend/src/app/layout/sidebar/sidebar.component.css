@@ -1,6 +1,10 @@
 .sidebar {
   width: 292px;
-  min-height: 100dvh;
+  height: 100dvh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  align-self: start;
   padding: 1rem;
   color: var(--clinic-ink);
   background:
@@ -115,6 +119,10 @@
   .sidebar {
     width: 100%;
     min-height: auto;
+    height: auto;
+    position: static;
+    overflow-y: visible;
+    align-self: stretch;
     padding: 0.75rem;
   }
 

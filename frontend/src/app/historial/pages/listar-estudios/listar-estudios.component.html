@@ -1,0 +1,144 @@
+<section class="feature-page">
+  <app-page-header
+    kicker="Laboratorio"
+    title="Estudios Complementarios"
+    description="Gestión y carga de resultados para los exámenes médicos solicitados."
+  ></app-page-header>
+
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (mensajeExito) {
+    <div class="alert alert-success" role="status">{{ mensajeExito }}</div>
+  }
+
+  <div class="feature-panel">
+    <div class="feature-panel-body">
+      <form class="form-grid" [formGroup]="filtroForm" (ngSubmit)="cargarEstudios(0)">
+        <label class="form-label">
+          Estado del Estudio
+          <select class="form-select" formControlName="estado" (change)="cargarEstudios(0)">
+            <option value="">Todos</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="realizado">Completados</option>
+          </select>
+        </label>
+        
+        <label class="form-label">
+          Buscar Paciente
+          <input
+            type="text"
+            class="form-control"
+            placeholder="DNI, nombres o apellidos..."
+            formControlName="filtro"
+            (keyup.enter)="cargarEstudios(0)"
+          />
+        </label>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Filtrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="table-shell">
+    @if (cargando) {
+      <div class="loading-state">Cargando estudios...</div>
+    }
+    @if (!cargando && estudios.length === 0) {
+      <div class="empty-state">No se encontraron estudios clínicos con los filtros indicados.</div>
+    }
+    @if (!cargando && estudios.length > 0) {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Fecha Solicitud</th>
+              <th>Paciente</th>
+              <th>DNI</th>
+              <th>Estudio</th>
+              <th>Detalle / Indicación</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (estudio of estudios; track estudio.id) {
+              <tr>
+                <td>{{ estudio.fechaHora | date:'shortDate' }}</td>
+                <td class="fw-semibold">{{ estudio.pacienteNombre }}</td>
+                <td>{{ estudio.pacienteDni }}</td>
+                <td><span class="badge bg-light text-dark fw-bold">{{ estudio.tipoEstudio }}</span></td>
+                <td>{{ estudio.detalle }}</td>
+                <td>
+                  @if (estudio.estado === 'realizado') {
+                    <span class="status-pill is-active">Completado</span>
+                  } @else {
+                    <span class="status-pill is-inactive" style="background-color: var(--color-warning-bg); color: var(--color-warning-text);">Pendiente</span>
+                  }
+                </td>
+                <td>
+                  <div class="d-flex flex-column gap-1 align-items-start">
+                    @if (estudio.estado === 'realizado') {
+                      @for (arch of obtenerArchivos(estudio.archivoResultado); track arch.index) {
+                        <button class="btn btn-sm btn-outline-primary text-truncate" style="max-width: 150px;" (click)="descargarResultado(estudio.id, arch.index, arch.nombre)" [title]="arch.nombre">
+                          Descargar: {{ arch.nombre }}
+                        </button>
+                      }
+                    }
+                    @if (estudio.estado === 'pendiente' && authService.hasPermission('historial.editar')) {
+                      <button class="btn btn-sm btn-primary" (click)="abrirUpload(estudio)">
+                        Subir Resultado
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+
+  <app-paginator
+    [page]="page"
+    [totalPages]="totalPages"
+    [totalElements]="totalElements"
+    [size]="size"
+    (pageChange)="cargarEstudios($event)"
+  ></app-paginator>
+
+  <!-- Modal de Carga de Resultado -->
+  @if (mostrarModalUpload && estudioSeleccionado) {
+    <div class="modal-backdrop" (click)="cerrarUpload()">
+      <div class="modal-dialog" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Cargar Resultado de Laboratorio</h5>
+            <button class="btn-close-custom" (click)="cerrarUpload()">✕</button>
+          </div>
+          <div class="modal-body">
+            <p><strong>Paciente:</strong> {{ estudioSeleccionado.pacienteNombre }}</p>
+            <p><strong>Estudio:</strong> {{ estudioSeleccionado.tipoEstudio }}</p>
+            
+            <div class="form-grid mt-3">
+              <label class="form-label">
+                Seleccione archivo(s) de resultado (PDF, JPG, PNG)
+                <input type="file" class="form-control" (change)="onFileSelected($event)" accept=".pdf,.jpg,.jpeg,.png" multiple />
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline-secondary" (click)="cerrarUpload()">Cancelar</button>
+            <button class="btn btn-primary" [disabled]="archivosSeleccionados.length === 0 || cargando" (click)="subirResultado()">
+              Guardar Resultado
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</section>

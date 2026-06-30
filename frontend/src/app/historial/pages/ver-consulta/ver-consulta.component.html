@@ -16,7 +16,10 @@
   }
 
   @if (consulta) {
-    <div class="d-flex justify-content-end mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <button class="btn btn-outline-secondary" type="button" (click)="volver()">
+        Volver
+      </button>
       <button class="btn btn-primary" type="button" [disabled]="descargandoPdf" (click)="descargarPdf()">
         @if (descargandoPdf) {
           <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
@@ -24,6 +27,7 @@
         Descargar Ficha en PDF
       </button>
     </div>
+
 
     <div class="feature-panel">
       <div class="feature-panel-body detail-grid">

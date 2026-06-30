@@ -41,7 +41,12 @@ export interface EstudioComplementarioResponse {
   detalle: string;
   estado: string;
   archivoResultado?: string;
+  pacienteNombre?: string;
+  pacienteDni?: string;
+  consultaId?: number;
+  fechaHora?: string;
 }
+
 
 export interface AdjuntoResponse {
   id: number;

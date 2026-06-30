@@ -23,7 +23,7 @@ export class ListarHistorialComponent implements OnInit {
   sedes: SedeResponse[] = [];
   consultas: ConsultaResponse[] = [];
   page = 0;
-  size = 10;
+  size = 500;
   totalPages = 0;
   totalElements = 0;
   cargando = false;
@@ -34,6 +34,9 @@ export class ListarHistorialComponent implements OnInit {
 
   busquedaPaciente = '';
   mostrarDropdownPaciente = false;
+  pestañaActiva: 'consultas' | 'recetas' | 'estudios' | 'adjuntos' = 'consultas'; // Keep this internal back-compat or rename to pestanaActiva
+  pestanaActiva: 'consultas' | 'recetas' | 'estudios' | 'adjuntos' = 'consultas';
+  consultasVisiblesCount = 15;
 
   get pacientesFiltrados(): PacienteResponse[] {
     const q = this.busquedaPaciente.toLowerCase().trim();
@@ -63,7 +66,13 @@ export class ListarHistorialComponent implements OnInit {
   }
 
   filtroForm = this.fb.group({
-    pacienteId: [null as number | null, Validators.required]
+    pacienteId: [null as number | null, Validators.required],
+    search: [''],
+    tieneRecetas: [false],
+    tieneEstudios: [false],
+    tieneAdjuntos: [false],
+    fechaInicio: [''],
+    fechaFin: ['']
   });
 
   consultaForm = this.fb.group({
@@ -224,12 +233,83 @@ export class ListarHistorialComponent implements OnInit {
       return;
     }
     this.cargando = true;
-    this.historialService.listarPorPaciente(pacienteId, page, this.size)
+    const search = this.filtroForm.value.search || '';
+    const tieneRecetas = !!this.filtroForm.value.tieneRecetas;
+    const tieneEstudios = !!this.filtroForm.value.tieneEstudios;
+    const tieneAdjuntos = !!this.filtroForm.value.tieneAdjuntos;
+    const fechaInicio = this.filtroForm.value.fechaInicio || '';
+    const fechaFin = this.filtroForm.value.fechaFin || '';
+
+    if (page === 0) {
+      this.consultasVisiblesCount = 15;
+    }
+
+    this.historialService.listarPorPaciente(pacienteId, page, this.size, search, tieneRecetas, tieneEstudios, tieneAdjuntos, fechaInicio, fechaFin)
       .pipe(finalize(() => (this.cargando = false)))
       .subscribe({
         next: (response) => this.aplicarPagina(response),
         error: () => (this.mensajeError = 'No se pudo cargar el historial del paciente.')
       });
+  }
+
+  seleccionarPestana(tab: 'consultas' | 'recetas' | 'estudios' | 'adjuntos'): void {
+    this.pestanaActiva = tab;
+  }
+
+  get consultasVisibles(): ConsultaResponse[] {
+    return this.consultas.slice(0, this.consultasVisiblesCount);
+  }
+
+  cargarMasConsultas(): void {
+    this.consultasVisiblesCount += 15;
+  }
+
+  get recetasConsolidadas(): any[] {
+    const list: any[] = [];
+    this.consultas.forEach(c => {
+      if (c.recetas) {
+        c.recetas.forEach(r => {
+          list.push({
+            ...r,
+            fechaHora: c.fechaHora,
+            doctorNombre: c.doctorNombre
+          });
+        });
+      }
+    });
+    return list;
+  }
+
+  get estudiosConsolidados(): any[] {
+    const list: any[] = [];
+    this.consultas.forEach(c => {
+      if (c.estudios) {
+        c.estudios.forEach(e => {
+          list.push({
+            ...e,
+            fechaHora: c.fechaHora,
+            doctorNombre: c.doctorNombre
+          });
+        });
+      }
+    });
+    return list;
+  }
+
+  get adjuntosConsolidados(): any[] {
+    const list: any[] = [];
+    this.consultas.forEach(c => {
+      if (c.adjuntos) {
+        c.adjuntos.forEach(a => {
+          list.push({
+            ...a,
+            fechaHora: c.fechaHora,
+            doctorNombre: c.doctorNombre
+          });
+        });
+      }
+    });
+    return list;
   }
 
   crearConsulta(): void {
@@ -261,6 +341,67 @@ export class ListarHistorialComponent implements OnInit {
       });
   }
 
+  descargarAdjunto(adjuntoId: number, nombre: string): void {
+    this.historialService.descargarAdjunto(adjuntoId).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombre;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => (this.mensajeError = 'Error al descargar el archivo adjunto.')
+    });
+  }
+
+  descargarResultadoEstudio(estudioId: number, index: number, nombre: string): void {
+    this.historialService.descargarResultadoEstudio(estudioId, index).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombre || `resultado_${estudioId}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => (this.mensajeError = 'Error al descargar el resultado del estudio.')
+    });
+  }
+
+  descargarFicha(consultaId: number): void {
+    this.historialService.descargarPdf(consultaId).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ficha_consulta_${consultaId}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => (this.mensajeError = 'Error al generar y descargar la ficha de consulta.')
+    });
+  }
+
+  agregarNotaEvolucion(consultaId: number, notaInput: HTMLInputElement): void {
+    const nota = notaInput.value.trim();
+    if (!nota) {
+      return;
+    }
+    this.cargando = true;
+    this.historialService.agregarNota(consultaId, nota).subscribe({
+      next: () => {
+        this.mensajeExito = 'Nota de evolución agregada correctamente.';
+        notaInput.value = '';
+        this.cargarHistorial(this.page);
+      },
+      error: () => {
+        this.mensajeError = 'No se pudo agregar la nota de evolución.';
+        this.cargando = false;
+      }
+    });
+  }
+
   private aplicarPagina(response: Page<ConsultaResponse>): void {
     this.consultas = response.content;
     this.page = response.number;
@@ -268,4 +409,19 @@ export class ListarHistorialComponent implements OnInit {
     this.totalPages = response.totalPages;
     this.totalElements = response.totalElements;
   }
+
+  obtenerArchivos(archivoResultado?: string): { nombre: string, index: number }[] {
+    if (!archivoResultado) {
+      return [];
+    }
+    return archivoResultado.split(',').map((url, i) => {
+      const parts = url.split('/');
+      const nombreConId = parts[parts.length - 1];
+      return {
+        nombre: nombreConId || `resultado_${i + 1}`,
+        index: i
+      };
+    });
+  }
 }
+

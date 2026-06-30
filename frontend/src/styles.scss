@@ -267,7 +267,7 @@ button,
   border-left: 3px solid var(--clinic-border-strong);
 }
 
-.timeline-item span {
+.timeline-item > span {
   display: block;
   color: var(--clinic-muted);
   font-size: 0.85rem;

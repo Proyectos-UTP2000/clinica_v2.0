@@ -16,7 +16,8 @@
             class="nav-link"
             [routerLink]="item.route"
             routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+            [routerLinkActiveOptions]="{ exact: item.exact || false }"
+
             >
             <span class="nav-code" aria-hidden="true">{{ item.code }}</span>
             <span>{{ item.label }}</span>

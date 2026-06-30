@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
 import { finalize } from 'rxjs';
 import { AdjuntoResponse, ConsultaResponse } from '../../../shared/models/consulta.model';
 import { HistorialService } from '../../services/historial.service';
@@ -25,8 +26,14 @@ export class VerConsultaComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly fb: FormBuilder,
-    private readonly historialService: HistorialService
+    private readonly historialService: HistorialService,
+    private readonly location: Location
   ) {}
+
+  volver(): void {
+    this.location.back();
+  }
+
 
   ngOnInit(): void {
     this.cargarConsulta(Number(this.route.snapshot.paramMap.get('id')));

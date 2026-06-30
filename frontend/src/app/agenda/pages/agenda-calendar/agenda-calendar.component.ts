@@ -159,7 +159,7 @@ export class AgendaCalendarComponent implements OnInit {
   citasEnDia(dia: string): CitaResponse[] {
     return this.citas.filter((cita) => {
       const inicio = new Date(cita.fechaHoraInicio);
-      return this.formatearFecha(inicio) === dia;
+      return this.formatearFecha(inicio) === dia && cita.estado !== 'cancelada';
     });
   }
 

@@ -119,6 +119,10 @@
                             <span>{{ cita.doctorNombre }}</span>
                             <small>{{ cita.estado }} / {{ cita.estadoPago }}</small>
                           </a>
+                        } @else if (cita.estado === 'cancelada') {
+                          <div class="appointment-block is-cancelled" title="Cita Cancelada">
+                            <span class="cancelled-text">Cita Cancelada</span>
+                          </div>
                         } @else {
                           <div class="appointment-block disabled" title="Esta cita ya no puede ser atendida en su estado actual ({{ cita.estado }})">
                             <strong>{{ cita.pacienteNombre }}</strong>

@@ -154,3 +154,26 @@
   }
 }
 
+::ng-deep .appointment-block.is-cancelled {
+  background-color: #fef2f2 !important;
+  border: 1px dashed #fca5a5 !important;
+  color: #ef4444 !important;
+  min-height: auto !important;
+  padding: 0.25rem 0.5rem !important;
+  cursor: default !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+::ng-deep .appointment-block.is-cancelled .cancelled-text {
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #dc2626 !important;
+}
+
+

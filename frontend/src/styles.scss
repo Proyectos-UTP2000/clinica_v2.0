@@ -139,11 +139,10 @@ button,
 }
 
 .feature-panel {
-  background: rgba(255, 255, 255, 0.82);
+  background: #ffffff;
   border: 1px solid var(--clinic-border);
   border-radius: var(--clinic-radius-lg);
   box-shadow: var(--clinic-shadow-sm);
-  backdrop-filter: blur(12px);
 }
 
 .feature-panel-body {

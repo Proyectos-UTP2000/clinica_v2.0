@@ -47,7 +47,7 @@ export class RegistroPagoComponent implements OnInit {
       metodo: this.pagoForm.value.metodo || 'efectivo'
     }).pipe(finalize(() => (this.guardando = false))).subscribe({
       next: () => this.router.navigate(['/pagos']),
-      error: () => (this.mensajeError = 'No se pudo registrar el pago.')
+      error: (err: any) => (this.mensajeError = err.error?.message || 'No se pudo registrar el pago.')
     });
   }
 

@@ -57,4 +57,8 @@ export class PagoService {
   descargarReportePdf(cajaId: number): Observable<Blob> {
     return this.http.get(`${API_URL}/caja/${cajaId}/reporte-pdf`, { responseType: 'blob' });
   }
+
+  reabrirCaja(): Observable<any> {
+    return this.http.post<any>(`${API_URL}/caja/reabrir`, {});
+  }
 }

@@ -194,6 +194,23 @@ public class CajaDiariaServiceImpl implements ICajaDiariaService {
         throw new AccesoDenegadoException("No se pudo resolver el usuario autenticado");
     }
 
+    @Override
+    @Transactional
+    public CajaDiariaResponse reabrirCaja() {
+        LocalDate hoy = LocalDate.now();
+        CajaDiaria caja = cajaDiariaRepository.findByFechaAndEstado(hoy, "cerrada")
+                .orElseThrow(() -> new BadRequestException("No hay ninguna caja cerrada hoy para reabrir."));
+
+        caja.setEstado("abierta");
+        caja.setFechaCierre(null);
+        caja.setCerradoPorUsuario(null);
+        caja.setMontoCierre(null);
+        caja.setDiferencia(null);
+        caja.setBalanceReal(null);
+
+        return convertirRespuesta(cajaDiariaRepository.save(caja));
+    }
+
     private CajaDiariaResponse convertirRespuesta(CajaDiaria caja) {
         return CajaDiariaResponse.builder()
                 .id(caja.getId())

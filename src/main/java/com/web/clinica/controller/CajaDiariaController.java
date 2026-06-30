@@ -55,4 +55,10 @@ public class CajaDiariaController {
         headers.setContentDispositionFormData("attachment", nombreArchivo);
         return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
     }
+
+    @PostMapping("/reabrir")
+    @RequierePermiso("caja.gestionar")
+    public ResponseEntity<CajaDiariaResponse> reabrirCaja() {
+        return ResponseEntity.ok(cajaDiariaService.reabrirCaja());
+    }
 }

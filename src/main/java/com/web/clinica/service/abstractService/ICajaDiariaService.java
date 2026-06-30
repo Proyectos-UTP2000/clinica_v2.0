@@ -16,4 +16,6 @@ public interface ICajaDiariaService {
     CajaDiariaResponse obtenerCajaPorFecha(LocalDate fecha);
 
     byte[] generarReportePdf(Long cajaId);
+
+    CajaDiariaResponse reabrirCaja();
 }

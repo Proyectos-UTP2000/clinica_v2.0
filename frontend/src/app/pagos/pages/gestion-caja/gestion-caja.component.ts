@@ -18,6 +18,7 @@ export class GestionCajaComponent implements OnInit {
   procesandoPdf = false;
   mensajeError = '';
   mensajeExito = '';
+  reabriendo = false;
 
   // Form fields
   montoApertura = 0;
@@ -129,6 +130,26 @@ export class GestionCajaComponent implements OnInit {
         },
         error: () => {
           this.mensajeError = 'Error al intentar descargar el reporte en PDF.';
+        }
+      });
+  }
+
+  reabrirCaja(): void {
+    this.reabriendo = true;
+    this.mensajeError = '';
+    this.mensajeExito = '';
+    this.pagoService.reabrirCaja()
+      .pipe(finalize(() => this.reabriendo = false))
+      .subscribe({
+        next: (cajaData) => {
+          this.caja = cajaData;
+          this.mensajeExito = 'La caja ha sido reabierta con éxito.';
+          this.observaciones = '';
+          this.balanceReal = 0;
+          this.cargarPagosDeCaja(cajaData.id);
+        },
+        error: (err) => {
+          this.mensajeError = err.error?.mensaje || err.error?.message || 'Error al intentar reabrir la caja.';
         }
       });
   }

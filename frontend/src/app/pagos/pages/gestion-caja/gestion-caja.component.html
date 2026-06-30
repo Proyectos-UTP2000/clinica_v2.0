@@ -84,6 +84,14 @@
                     Descargar Reporte PDF de Caja
                   </button>
                 }
+                @if (caja.estado === 'cerrada' && authService.hasPermission('caja.gestionar')) {
+                  <button class="btn btn-warning w-100 d-flex align-items-center justify-content-center gap-2 text-dark fw-semibold" (click)="reabrirCaja()" [disabled]="reabriendo">
+                    @if (reabriendo) {
+                      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    }
+                    Reabrir Caja de Hoy
+                  </button>
+                }
                 <div class="text-muted small mt-2">
                   Abierta por: {{ caja.abiertoPor || 'Sistema' }} a las {{ caja.fechaApertura | date:'shortTime' }}<br />
                   @if (caja.estado === 'cerrada') {

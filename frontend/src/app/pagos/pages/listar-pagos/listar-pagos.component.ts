@@ -131,7 +131,8 @@ export class ListarPagosComponent implements OnInit {
           this.mensajeExito = 'Pago registrado correctamente.';
           this.pagoForm.reset({ citaId: null, monto: 80, metodo: 'efectivo' });
           this.cargarDatosIniciales();
-        error: (err) => {
+        },
+        error: (err: any) => {
           this.mensajeError = err.error?.message || 'No se pudo registrar el pago.';
         }
       });

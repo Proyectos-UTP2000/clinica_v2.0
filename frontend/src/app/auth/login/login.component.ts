@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -10,7 +10,7 @@ import { AuthService } from '../../core/services/auth.service';
     styleUrl: './login.component.css',
     standalone: false
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   cargando = false;
   mensajeError = '';
 
@@ -22,8 +22,17 @@ export class LoginComponent {
   constructor(
     private readonly fb: FormBuilder,
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly route: ActivatedRoute
   ) {}
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['expirado'] === 'true') {
+        this.mensajeError = 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.';
+      }
+    });
+  }
 
   ingresar(): void {
     this.mensajeError = '';
@@ -44,7 +53,7 @@ export class LoginComponent {
           this.router.navigateByUrl(destino);
         },
         error: () => {
-          this.mensajeError = 'No se pudo iniciar sesion. Verifique el DNI y la contrasena.';
+          this.mensajeError = 'No se pudo iniciar sesión. Verifique el DNI y la contraseña.';
         }
       });
   }

@@ -158,7 +158,7 @@ CREATE TABLE cita (
     sede_id BIGINT NOT NULL REFERENCES sede(id) ON DELETE RESTRICT,
     fecha_hora_inicio TIMESTAMP NOT NULL,
     fecha_hora_fin TIMESTAMP NOT NULL,
-    estado VARCHAR(20) NOT NULL CHECK (estado IN ('programada', 'confirmada', 'cancelada', 'reprogramada', 'atendida', 'no_asistida')),
+    estado VARCHAR(20) NOT NULL CHECK (estado IN ('programada', 'confirmada', 'cancelada', 'reprogramada', 'atendida', 'no_asistida', 'en_espera')),
     estado_pago VARCHAR(20) NOT NULL DEFAULT 'pendiente' CHECK (estado_pago IN ('pendiente', 'pagado')),
     pago_anticipado BOOLEAN NOT NULL DEFAULT FALSE,
     reprogramaciones_restantes INT NOT NULL DEFAULT 2 CHECK (reprogramaciones_restantes BETWEEN 0 AND 2),

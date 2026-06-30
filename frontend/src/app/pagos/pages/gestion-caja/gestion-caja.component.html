@@ -1,0 +1,224 @@
+<section class="feature-page" aria-labelledby="caja-title">
+  <app-page-header
+    kicker="Gestión de Caja"
+    title="Caja Diaria"
+    description="Administre el flujo de efectivo del día. Realice la apertura de caja por la mañana y el cierre con balance real por la tarde."
+  >
+    @if (caja) {
+      <button class="btn btn-outline-primary" type="button" (click)="cargarCajaHoy()">Refrescar</button>
+    }
+  </app-page-header>
+
+  @if (mensajeError) {
+    <div class="alert alert-danger" role="alert">{{ mensajeError }}</div>
+  }
+  @if (mensajeExito) {
+    <div class="alert alert-success" role="status">{{ mensajeExito }}</div>
+  }
+
+  @if (cargando) {
+    <div class="loading-state" aria-live="polite">
+      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      Cargando información de caja diaria...
+    </div>
+  }
+
+  @if (!cargando) {
+    <!-- CASO 1: CAJA CERRADA O ABIERTA PARA HOY -->
+    @if (caja) {
+      <div class="row g-4">
+        <!-- Resumen de Caja -->
+        <div class="col-12 col-lg-4">
+          <div class="feature-panel card-premium">
+            <div class="feature-panel-body">
+              <h4 class="mb-3 d-flex align-items-center gap-2">
+                @if (caja.estado === 'abierta') {
+                  <span class="status-indicator bg-success pulse"></span>
+                  Caja Abierta (Hoy)
+                } @else {
+                  <span class="status-indicator bg-danger"></span>
+                  Caja Cerrada (Hoy)
+                }
+              </h4>
+              <hr />
+              <div class="summary-details">
+                <div class="summary-row">
+                  <span>Fecha:</span>
+                  <strong>{{ caja.fecha | date:'dd/MM/yyyy' }}</strong>
+                </div>
+                <div class="summary-row">
+                  <span>Monto Inicial (Apertura):</span>
+                  <strong>S/ {{ caja.montoApertura | number:'1.2-2' }}</strong>
+                </div>
+                <div class="summary-row text-success">
+                  <span>Total Ingresos (Cobros):</span>
+                  <strong>+ S/ {{ caja.ingresos | number:'1.2-2' }}</strong>
+                </div>
+                <div class="summary-row text-danger">
+                  <span>Total Egresos (Salidas):</span>
+                  <strong>- S/ {{ caja.egresos | number:'1.2-2' }}</strong>
+                </div>
+                <div class="summary-row border-top pt-2">
+                  <span>Monto Final Esperado:</span>
+                  <strong>S/ {{ finalEsperado | number:'1.2-2' }}</strong>
+                </div>
+                
+                @if (caja.estado === 'cerrada') {
+                  <div class="summary-row text-primary">
+                    <span>Monto Real Entregado:</span>
+                    <strong>S/ {{ caja.montoCierre | number:'1.2-2' }}</strong>
+                  </div>
+                  <div class="summary-row" [ngClass]="diferenciaClase">
+                    <span>Diferencia (Sobrante/Faltante):</span>
+                    <strong>S/ {{ caja.diferencia | number:'1.2-2' }}</strong>
+                  </div>
+                }
+              </div>
+              
+              <div class="mt-4 gap-2 d-flex flex-column">
+                @if (caja.estado === 'cerrada') {
+                  <button class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2" (click)="descargarReportePdf()" [disabled]="procesandoPdf">
+                    @if (procesandoPdf) {
+                      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    }
+                    Descargar Reporte PDF de Caja
+                  </button>
+                }
+                <div class="text-muted small mt-2">
+                  Abierta por: {{ caja.abiertoPor || 'Sistema' }} a las {{ caja.fechaApertura | date:'shortTime' }}<br />
+                  @if (caja.estado === 'cerrada') {
+                    Cerrada por: {{ caja.cerradoPor || 'Sistema' }} a las {{ caja.fechaCierre | date:'shortTime' }}
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Flujo de Cierre o Detalle de Transacciones -->
+        <div class="col-12 col-lg-8">
+          <!-- Si la caja está abierta, mostramos el formulario de cierre -->
+          @if (caja.estado === 'abierta') {
+            <section class="feature-panel mb-4" aria-labelledby="cierre-title">
+              <div class="feature-panel-body">
+                <h4 id="cierre-title" class="mb-3 text-warning-dark">Cerrar Caja Diaria</h4>
+                <p class="text-muted small">
+                  Ingrese el monto real que tiene físicamente en caja para realizar el balance y cierre del día.
+                </p>
+                <form (ngSubmit)="cerrarCaja()" class="row g-3">
+                  <div class="col-12 col-md-6">
+                    <label for="balanceReal" class="form-label">Monto Físico Contado (S/)</label>
+                    <input id="balanceReal" type="number" min="0" step="0.01" class="form-control form-control-lg fw-bold" [(ngModel)]="balanceReal" name="balanceReal" required />
+                  </div>
+                  <div class="col-12">
+                    <label for="obsCierre" class="form-label">Notas / Observaciones del Cierre</label>
+                    <textarea id="obsCierre" class="form-control" rows="2" [(ngModel)]="observaciones" name="obsCierre" placeholder="Describa diferencias de caja, novedades, etc..."></textarea>
+                  </div>
+                  <div class="col-12 d-flex justify-content-end gap-2">
+                    <button type="submit" class="btn btn-warning text-dark px-4 fw-semibold" [disabled]="cerrando">
+                      @if (cerrando) {
+                        <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                      }
+                      Realizar Cierre de Caja
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </section>
+          }
+
+          <!-- Transacciones asociadas a la caja de hoy -->
+          <section class="feature-panel" aria-labelledby="transacciones-title">
+            <div class="feature-panel-body">
+              <h4 id="transacciones-title" class="mb-3">Transacciones del Día (Cobros en Caja)</h4>
+              @if (pagos.length === 0) {
+                <div class="empty-state">Aún no se han registrado cobros el día de hoy.</div>
+              } @else {
+                <div class="table-responsive">
+                  <table class="table table-striped align-middle">
+                    <thead>
+                      <tr>
+                        <th>Hora</th>
+                        <th>Cita #</th>
+                        <th>Método</th>
+                        <th>Registrado Por</th>
+                        <th class="text-end">Monto</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (pago of pagos; track pago.id) {
+                        <tr>
+                          <td>{{ pago.fechaPago | date:'shortTime' }}</td>
+                          <td><a [routerLink]="['/citas']" class="fw-semibold text-primary">#{{ pago.citaId }}</a></td>
+                          <td>
+                            <span class="badge bg-light text-dark text-capitalize border">{{ pago.metodo }}</span>
+                          </td>
+                          <td class="small">{{ pago.registradoPor }}</td>
+                          <td class="text-end fw-semibold text-success">S/ {{ pago.monto | number:'1.2-2' }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          </section>
+        </div>
+      </div>
+    }
+
+    <!-- CASO 2: CAJA NO ABIERTA HOY (FORMULARIO APERTURA) -->
+    @if (!caja) {
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+          <section class="feature-panel card-premium" aria-labelledby="apertura-title">
+            <div class="feature-panel-body">
+              <h3 id="apertura-title" class="mb-3 text-center text-primary-dark">Apertura de Caja</h3>
+              <p class="text-muted text-center small mb-4">
+                La caja diaria aún no ha sido abierta para la fecha de hoy. Por favor, introduzca el monto inicial en efectivo con el que se inicia la jornada laboral.
+              </p>
+              
+              <form (ngSubmit)="abrirCaja()" class="row g-3">
+                <div class="col-12">
+                  <label for="montoApertura" class="form-label fw-semibold">Monto Inicial en Efectivo (S/)</label>
+                  <input
+                    id="montoApertura"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="form-control form-control-lg text-center fw-bold text-success"
+                    [(ngModel)]="montoApertura"
+                    name="montoApertura"
+                    required
+                  />
+                  <div class="form-text text-center">Fondo base en soles para vueltos/cambio.</div>
+                </div>
+                
+                <div class="col-12">
+                  <label for="obsApertura" class="form-label fw-semibold">Notas / Observaciones de Apertura (Opcional)</label>
+                  <textarea
+                    id="obsApertura"
+                    class="form-control"
+                    rows="3"
+                    [(ngModel)]="observaciones"
+                    name="obsApertura"
+                    placeholder="Ej. Se inicia con S/100 en billetes de 10 y S/50 en monedas..."
+                  ></textarea>
+                </div>
+                
+                <div class="col-12 mt-4">
+                  <button type="submit" class="btn btn-primary btn-lg w-100 fw-semibold" [disabled]="abriendo">
+                    @if (abriendo) {
+                      <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                    }
+                    Abrir Caja del Día
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>
+      </div>
+    }
+  }
+</section>

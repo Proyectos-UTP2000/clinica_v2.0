@@ -34,7 +34,27 @@ export class PagoService {
     return this.http.get<PagoResponse[]>(`${API_URL}/pagos/paciente/${pacienteId}`);
   }
 
+  listarPorCaja(cajaId: number): Observable<PagoResponse[]> {
+    return this.http.get<PagoResponse[]>(`${API_URL}/pagos/caja/${cajaId}`);
+  }
+
   registrar(request: PagoCreateRequest): Observable<PagoResponse> {
     return this.http.post<PagoResponse>(`${API_URL}/pagos`, request);
+  }
+
+  abrirCaja(montoApertura: number, observaciones?: string): Observable<any> {
+    return this.http.post<any>(`${API_URL}/caja/abrir`, { montoApertura, observaciones });
+  }
+
+  cerrarCaja(balanceReal: number, observaciones?: string): Observable<any> {
+    return this.http.post<any>(`${API_URL}/caja/cerrar`, { balanceReal, observaciones });
+  }
+
+  obtenerCajaHoy(): Observable<any> {
+    return this.http.get<any>(`${API_URL}/caja/hoy`);
+  }
+
+  descargarReportePdf(cajaId: number): Observable<Blob> {
+    return this.http.get(`${API_URL}/caja/${cajaId}/reporte-pdf`, { responseType: 'blob' });
   }
 }

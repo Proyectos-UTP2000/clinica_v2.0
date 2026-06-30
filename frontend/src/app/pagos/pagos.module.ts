@@ -5,11 +5,12 @@ import { SharedModule } from '../shared/shared.module';
 import { HistorialPagosComponent } from './pages/historial-pagos/historial-pagos.component';
 import { ListarPagosComponent } from './pages/listar-pagos/listar-pagos.component';
 import { RegistroPagoComponent } from './pages/registro-pago/registro-pago.component';
+import { GestionCajaComponent } from './pages/gestion-caja/gestion-caja.component';
 import { PagosRoutingModule } from './pagos-routing.module';
 import { PagoService } from './services/pago.service';
 
 @NgModule({
-  declarations: [ListarPagosComponent, RegistroPagoComponent, HistorialPagosComponent],
+  declarations: [ListarPagosComponent, RegistroPagoComponent, HistorialPagosComponent, GestionCajaComponent],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, SharedModule, PagosRoutingModule],
   providers: [PagoService]
 })

@@ -17,7 +17,7 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
     @org.springframework.data.jpa.repository.Query("""
         SELECT DISTINCT c FROM Consulta c
         WHERE c.paciente.id = :pacienteId
-          AND (:search IS NULL OR :search = ''
+          AND (COALESCE(:search, '') = ''
                OR LOWER(c.motivoConsulta) LIKE LOWER(CONCAT('%', :search, '%'))
                OR LOWER(c.diagnostico) LIKE LOWER(CONCAT('%', :search, '%'))
                OR LOWER(c.observaciones) LIKE LOWER(CONCAT('%', :search, '%'))
@@ -26,8 +26,8 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
           AND (:tieneRecetas = false OR EXISTS (SELECT r FROM Receta r WHERE r.consulta = c))
           AND (:tieneEstudios = false OR EXISTS (SELECT e FROM EstudioComplementario e WHERE e.consulta = c))
           AND (:tieneAdjuntos = false OR EXISTS (SELECT a FROM Adjunto a WHERE a.consulta = c))
-          AND (:fechaInicio IS NULL OR c.fechaHora >= :fechaInicio)
-          AND (:fechaFin IS NULL OR c.fechaHora <= :fechaFin)
+          AND c.fechaHora >= COALESCE(:fechaInicio, c.fechaHora)
+          AND c.fechaHora <= COALESCE(:fechaFin, c.fechaHora)
     """)
     Page<Consulta> findByPacienteIdWithFilters(
             @org.springframework.data.repository.query.Param("pacienteId") Long pacienteId,

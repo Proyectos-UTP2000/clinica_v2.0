@@ -111,3 +111,57 @@
 .combobox-dropdown li.no-results:hover {
   background-color: transparent;
 }
+
+/* Estilos de botones y badges premium de la clínica */
+.action-group .btn {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  min-height: auto;
+  border-radius: var(--clinic-radius);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-clinic-success {
+  background-color: var(--clinic-success);
+  border-color: var(--clinic-success);
+  color: #ffffff;
+}
+
+.btn-clinic-success:hover {
+  background-color: #246342;
+  border-color: #246342;
+  color: #ffffff;
+}
+
+.btn-clinic-info {
+  background-color: var(--clinic-primary-soft);
+  border-color: var(--clinic-primary-soft);
+  color: var(--clinic-primary-dark);
+}
+
+.btn-clinic-info:hover {
+  background-color: #c5e3d9;
+  border-color: #c5e3d9;
+  color: var(--clinic-primary-dark);
+}
+
+.badge-anticipado {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 2rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--clinic-primary-dark);
+  background-color: var(--clinic-primary-soft);
+  border: 1px solid rgba(20, 107, 95, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  vertical-align: middle;
+}
+

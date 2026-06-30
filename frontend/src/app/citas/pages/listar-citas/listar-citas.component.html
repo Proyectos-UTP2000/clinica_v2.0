@@ -132,7 +132,7 @@
                     {{ cita.estadoPago }}
                   </span>
                   @if (cita.pagoAnticipado) {
-                    <span class="badge bg-info text-white ms-1" style="font-size: 0.7rem;" title="Disfruta de beneficios de reprogramación">Anticipado</span>
+                    <span class="badge-anticipado ms-1" title="Disfruta de beneficios de reprogramación">Anticipado</span>
                   }
                 </td>
                 <td class="text-end">
@@ -140,7 +140,7 @@
                     @if (authService.hasPermission('citas.editar_asignados') && (cita.estado === 'programada' || cita.estado === 'reprogramada')) {
                       <button
                         type="button"
-                        class="btn btn-sm btn-info text-white"
+                        class="btn btn-sm btn-clinic-info"
                         (click)="marcarLlegada(cita)"
                         >
                         Marcar Llegada
@@ -148,7 +148,7 @@
                     }
                     @if (authService.hasPermission('historial.crear') && (cita.estado === 'programada' || cita.estado === 'reprogramada' || cita.estado === 'en_espera')) {
                       <a
-                        class="btn btn-sm btn-success text-white"
+                        class="btn btn-sm btn-clinic-success"
                         [routerLink]="['/historial/crear']"
                         [queryParams]="{ pacienteId: cita.pacienteId, citaId: cita.id, doctorId: cita.doctorId, sedeId: cita.sedeId }"
                         >

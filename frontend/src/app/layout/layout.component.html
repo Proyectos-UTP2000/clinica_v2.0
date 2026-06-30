@@ -3,7 +3,7 @@
     <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
   }
 
-  <app-sidebar [class.mobile-open]="sidebarOpen" (closeSidebar)="closeSidebar()"></app-sidebar>
+  <app-sidebar [isOpen]="sidebarOpen" (closeSidebar)="closeSidebar()"></app-sidebar>
 
   <div class="app-main">
     <app-header (toggleSidebar)="toggleSidebar()"></app-header>

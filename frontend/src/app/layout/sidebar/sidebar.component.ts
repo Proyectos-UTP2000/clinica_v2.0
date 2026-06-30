@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, Input } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 
 interface MenuItem {
@@ -17,6 +17,7 @@ interface MenuItem {
     standalone: false
 })
 export class SidebarComponent {
+  @Input() isOpen = false;
   @Output() closeSidebar = new EventEmitter<void>();
   menuItems: MenuItem[] = [
     { label: 'Dashboard', route: '/dashboard', permiso: 'dashboard.ver', code: 'DB', group: 'Operacion', exact: true },

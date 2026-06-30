@@ -46,4 +46,8 @@ public class Pago {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "registrado_por_usuario_id")
     private Usuario registradoPorUsuario;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "caja_diaria_id")
+    private CajaDiaria cajaDiaria;
 }

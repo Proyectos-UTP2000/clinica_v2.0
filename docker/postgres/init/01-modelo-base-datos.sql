@@ -174,13 +174,32 @@ CREATE TABLE cita (
 );
 COMMENT ON TABLE cita IS 'Citas medicas programadas, reprogramadas, canceladas o atendidas.';
 
+CREATE TABLE caja_diaria (
+    id BIGSERIAL PRIMARY KEY,
+    fecha DATE NOT NULL UNIQUE,
+    monto_apertura DECIMAL(10, 2) NOT NULL CHECK (monto_apertura >= 0),
+    monto_cierre DECIMAL(10, 2) CHECK (monto_cierre >= 0),
+    ingresos DECIMAL(10, 2) NOT NULL DEFAULT 0 CHECK (ingresos >= 0),
+    egresos DECIMAL(10, 2) NOT NULL DEFAULT 0 CHECK (egresos >= 0),
+    balance_real DECIMAL(10, 2),
+    diferencia DECIMAL(10, 2),
+    estado VARCHAR(20) NOT NULL CHECK (estado IN ('abierta', 'cerrada')),
+    fecha_apertura TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_cierre TIMESTAMP,
+    abierto_por_usuario_id BIGINT REFERENCES usuario(id) ON DELETE SET NULL,
+    cerrado_por_usuario_id BIGINT REFERENCES usuario(id) ON DELETE SET NULL,
+    observaciones TEXT
+);
+COMMENT ON TABLE caja_diaria IS 'Registro diario de apertura y cierre de caja.';
+
 CREATE TABLE pago (
     id BIGSERIAL PRIMARY KEY,
     cita_id BIGINT NOT NULL UNIQUE REFERENCES cita(id) ON DELETE RESTRICT,
     monto DECIMAL(10, 2) NOT NULL CHECK (monto >= 0),
-    metodo VARCHAR(20) NOT NULL CHECK (metodo IN ('efectivo', 'tarjeta', 'transferencia', 'web')),
+    metodo VARCHAR(20) NOT NULL CHECK (metodo IN ('efectivo', 'tarjeta', 'transferencia', 'web', 'yape', 'plin')),
     fecha_pago TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    registrado_por_usuario_id BIGINT REFERENCES usuario(id) ON DELETE SET NULL
+    registrado_por_usuario_id BIGINT REFERENCES usuario(id) ON DELETE SET NULL,
+    caja_diaria_id BIGINT REFERENCES caja_diaria(id) ON DELETE SET NULL
 );
 COMMENT ON TABLE pago IS 'Pago asociado a una cita. Solo puede existir un pago por cita.';
 
@@ -333,6 +352,30 @@ CREATE INDEX idx_codigo_verificacion_email ON codigo_verificacion(email);
 CREATE INDEX idx_codigo_verificacion_codigo ON codigo_verificacion(codigo);
 CREATE INDEX idx_codigo_verificacion_expiracion ON codigo_verificacion(fecha_expiracion);
 
+CREATE TABLE audit_log (
+    id BIGSERIAL PRIMARY KEY,
+    usuario_dni VARCHAR(20),
+    usuario_nombre VARCHAR(100),
+    accion VARCHAR(100) NOT NULL,
+    detalles TEXT,
+    ip_address VARCHAR(45),
+    fecha TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_audit_log_usuario_dni ON audit_log(usuario_dni);
+CREATE INDEX idx_audit_log_fecha ON audit_log(fecha);
+
+CREATE TABLE configuracion_global (
+    clave VARCHAR(50) PRIMARY KEY,
+    valor TEXT NOT NULL
+);
+
+INSERT INTO configuracion_global (clave, valor) VALUES 
+('clinica.nombre', 'Clínica San Lucas'),
+('clinica.razon_social', 'San Lucas S.A.C.'),
+('clinica.direccion', 'Av. Larco 123, Miraflores, Lima'),
+('clinica.telefono', '01 444-5555'),
+('clinica.logotipo', '');
+
 -- Datos semilla esenciales.
 INSERT INTO permiso (codigo, descripcion) VALUES
     ('roles.ver', 'Ver roles'),
@@ -384,7 +427,12 @@ INSERT INTO permiso (codigo, descripcion) VALUES
     ('justificaciones.ver_todas', 'Ver todas las justificaciones'),
     ('justificaciones.ver_propias', 'Ver justificaciones propias'),
     ('reportes.ver', 'Ver reportes'),
-    ('dashboard.ver', 'Ver dashboard');
+    ('dashboard.ver', 'Ver dashboard'),
+    ('caja.gestionar', 'Abrir y cerrar caja diaria'),
+    ('caja.ver', 'Ver reportes y balances de caja'),
+    ('audit.ver', 'Ver historial de auditoria'),
+    ('config.ver', 'Ver configuración global'),
+    ('config.editar', 'Editar configuración global');
 
 INSERT INTO rol (nombre, descripcion, activo)
 VALUES
@@ -429,7 +477,9 @@ JOIN permiso p ON p.codigo IN (
     'citas.cancelar',
     'pagos.ver',
     'pagos.crear',
-    'dashboard.ver'
+    'dashboard.ver',
+    'caja.gestionar',
+    'caja.ver'
 )
 WHERE r.nombre = 'Secretaria';
 

@@ -40,6 +40,7 @@ public class EstudioComplementario {
     @Column(nullable = false, length = 20)
     private String estado = "pendiente";
 
-    @Column(name = "archivo_resultado", length = 255)
+    @Column(name = "archivo_resultado", columnDefinition = "TEXT")
     private String archivoResultado;
 }
+

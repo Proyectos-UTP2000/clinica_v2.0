@@ -20,4 +20,23 @@ public class AppConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    @org.springframework.beans.factory.annotation.Value("${app.cloudinary.cloud-name}")
+    private String cloudName;
+
+    @org.springframework.beans.factory.annotation.Value("${app.cloudinary.api-key}")
+    private String apiKey;
+
+    @org.springframework.beans.factory.annotation.Value("${app.cloudinary.api-secret}")
+    private String apiSecret;
+
+    @Bean
+    public com.cloudinary.Cloudinary cloudinary() {
+        java.util.Map<String, String> config = new java.util.HashMap<>();
+        config.put("cloud_name", cloudName);
+        config.put("api_key", apiKey);
+        config.put("api_secret", apiSecret);
+        return new com.cloudinary.Cloudinary(config);
+    }
 }
+

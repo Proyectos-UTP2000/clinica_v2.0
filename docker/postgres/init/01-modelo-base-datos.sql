@@ -2,7 +2,6 @@
 -- PostgreSQL database dump
 --
 
-\restrict DprwS4W23kQnqPC7hJ9MPsnDIBvghgEFKeGwArAI0tlUzPIt93J9XHOjMZ6PmjQ
 
 -- Dumped from database version 16.14
 -- Dumped by pg_dump version 18.4
@@ -10,7 +9,6 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -23,19 +21,13 @@ SET row_security = off;
 -- Name: clinica_db; Type: DATABASE; Schema: -; Owner: clinica
 --
 
-CREATE DATABASE clinica_db WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'en_US.utf8';
 
 
-ALTER DATABASE clinica_db OWNER TO clinica;
 
-\unrestrict DprwS4W23kQnqPC7hJ9MPsnDIBvghgEFKeGwArAI0tlUzPIt93J9XHOjMZ6PmjQ
-\connect clinica_db
-\restrict DprwS4W23kQnqPC7hJ9MPsnDIBvghgEFKeGwArAI0tlUzPIt93J9XHOjMZ6PmjQ
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -2903,5 +2895,4 @@ ALTER TABLE ONLY public.usuario_rol
 -- PostgreSQL database dump complete
 --
 
-\unrestrict DprwS4W23kQnqPC7hJ9MPsnDIBvghgEFKeGwArAI0tlUzPIt93J9XHOjMZ6PmjQ
 

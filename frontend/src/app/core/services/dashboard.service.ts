@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { DashboardTotalesResponse } from '../../shared/models/dashboard-totales.model';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = '/api';
 
 @Injectable({
   providedIn: 'root'

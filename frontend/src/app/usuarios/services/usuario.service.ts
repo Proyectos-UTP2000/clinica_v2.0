@@ -8,7 +8,7 @@ import { RolResponse } from '../../shared/models/rol.model';
 import { MedicoResponse } from '../../shared/models/medico.model';
 import { UsuarioResponse, UsuarioCreateRequest, UsuarioUpdateRequest } from '../../shared/models/usuario.model';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = '/api';
 
 @Injectable()
 export class UsuarioService {

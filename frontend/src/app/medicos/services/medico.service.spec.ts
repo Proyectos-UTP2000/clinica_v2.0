@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { MedicoService } from './medico.service';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = '/api';
 
 describe('MedicoService', () => {
   let service: MedicoService;

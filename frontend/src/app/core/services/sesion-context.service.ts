@@ -6,7 +6,7 @@ import { Page } from '../../shared/models/page.model';
 import { AuthService } from './auth.service';
 import { MedicoResponse } from '../../shared/models/medico.model';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = '/api';
 
 @Injectable({
   providedIn: 'root'

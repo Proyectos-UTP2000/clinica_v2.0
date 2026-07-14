@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { RolService } from './rol.service';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = '/api';
 
 describe('RolService', () => {
   let service: RolService;

@@ -5,7 +5,7 @@ import { ApiResponse } from '../../shared/models/api-response.model';
 import { EspecialidadCreateRequest, EspecialidadResponse, EspecialidadUpdateRequest } from '../../shared/models/especialidad.model';
 import { Page } from '../../shared/models/page.model';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = '/api';
 
 @Injectable()
 export class EspecialidadService {

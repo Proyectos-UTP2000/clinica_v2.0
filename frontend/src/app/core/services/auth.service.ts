@@ -7,7 +7,7 @@ import { JwtResponse } from '../../shared/models/jwt-response.model';
 import { RecuperarPasswordRequest } from '../../shared/models/recuperar-password-request.model';
 import { VerificarCodigoRequest } from '../../shared/models/verificar-codigo-request.model';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = '/api';
 const TOKEN_KEY = 'clinica_token';
 const USER_KEY = 'clinica_usuario';
 

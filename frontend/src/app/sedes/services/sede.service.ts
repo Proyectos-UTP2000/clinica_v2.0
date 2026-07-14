@@ -5,7 +5,7 @@ import { ApiResponse } from '../../shared/models/api-response.model';
 import { Page } from '../../shared/models/page.model';
 import { SedeCreateRequest, SedeResponse, SedeUpdateRequest } from '../../shared/models/sede.model';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = '/api';
 
 @Injectable({
   providedIn: 'root'

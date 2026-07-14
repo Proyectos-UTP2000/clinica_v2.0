@@ -5,7 +5,7 @@ import { ApiResponse } from '../../shared/models/api-response.model';
 import { Page } from '../../shared/models/page.model';
 import { PermisoResponse, RolCreateRequest, RolResponse, RolUpdateRequest } from '../../shared/models/rol.model';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = '/api';
 
 @Injectable()
 export class RolService {

@@ -6,7 +6,7 @@ import { PacienteResponse } from '../../shared/models/paciente.model';
 import { Page } from '../../shared/models/page.model';
 import { PagoCreateRequest, PagoResponse } from '../../shared/models/pago.model';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = '/api';
 
 @Injectable()
 export class PagoService {

@@ -6,7 +6,7 @@ import { DniInfo } from '../../shared/models/dni-info.model';
 import { PacienteCreateRequest, PacienteResponse, PacienteUpdateRequest } from '../../shared/models/paciente.model';
 import { Page } from '../../shared/models/page.model';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = '/api';
 
 @Injectable()
 export class PacienteService {

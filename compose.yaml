@@ -1,11 +1,52 @@
 services:
   postgres:
     image: postgres:16-alpine
+    container_name: clinica_postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-clinica_db}
       POSTGRES_USER: ${POSTGRES_USER:-clinica}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: clinica_backend
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+      CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN}
+      MAIL_ENABLED: ${MAIL_ENABLED}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      API_PERU_URL_DNI: ${API_PERU_URL_DNI}
+      API_PERU_TOKEN: ${API_PERU_TOKEN}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+    # Map port 8081 on the VM host to 8080 in the container to avoid conflicts
+    ports:
+      - "127.0.0.1:8081:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: clinica_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    # Map port 4175 on the VM host to 80 in the container for Nginx proxying
+    ports:
+      - "127.0.0.1:4175:80"

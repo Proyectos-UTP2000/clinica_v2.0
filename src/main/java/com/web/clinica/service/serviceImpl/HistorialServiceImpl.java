@@ -409,8 +409,8 @@ public class HistorialServiceImpl implements IHistorialService {
         if (!compatible) {
             throw new BadRequestException("La cita no corresponde al paciente, doctor y sede enviados");
         }
-        if (!"programada".equalsIgnoreCase(cita.getEstado()) && !"reprogramada".equalsIgnoreCase(cita.getEstado())) {
-            throw new BadRequestException("Solo se pueden atender citas con estado programada o reprogramada");
+        if (!"programada".equalsIgnoreCase(cita.getEstado()) && !"reprogramada".equalsIgnoreCase(cita.getEstado()) && !"en_espera".equalsIgnoreCase(cita.getEstado())) {
+            throw new BadRequestException("Solo se pueden atender citas con estado programada, reprogramada o en espera");
         }
     }
 

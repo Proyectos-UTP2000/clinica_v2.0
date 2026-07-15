@@ -11,8 +11,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.HashSet;
@@ -38,6 +40,17 @@ public class DataLoader implements CommandLineRunner {
     private final DisponibilidadBaseRepository disponibilidadBaseRepository;
     private final ExcepcionDisponibilidadRepository excepcionDisponibilidadRepository;
     private final ConfiguracionGlobalRepository configuracionGlobalRepository;
+    private final CitaRepository citaRepository;
+    private final ConsultaRepository consultaRepository;
+    private final PagoRepository pagoRepository;
+    private final CajaDiariaRepository cajaDiariaRepository;
+    private final RecetaRepository recetaRepository;
+    private final NotaEvolucionRepository notaEvolucionRepository;
+    private final IndicacionMedicaRepository indicacionMedicaRepository;
+    private final EstudioComplementarioRepository estudioComplementarioRepository;
+    private final AuditLogRepository auditLogRepository;
+    private final CodigoVerificacionRepository codigoVerificacionRepository;
+    private final AdjuntoRepository adjuntoRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -487,6 +500,330 @@ public class DataLoader implements CommandLineRunner {
                         .build();
                 configuracionGlobalRepository.save(conf);
             }
+        }        // 13. Cargar Caja Diaria
+        log.info("Cargando caja diaria...");
+        CajaDiaria cajaAyer = null;
+        CajaDiaria cajaHoy = null;
+
+        if (cajaDiariaRepository.count() == 0) {
+            LocalDate ayer = LocalDate.now().minusDays(1);
+            cajaAyer = CajaDiaria.builder()
+                    .fecha(ayer)
+                    .montoApertura(new BigDecimal("100.00"))
+                    .montoCierre(new BigDecimal("250.00"))
+                    .ingresos(new BigDecimal("150.00"))
+                    .egresos(BigDecimal.ZERO)
+                    .balanceReal(new BigDecimal("250.00"))
+                    .diferencia(BigDecimal.ZERO)
+                    .estado("cerrada")
+                    .fechaApertura(ayer.atTime(8, 0))
+                    .fechaCierre(ayer.atTime(18, 0))
+                    .abiertoPorUsuario(adminUser)
+                    .cerradoPorUsuario(adminUser)
+                    .observaciones("Cierre de caja de ayer sin novedades")
+                    .build();
+            cajaAyer = cajaDiariaRepository.save(cajaAyer);
+
+            LocalDate hoy = LocalDate.now();
+            cajaHoy = CajaDiaria.builder()
+                    .fecha(hoy)
+                    .montoApertura(new BigDecimal("250.00"))
+                    .ingresos(BigDecimal.ZERO) // Se actualizará al asociar pagos
+                    .egresos(BigDecimal.ZERO)
+                    .estado("abierta")
+                    .fechaApertura(hoy.atTime(8, 0))
+                    .abiertoPorUsuario(adminUser)
+                    .observaciones("Caja de hoy abierta")
+                    .build();
+            cajaHoy = cajaDiariaRepository.save(cajaHoy);
+        } else {
+            List<CajaDiaria> cajas = cajaDiariaRepository.findAll();
+            for (CajaDiaria c : cajas) {
+                if (c.getFecha().equals(LocalDate.now().minusDays(1))) {
+                    cajaAyer = c;
+                } else if (c.getFecha().equals(LocalDate.now())) {
+                    cajaHoy = c;
+                }
+            }
+        }
+
+        // 14. Cargar Citas
+        log.info("Cargando citas de prueba...");
+        Cita citaAyerAtendida = null;
+        Cita citaHoyConfirmada = null;
+        Cita citaHoyPendiente = null;
+
+        if (citaRepository.count() == 0) {
+            LocalDate ayer = LocalDate.now().minusDays(1);
+            LocalDate hoy = LocalDate.now();
+
+            // Cita de ayer (atendida)
+            citaAyerAtendida = new Cita();
+            citaAyerAtendida.setPaciente(pacientePablo);
+            citaAyerAtendida.setDoctor(drDiana);
+            citaAyerAtendida.setSede(sedeCentral);
+            citaAyerAtendida.setConsultorio(consultorio101);
+            citaAyerAtendida.setFechaHoraInicio(ayer.atTime(9, 0));
+            citaAyerAtendida.setFechaHoraFin(ayer.atTime(9, 30));
+            citaAyerAtendida.setEstado("atendida");
+            citaAyerAtendida.setEstadoPago("pagado");
+            citaAyerAtendida.setPagoAnticipado(true);
+            citaAyerAtendida.setReprogramacionesRestantes(2);
+            citaAyerAtendida.setOrigen("web");
+            citaAyerAtendida.setCreadoPorUsuario(adminUser);
+            citaAyerAtendida = citaRepository.save(citaAyerAtendida);
+
+            // Cita de ayer (cancelada)
+            Cita citaAyerCancelada = new Cita();
+            citaAyerCancelada.setPaciente(pacienteMaria);
+            citaAyerCancelada.setDoctor(drPedro);
+            citaAyerCancelada.setSede(sedeCentral);
+            citaAyerCancelada.setConsultorio(consultorio102);
+            citaAyerCancelada.setFechaHoraInicio(ayer.atTime(15, 0));
+            citaAyerCancelada.setFechaHoraFin(ayer.atTime(15, 30));
+            citaAyerCancelada.setEstado("cancelada");
+            citaAyerCancelada.setEstadoPago("pendiente");
+            citaAyerCancelada.setPagoAnticipado(false);
+            citaAyerCancelada.setReprogramacionesRestantes(2);
+            citaAyerCancelada.setOrigen("interno");
+            citaAyerCancelada.setCreadoPorUsuario(adminUser);
+            citaRepository.save(citaAyerCancelada);
+
+            // Cita de hoy (confirmada)
+            citaHoyConfirmada = new Cita();
+            citaHoyConfirmada.setPaciente(pacientePablo);
+            citaHoyConfirmada.setDoctor(drDiana);
+            citaHoyConfirmada.setSede(sedeCentral);
+            citaHoyConfirmada.setConsultorio(consultorio101);
+            citaHoyConfirmada.setFechaHoraInicio(hoy.atTime(10, 0));
+            citaHoyConfirmada.setFechaHoraFin(hoy.atTime(10, 30));
+            citaHoyConfirmada.setEstado("confirmada");
+            citaHoyConfirmada.setEstadoPago("pagado");
+            citaHoyConfirmada.setPagoAnticipado(true);
+            citaHoyConfirmada.setReprogramacionesRestantes(2);
+            citaHoyConfirmada.setOrigen("web");
+            citaHoyConfirmada.setCreadoPorUsuario(adminUser);
+            citaHoyConfirmada = citaRepository.save(citaHoyConfirmada);
+
+            // Cita de hoy (pendiente)
+            citaHoyPendiente = new Cita();
+            citaHoyPendiente.setPaciente(pacienteMaria);
+            citaHoyPendiente.setDoctor(drPedro);
+            citaHoyPendiente.setSede(sedeCentral);
+            citaHoyPendiente.setConsultorio(consultorio102);
+            citaHoyPendiente.setFechaHoraInicio(hoy.atTime(16, 0));
+            citaHoyPendiente.setFechaHoraFin(hoy.atTime(16, 30));
+            citaHoyPendiente.setEstado("programada");
+            citaHoyPendiente.setEstadoPago("pendiente");
+            citaHoyPendiente.setPagoAnticipado(false);
+            citaHoyPendiente.setReprogramacionesRestantes(2);
+            citaHoyPendiente.setOrigen("interno");
+            citaHoyPendiente.setCreadoPorUsuario(adminUser);
+            citaHoyPendiente = citaRepository.save(citaHoyPendiente);
+
+            // Cita de mañana (confirmada)
+            Cita citaManana = new Cita();
+            citaManana.setPaciente(pacientePablo);
+            citaManana.setDoctor(drPedro);
+            citaManana.setSede(sedeCentral);
+            citaManana.setConsultorio(consultorio102);
+            citaManana.setFechaHoraInicio(manana.atTime(14, 0));
+            citaManana.setFechaHoraFin(manana.atTime(14, 30));
+            citaManana.setEstado("confirmada");
+            citaManana.setEstadoPago("pendiente");
+            citaManana.setPagoAnticipado(false);
+            citaManana.setReprogramacionesRestantes(2);
+            citaManana.setOrigen("web");
+            citaManana.setCreadoPorUsuario(adminUser);
+            citaRepository.save(citaManana);
+        }
+
+        // 15. Cargar Pagos
+        log.info("Cargando pagos de prueba...");
+        if (pagoRepository.count() == 0) {
+            if (citaAyerAtendida != null && cajaAyer != null) {
+                Pago pagoAyer = Pago.builder()
+                        .cita(citaAyerAtendida)
+                        .monto(new BigDecimal("150.00"))
+                        .metodo("efectivo")
+                        .fechaPago(LocalDate.now().minusDays(1).atTime(8, 55))
+                        .registradoPorUsuario(adminUser)
+                        .cajaDiaria(cajaAyer)
+                        .build();
+                pagoRepository.save(pagoAyer);
+            }
+
+            if (citaHoyConfirmada != null && cajaHoy != null) {
+                BigDecimal montoPago = new BigDecimal("120.00");
+                Pago pagoHoy = Pago.builder()
+                        .cita(citaHoyConfirmada)
+                        .monto(montoPago)
+                        .metodo("tarjeta")
+                        .fechaPago(LocalDate.now().atTime(9, 30))
+                        .registradoPorUsuario(adminUser)
+                        .cajaDiaria(cajaHoy)
+                        .build();
+                pagoRepository.save(pagoHoy);
+
+                // Actualizar ingresos de caja de hoy
+                cajaHoy.setIngresos(montoPago);
+                cajaDiariaRepository.save(cajaHoy);
+            }
+        }
+
+        // 16. Cargar Consultas
+        log.info("Cargando consultas de prueba...");
+        Consulta consultaAyer = null;
+        if (consultaRepository.count() == 0 && citaAyerAtendida != null) {
+            consultaAyer = Consulta.builder()
+                    .paciente(pacientePablo)
+                    .doctor(drDiana)
+                    .cita(citaAyerAtendida)
+                    .sede(sedeCentral)
+                    .fechaHora(LocalDate.now().minusDays(1).atTime(9, 10))
+                    .tipo("control")
+                    .motivoConsulta("Dolor de cabeza continuo, cansancio visual y fatiga generalizada.")
+                    .diagnostico("Cefalea tensional asociada a estrés laboral y fatiga ocular.")
+                    .observaciones("Se indica descanso médico por 24 horas. Evitar pantallas electrónicas. Control en 15 días.")
+                    .estado("finalizada")
+                    .build();
+            consultaAyer = consultaRepository.save(consultaAyer);
+        }
+
+        // 17. Cargar Recetas
+        log.info("Cargando recetas de prueba...");
+        if (recetaRepository.count() == 0 && consultaAyer != null) {
+            Receta receta1 = Receta.builder()
+                    .consulta(consultaAyer)
+                    .medicamento("Paracetamol 500mg")
+                    .dosis("1 tableta")
+                    .frecuencia("Cada 8 horas")
+                    .duracion("3 días")
+                    .indicaciones("Tomar preferentemente con alimentos. No exceder dosis recomendada.")
+                    .build();
+            recetaRepository.save(receta1);
+
+            Receta receta2 = Receta.builder()
+                    .consulta(consultaAyer)
+                    .medicamento("Ibuprofeno 400mg")
+                    .dosis("1 tableta")
+                    .frecuencia("Cada 12 horas (si persiste dolor intenso)")
+                    .duracion("3 días")
+                    .indicaciones("Tomar junto con protector gástrico o con comida abundante.")
+                    .build();
+            recetaRepository.save(receta2);
+        }
+
+        // 18. Cargar Notas de Evolución
+        log.info("Cargando notas de evolución...");
+        if (notaEvolucionRepository.count() == 0 && consultaAyer != null) {
+            NotaEvolucion nota = NotaEvolucion.builder()
+                    .consulta(consultaAyer)
+                    .fecha(LocalDate.now().minusDays(1).atTime(9, 25))
+                    .nota("El paciente responde favorablemente a la presión digital leve en las sienes. Presión arterial registrada de 125/80 mmHg. Frecuencia cardíaca de 72 lpm. Sin signos de alerta neurológica.")
+                    .autor(doctorDianaUser)
+                    .build();
+            notaEvolucionRepository.save(nota);
+        }
+
+        // 19. Cargar Indicaciones Médicas
+        log.info("Cargando indicaciones médicas...");
+        if (indicacionMedicaRepository.count() == 0 && consultaAyer != null) {
+            IndicacionMedica ind1 = IndicacionMedica.builder()
+                    .consulta(consultaAyer)
+                    .tipo("reposo")
+                    .descripcion("Realizar pausas activas oculares de 5 minutos por cada hora de trabajo frente a pantallas.")
+                    .build();
+            indicacionMedicaRepository.save(ind1);
+
+            IndicacionMedica ind2 = IndicacionMedica.builder()
+                    .consulta(consultaAyer)
+                    .tipo("reposo")
+                    .descripcion("Mantener una correcta hidratación (mínimo 2 litros de agua diarios) y reducir consumo de cafeína por las tardes.")
+                    .build();
+            indicacionMedicaRepository.save(ind2);
+        }
+
+        // 20. Cargar Estudios Complementarios
+        log.info("Cargando estudios complementarios...");
+        if (estudioComplementarioRepository.count() == 0 && consultaAyer != null) {
+            EstudioComplementario estudio = EstudioComplementario.builder()
+                    .consulta(consultaAyer)
+                    .tipoEstudio("Examen Oftalmológico Completo")
+                    .detalle("Descartar errores de refracción o necesidad de lentes de descanso.")
+                    .estado("pendiente")
+                    .build();
+            estudioComplementarioRepository.save(estudio);
+        }
+
+        // 21. Cargar Adjuntos
+        log.info("Cargando adjuntos de prueba...");
+        if (adjuntoRepository.count() == 0 && consultaAyer != null) {
+            Adjunto adj = Adjunto.builder()
+                    .consulta(consultaAyer)
+                    .nombreArchivo("anamnesis_inicial.pdf")
+                    .ruta("/uploads/consultas/anamnesis_inicial.pdf")
+                    .tipoMime("application/pdf")
+                    .fechaSubida(LocalDate.now().minusDays(1).atTime(9, 15))
+                    .build();
+            adjuntoRepository.save(adj);
+        }
+
+        // 22. Cargar Códigos de Verificación
+        log.info("Cargando códigos de verificación...");
+        if (codigoVerificacionRepository.count() == 0) {
+            CodigoVerificacion cod = new CodigoVerificacion();
+            cod.setEmail("pablo.paciente@example.com");
+            cod.setCodigo("987654");
+            cod.setTipo("verificacion_registro");
+            cod.setUsado(true);
+            cod.setFechaExpiracion(LocalDateTime.now().minusHours(1));
+            codigoVerificacionRepository.save(cod);
+
+            CodigoVerificacion cod2 = new CodigoVerificacion();
+            cod2.setEmail("maria.paciente@example.com");
+            cod2.setCodigo("123456");
+            cod2.setTipo("recuperacion");
+            cod2.setUsado(false);
+            cod2.setFechaExpiracion(LocalDateTime.now().plusHours(25));
+            codigoVerificacionRepository.save(cod2);
+        }
+
+        // 23. Cargar Logs de Auditoría
+        log.info("Cargando logs de auditoría...");
+        if (auditLogRepository.count() == 0) {
+            AuditLog log1 = AuditLog.builder()
+                    .usuarioDni("00000000")
+                    .usuarioNombre("Admin Sistema")
+                    .accion("INICIO_SESION")
+                    .detalles("El usuario inició sesión en la aplicación web.")
+                    .ipAddress("127.0.0.1")
+                    .estado("EXITOSO")
+                    .fecha(LocalDate.now().minusDays(1).atTime(8, 0))
+                    .build();
+            auditLogRepository.save(log1);
+
+            AuditLog log2 = AuditLog.builder()
+                    .usuarioDni("22222222")
+                    .usuarioNombre("Sara Secretaria")
+                    .accion("CREAR_CITA")
+                    .detalles("Se registró una nueva cita para el paciente Pablo Paciente con el Doctor Diana.")
+                    .ipAddress("192.168.1.15")
+                    .estado("EXITOSO")
+                    .fecha(LocalDate.now().minusDays(1).atTime(8, 30))
+                    .build();
+            auditLogRepository.save(log2);
+
+            AuditLog log3 = AuditLog.builder()
+                    .usuarioDni("11111111")
+                    .usuarioNombre("Diana Medico")
+                    .accion("ATENDER_CITA")
+                    .detalles("El doctor inició la atención y registro de consulta del paciente Pablo Paciente.")
+                    .ipAddress("192.168.1.20")
+                    .estado("EXITOSO")
+                    .fecha(LocalDate.now().minusDays(1).atTime(9, 5))
+                    .build();
+            auditLogRepository.save(log3);
         }
 
         log.info("Carga de datos iniciales finalizada exitosamente.");
